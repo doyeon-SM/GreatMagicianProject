@@ -1,0 +1,71 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d7061e613fa6e63488f1c8b3459ea46b, type: 3}
+  m_Name: T2_Skill_Damage
+  m_EditorClassIdentifier: 
+  t2SkillDamageEntries:
+  - skillName: Bomb
+    damageMultiplier: 1.4
+  - skillName: Lava
+    damageMultiplier: 0.9
+  - skillName: Rain
+    damageMultiplier: 0.9
+  - skillName: Spark
+    damageMultiplier: 1.4
+  - skillName: Electric_Shock
+    damageMultiplier: 0.9
+  - skillName: Chainlighting
+    damageMultiplier: 1.4
+  - skillName: Meteor
+    damageMultiplier: 2
+  - skillName: Earthquake
+    damageMultiplier: 0.9
+  - skillName: Magnet
+    damageMultiplier: 0.7
+  - skillName: Iron
+    damageMultiplier: 1.4
+  - skillName: Ice_Bomb
+    damageMultiplier: 1.4
+  - skillName: ColdAir_Zone
+    damageMultiplier: 0.4
+  - skillName: Icicle(A)
+    damageMultiplier: 1.4
+  - skillName: Snowball
+    damageMultiplier: 1.2
+  - skillName: Ice_Spear
+    damageMultiplier: 0.5
+  - skillName: Water_Bomb
+    damageMultiplier: 1.4
+  - skillName: HighPressure_Water
+    damageMultiplier: 1.4
+  - skillName: Rail_Gun
+    damageMultiplier: 1.4
+  - skillName: Landslide
+    damageMultiplier: 1.2
+  - skillName: Icicle(S)
+    damageMultiplier: 2
+  - skillName: Water_Cannon2
+    damageMultiplier: 1.4
+  - skillName: Whip(Fire)
+    damageMultiplier: 1.4
+  - skillName: Haunted_Forest
+    damageMultiplier: 0.8
+  - skillName: Whip(Electricity)
+    damageMultiplier: 1.4
+  - skillName: Sowing_Seeds
+    damageMultiplier: 1.4
+  - skillName: Ice_Flower
+    damageMultiplier: 1
+  - skillName: Restricion
+    damageMultiplier: 1
+  - skillName: Flower
+    damageMultiplier: 1

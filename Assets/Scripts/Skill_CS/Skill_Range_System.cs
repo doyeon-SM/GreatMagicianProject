@@ -1,0 +1,294 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Skill_Range_System : MonoBehaviour
+{
+    public Skill_Data skillData;  // 현재 스킬에 대한 SkillData 참조
+    private List<Monster_Base> monstersInRange = new List<Monster_Base>();  // 범위 내의 몬스터 리스트
+    private Coroutine periodicDamageCoroutine;
+
+    public GameObject createPrefab; //Create 타입 프리팹
+
+    private void Start()
+    {
+        
+    }
+    public void StartRangeEffect() //폭발효과
+    {
+        if (skillData != null && skillData.skillType == Skill_Data.SkillType.Projectile)
+        {
+            periodicDamageCoroutine = StartCoroutine(ApplyPeriodicDamage(0.2f, 0.1f));
+        }
+        else if (skillData != null && skillData.skillType == Skill_Data.SkillType.Area)
+        {
+            periodicDamageCoroutine = StartCoroutine(ApplyPeriodicDamage(skillData.AreaTime, 0.5f));
+        }
+        else
+        {
+            Debug.LogError("Invalid skill data or skill type for range effect.");
+        }
+    }
+
+    private IEnumerator ApplyPeriodicDamage(float duration, float interval)
+    {
+        float elapsedTime = 0f;
+        float effectvalue = 0f;
+        string monster_Element_String = "None";
+
+        if (skillData == null) yield break;
+        
+        switch (skillData.skillEffect.ToString())
+        {
+            case "Slow":
+                effectvalue = 0.3f;
+                break;
+            case "Bind":
+                effectvalue = 0f;
+                break;
+            default:
+                effectvalue = 1.0f;
+                break;
+        }
+            
+        
+        while (elapsedTime < duration)
+        {
+            if (this == null || gameObject == null)
+            {
+                yield break; // 오브젝트가 파괴된 경우 코루틴 종료
+            }
+            
+            foreach (Monster_Base monster in monstersInRange)
+            {
+                if (monster != null)
+                {
+                    if (monster_Element_String != "None")
+                        monster.ApplyElement(monster_Element_String);
+                    monster.ApplySlowEffect(effectvalue);
+                }
+            }
+            ApplyDamageInRange();
+            elapsedTime += interval;
+            yield return new WaitForSeconds(interval);
+        }
+        
+        foreach (Monster_Base monster in monstersInRange)
+        {
+            if (monster != null)
+            {
+                monster.RemoveSlowEffect();
+            }
+        }
+        
+        // 오브젝트가 파괴되지 않았을 때만 파괴 시도
+        if (gameObject != null)
+        {
+            Debug.Log("Destroying range object after periodic damage");
+            Destroy(gameObject);
+        }
+    }
+
+    private void OnDestroy()
+    {
+        Debug.Log("Skill_Range_System destroyed: " + gameObject.name);
+        if (periodicDamageCoroutine != null)
+        {
+            StopCoroutine(periodicDamageCoroutine);
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.CompareTag("Monster"))
+        {
+            Monster_Base monster = collision.GetComponent<Monster_Base>();
+            if (monster != null && !monstersInRange.Contains(monster))
+            {
+                monstersInRange.Add(monster);
+                
+            }
+        }
+    }
+
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        if (collision.CompareTag("Monster"))
+        {
+            Monster_Base monster = collision.GetComponent<Monster_Base>();
+            if (monster != null && monstersInRange.Contains(monster))
+            {
+                monstersInRange.Remove(monster);
+                
+            }
+        }
+    }
+
+    public void ApplyDamageInRange()
+    {
+        // monstersInRange 리스트의 복사본을 사용하여 반복을 수행합니다.
+        List<Monster_Base> monstersToDamage = new List<Monster_Base>(monstersInRange);
+
+        foreach (Monster_Base monster in monstersToDamage)
+        {
+            if (monster != null)
+            {
+                Debug.Log("Attack: " + monster);
+                skillData.ApplyDamage(monster);
+
+                if (monster.MonsterIsDead) // 몬스터가 죽었는지 확인
+                {
+                    monstersInRange.Remove(monster); // 원본 리스트에서 몬스터를 제거
+                }
+            }
+        }
+    }
+
+
+
+    private void ApplyDamageToMonsters()
+    {
+        List<Monster_Base> monstersToDamage = new List<Monster_Base>(monstersInRange);
+
+        foreach (Monster_Base monster in monstersToDamage)
+        {
+            if (monster != null)
+            {
+                skillData.ExecuteSkill(monster, transform.position);
+            }
+        }
+
+        List<Monster_Base> monstersToRemove = new List<Monster_Base>();
+
+        foreach (Monster_Base monster in monstersToDamage)
+        {
+            if (monster != null && monster.MonsterIsDead)
+            {
+                monstersToRemove.Add(monster);
+            }
+        }
+
+        foreach (Monster_Base monster in monstersToRemove)
+        {
+            monstersInRange.Remove(monster);
+        }
+    }
+    public void ApplySkillEffect(Vector3 mousePosition)
+    {
+
+        if (skillData != null)
+        {
+            switch (skillData.skillType.ToString())
+            {
+                case "Projectile":
+                case "Chain":
+                    LaunchProjectile(mousePosition);
+                    break;
+                case "Area":
+                    CreateArea(mousePosition);
+                    break;
+                case "Create":
+                case "Summon":
+                    CreateSkillPrefab(mousePosition);
+                    break;
+                case "Scattered":
+                    for(int i=0;i<5;i++)
+                    {
+                        Vector3 randomOffset = new Vector3(Random.Range(-1f, 1f), 0f, 0f);
+                        LaunchProjectile(mousePosition + randomOffset);
+                    }
+                    break;
+                default:        //AraeOfEffect, StraightLine
+                    ApplyDamageToMonsters();
+                    break;
+            }  
+        }
+        else
+        {
+            Debug.LogError("SkillData is not assigned.");
+        }
+    }
+    private void LaunchProjectile(Vector3 mousePosition)
+    {
+        if (skillData != null && skillData.attackPrefab != null)
+        {
+            Vector3 spawnPosition = new Vector3(0, -8, 0); // Ignis 또는 Fire의 경우
+
+            if (skillData.skillEffect.ToString() == "Rolling")
+            {
+                spawnPosition = new Vector3(mousePosition.x, -8, 0);
+            }
+
+            GameObject projectile = Instantiate(skillData.attackPrefab, spawnPosition, Quaternion.identity);
+            Rigidbody2D rb = projectile.GetComponent<Rigidbody2D>();
+
+            if (rb != null)
+            {
+                Vector2 direction = (mousePosition - spawnPosition).normalized;
+                if (skillData.skillEffect.ToString() == "Rolling")
+                {
+                    direction = Vector2.up;
+                }
+                rb.velocity = direction * 10f;
+
+                Skill_System_Projectile projectileScript = projectile.GetComponent<Skill_System_Projectile>();
+                if (projectileScript != null)
+                {
+                    projectileScript.skillData = skillData;
+
+                    // Fire 관련 코드 제외, 다른 스킬에 대한 추가 처리가 필요하면 여기서 추가 가능
+                }
+                else
+                {
+                    Debug.LogError("Skill_System_Projectile component is missing on the attackPrefab.");
+                }
+
+                Destroy(projectile, 5f); // 투사체가 5초 후에 제거되도록 설정
+            }
+            else
+            {
+                Debug.LogError("Rigidbody2D component is missing on the attackPrefab.");
+            }
+        }
+        else
+        {
+            Debug.LogError("Attack prefab is not assigned in SkillData.");
+        }
+    }
+
+    private void CreateArea(Vector3 mousePosition)
+    {
+        if (skillData != null && skillData.rangePrefab != null)
+        {
+            GameObject rangeObject = Instantiate(skillData.rangePrefab, mousePosition, Quaternion.identity);
+            Skill_Range_System rangeSystem = rangeObject.GetComponent<Skill_Range_System>();
+
+            if (rangeSystem != null)
+            {
+                rangeSystem.skillData = skillData;
+                rangeSystem.StartRangeEffect();
+            }
+            else
+            {
+                Debug.LogError("Skill_Range_System component is missing on the rangePrefab.");
+            }
+        }
+        else
+        {
+            Debug.LogError("rangePrefab is not assigned in SkillData.");
+        }
+    }
+    private void CreateSkillPrefab(Vector3 position)
+    {
+        if (createPrefab == null) return;
+
+        if (skillData.skillType == Skill_Data.SkillType.Create) 
+        {
+            Instantiate(createPrefab, position, Quaternion.identity);
+        }
+        else if (skillData.skillType == Skill_Data.SkillType.Summon)
+        {
+            Instantiate(createPrefab, position, Quaternion.identity);
+        }        
+    }
+}

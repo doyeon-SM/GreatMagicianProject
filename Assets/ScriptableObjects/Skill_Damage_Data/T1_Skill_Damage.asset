@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 65cb8bf87b9c00948b0d0d2eda16cfb3, type: 3}
+  m_Name: T1_Skill_Damage
+  m_EditorClassIdentifier: 
+  t1SkillDamageEntries:
+  - skillName: Fire
+    damageMultiplier: 1.2
+  - skillName: Steam
+    damageMultiplier: 0.3
+  - skillName: Electricity
+    damageMultiplier: 1.2
+  - skillName: Rock
+    damageMultiplier: 1.2
+  - skillName: Ice
+    damageMultiplier: 1.2
+  - skillName: Water_Cannon
+    damageMultiplier: 1.2
+  - skillName: Plants
+    damageMultiplier: 0.5
+  - skillName: Tornado
+    damageMultiplier: 1.2
+  - skillName: Dust
+    damageMultiplier: 0.3
+  - skillName: Wall
+    damageMultiplier: 2

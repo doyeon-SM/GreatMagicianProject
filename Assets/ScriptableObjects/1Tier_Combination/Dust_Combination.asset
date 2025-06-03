@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 19fe9034beafdad40948a50814c133b7, type: 3}
+  m_Name: Dust_Combination
+  m_EditorClassIdentifier: 
+  baseSkills:
+  - {fileID: 11400000, guid: 6ce68fa4867617b43be72514bca91a33, type: 2}
+  - {fileID: 11400000, guid: 702b6d2af190e1546825cdbf021a264f, type: 2}
+  resultSkill: {fileID: 11400000, guid: 1b604f97287ec884b94d887793a25e5c, type: 2}
