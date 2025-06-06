@@ -53,7 +53,8 @@ public class Skill_Data : ScriptableObject
         Freezing,           //얼음: 50%확률 몬스터 이동속도 -90%
         Burn,               //화상: 스킬의 10% 데미지 지속시간동안 도트뎀
         Bind,               //속박: 몬스터 이동속도 0
-        Fear                //공포: 뒤로 몬스터 강제 이동
+        Fear,               //공포: 뒤로 몬스터 강제 이동
+        Gravity             //중력: 중심으로 끌어당김
     }
     private void OnEnable()
     {
@@ -128,6 +129,10 @@ public class Skill_Data : ScriptableObject
         {
             ApplyFear(monster);
         }
+        else if(skillEffect == SkillEffect.Gravity)
+        {
+            ApplyGravity(monster, origin);
+        }
     }
 
     public int ApplyCreate()
@@ -177,6 +182,17 @@ public class Skill_Data : ScriptableObject
         int i = damage / 10;
         monster.ApplyContinuousDamage(Effect_Value, i);
         monster.ApplyElement("Ignis");
+    }
+
+    public void ApplyGravity(Monster_Base monster, Vector3 origin)
+    {
+        if (monster == null) return;
+
+        Vector3 direction = (origin - monster.transform.position).normalized;
+        Vector3 GravityVelocity = direction * Effect_Value;
+        float GravityDuration = 0.2f;
+
+        monster.ApplyMoveEffect(GravityVelocity, GravityDuration);
     }
 }
 

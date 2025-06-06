@@ -98,6 +98,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: c741f7cf0ab809a439a836477f99a920, type: 2}
   - {fileID: 11400000, guid: 199446c1be863d1498936e17835e0a17, type: 2}
   - {fileID: 11400000, guid: 47708253f0e5ad54d9e8c59184caa6c1, type: 2}
+  - {fileID: 11400000, guid: ce7b77f9117488f42bac5191d09aeb82, type: 2}
   tier1SkillsCombination:
   - {fileID: 11400000, guid: 693c5257e7d8ebf4299020348a459f9b, type: 2}
   - {fileID: 11400000, guid: f30a366db3cc5474a84b22f0089d1dbd, type: 2}
@@ -139,4 +140,5 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 70a90fac4cd96764dbe43dc08174ecf5, type: 2}
   - {fileID: 11400000, guid: 4d01ee945fe317a4cbfdada3853ac996, type: 2}
   - {fileID: 11400000, guid: 298f0aae75e9c764c9570aa448446c51, type: 2}
+  - {fileID: 11400000, guid: ff0c3d02729a1ad4c847fd4050ec1b7a, type: 2}
   Character_NextEXP: 10

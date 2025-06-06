@@ -71,3 +71,7 @@ MonoBehaviour:
     damageMultiplier: 1
   - skillName: Fireball
     damageMultiplier: 1
+  - skillName: Low_Pressure
+    damageMultiplier: 1
+  - skillName: Electirc_Wires
+    damageMultiplier: 1
