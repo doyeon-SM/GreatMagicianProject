@@ -69,3 +69,5 @@ MonoBehaviour:
     damageMultiplier: 1
   - skillName: Flower
     damageMultiplier: 1
+  - skillName: Fireball
+    damageMultiplier: 1

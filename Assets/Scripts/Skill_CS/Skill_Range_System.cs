@@ -198,6 +198,9 @@ public class Skill_Range_System : MonoBehaviour
                         LaunchProjectile(mousePosition + randomOffset);
                     }
                     break;
+                case "Around":
+                    CreateAroundSkill();
+                    break;
                 default:        //AraeOfEffect, StraightLine
                     ApplyDamageToMonsters();
                     break;
@@ -291,4 +294,35 @@ public class Skill_Range_System : MonoBehaviour
             Instantiate(createPrefab, position, Quaternion.identity);
         }        
     }
+    private void CreateAroundSkill()
+    {
+        Vector3 centerPosition = new Vector3(0f, -8f, 0f);
+        GameObject centerObject = new GameObject("AroundCenter");
+        centerObject.transform.position = centerPosition;
+        centerObject.tag = "AroundCenter";
+
+        int numberOfOrbitProjectiles = 3;
+        float orbitRadius = 7.0f;
+        float orbitSpeed = 180.0f;
+        Debug.Log("Around Center 생성 완료");
+
+        for (int i = 0; i < numberOfOrbitProjectiles; i++)
+        {
+            float angleOffset = (360f / numberOfOrbitProjectiles) * i;
+            float rad = Mathf.Deg2Rad * angleOffset;
+            Vector3 offset = new Vector3(Mathf.Cos(rad), Mathf.Sin(rad), 0f) * orbitRadius;
+            Vector3 spawnPos = centerPosition + offset;
+
+            GameObject orbitProjectile = Instantiate(skillData.attackPrefab, spawnPos, Quaternion.identity);
+            orbitProjectile.tag = "AroundProjectile";
+
+            var orbitScript = orbitProjectile.AddComponent<Around_OrbitingProjectile>();
+            orbitScript.skillData = skillData;
+            orbitScript.center = centerObject.transform;
+            orbitScript.radius = orbitRadius;
+            orbitScript.angularSpeed = orbitSpeed;
+            orbitScript.startAngle = angleOffset; // 각도 분배로 위상 차이 부여
+        }
+    }
+
 }

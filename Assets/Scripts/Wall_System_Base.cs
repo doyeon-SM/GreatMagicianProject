@@ -108,6 +108,7 @@ public class Wall_System_Base : MonoBehaviour
     private void GameOver()
     {
         Debug.Log("Game Over!");
+        CleanupAroundObjects();
         PlayTime = 0f;
         // Canvas를 찾아서 결과 UI를 생성
         GameObject canvas = GameObject.Find("Canvas");
@@ -131,5 +132,14 @@ public class Wall_System_Base : MonoBehaviour
             Debug.LogError("GameResultUI가 할당되어 있지 않습니다.");
         }
         Time.timeScale = 0; // 게임 멈추기 (선택 사항)
+    }
+    //오브젝트 삭제 함수(게임종료시)
+    private void CleanupAroundObjects()
+    {
+        foreach (GameObject p in GameObject.FindGameObjectsWithTag("AroundProjectile"))
+            Destroy(p);
+
+        foreach (GameObject c in GameObject.FindGameObjectsWithTag("AroundCenter"))
+            Destroy(c);
     }
 }

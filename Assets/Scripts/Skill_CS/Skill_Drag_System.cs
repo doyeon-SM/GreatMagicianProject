@@ -250,6 +250,24 @@ public class Skill_Drag_System : MonoBehaviour
                         // 직사각형의 아랫변 중앙을 고정한 상태에서 마우스를 중앙선 위에 고정
                         instantiatedRange.transform.position = bottomCenter;
                     }
+                    else if (skillData.skillType == Skill_Data.SkillType.Around)
+                    {
+                        Vector3 fixedCenter = new Vector3(0, -8, 0); // 중심
+
+                        if (instantiatedUseableRange == null)
+                        {
+                            instantiatedUseableRange = Instantiate(skillData.useableRangePrefab, fixedCenter, Quaternion.identity);
+                            ConfigureRangeObject(instantiatedUseableRange);
+                        }
+
+                        if (skillData.rangePrefab != null && instantiatedRange == null)
+                        {
+                            instantiatedRange = Instantiate(skillData.rangePrefab, fixedCenter, Quaternion.identity);
+                            ConfigureRangeObject(instantiatedRange);
+                        }
+
+                        return; // Around 처리 종료
+                    }
                     else 
                     { 
                         instantiatedRange = Instantiate(skillData.rangePrefab, mousePosition, Quaternion.identity);
@@ -284,7 +302,7 @@ public class Skill_Drag_System : MonoBehaviour
                 // 직사각형의 아랫변 중앙을 고정한 상태에서 마우스를 중앙선 위에 고정
                 instantiatedRange.transform.position = bottomCenter;
             }
-            else
+            else if(skillData != null && skillData.skillType != Skill_Data.SkillType.Around)
             {
                 instantiatedRange.transform.position = mousePosition;
             }
@@ -416,7 +434,7 @@ public class Skill_Drag_System : MonoBehaviour
         return underUISprite.bounds.Contains(mouseWorldPosition);
     }
 
-    private Skill_Data TryCombineSkills()
+    /*private Skill_Data TryCombineSkills()
     {
         if (currentSlotData == null || currentSlotData.GetSkillIndex() == -1)
         {
@@ -459,7 +477,7 @@ public class Skill_Drag_System : MonoBehaviour
 
         ReturnIconToOriginalPosition();
         return null;
-    }
+    }*/
 
     private void ApplyCombinedSkill(Skill_Data combinedSkill, UnderUI_Slot_System otherSlot)
     {

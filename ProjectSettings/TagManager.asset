@@ -6,6 +6,8 @@ TagManager:
   tags:
   - Monster
   - Skill
+  - AroundCenter
+  - AroundProjectile
   layers:
   - Default
   - TransparentFX

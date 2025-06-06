@@ -39,7 +39,8 @@ public class Skill_Data : ScriptableObject
         StraightLine,    // 직선 영역 효과(AreaOfEffect 확장)
         Create,          // 설치형 타입 
         Scattered,       // 산탄형 투사체
-        Summon              // 소환수
+        Summon,          // 소환수
+        Around           // 회전체
     }
     public enum SkillEffect
     {
