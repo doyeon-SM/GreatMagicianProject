@@ -56,7 +56,8 @@ public class Skill_Data : ScriptableObject
         Fear,               //공포: 뒤로 몬스터 강제 이동
         Gravity,            //중력: 중심으로 끌어당김
         Posion,             //독
-        Blind               //실명
+        Blind,              //실명
+        Heal                //회복: 벽, 소환수의 체력 회복
     }
     private void OnEnable()
     {

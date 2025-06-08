@@ -41,11 +41,23 @@ public class Wall_System_Create : MonoBehaviour
             damageTimer += Time.deltaTime;
             //Blind 효과에 따른 데미지 처리
             contactingMonsters.RemoveWhere(monster => monster == null || monster.isBlind);
+
             if (damageTimer >= damageInterval)
             {
                 TakeDamage(1);  // 1초마다 체력 1 감소
                 damageTimer = 0f;
-            }
+                //효과에 따른 반사데미지
+                if (skillData.skillEffect == Skill_Data.SkillEffect.Burn ||
+                    skillData.skillEffect == Skill_Data.SkillEffect.Paralysis)
+                {
+                    ReflectDamage("Ignis");
+                }
+                else if (skillData.skillEffect == Skill_Data.SkillEffect.Knockback ||
+                    skillData.skillEffect == Skill_Data.SkillEffect.Freezing)
+                {
+                    ReflectDamage("Aqua");
+                }
+            }            
         }
         // 체력이 0 이하가 되면 게임 종료
         if (currentHealth <= 0)
@@ -98,6 +110,19 @@ public class Wall_System_Create : MonoBehaviour
         if (healthText != null)
         {
             Destroy(healthText);  // 체력 텍스트도 제거
+        }
+    }
+
+    //벽 반사함수
+    private void ReflectDamage(string element)
+    {
+        foreach (Monster_Base monster in contactingMonsters)
+        {
+            if (monster != null)
+            {
+                monster.ApplyElement(element);
+                monster.TakeDamage(skillData.damage); //반사 데미지
+            }
         }
     }
 }
