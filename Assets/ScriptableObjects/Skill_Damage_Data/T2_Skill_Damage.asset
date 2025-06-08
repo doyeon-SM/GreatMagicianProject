@@ -85,3 +85,15 @@ MonoBehaviour:
     damageMultiplier: 1
   - skillName: Typhoon
     damageMultiplier: 1
+  - skillName: Goblin_Fire
+    damageMultiplier: 1
+  - skillName: Steam2
+    damageMultiplier: 1
+  - skillName: Lightning
+    damageMultiplier: 1
+  - skillName: Yellow_Dust
+    damageMultiplier: 1
+  - skillName: Blizzard
+    damageMultiplier: 1
+  - skillName: Mud
+    damageMultiplier: 1
