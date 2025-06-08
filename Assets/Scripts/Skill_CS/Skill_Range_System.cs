@@ -6,6 +6,8 @@ public class Skill_Range_System : MonoBehaviour
 {
     public Skill_Data skillData;  // 현재 스킬에 대한 SkillData 참조
     private List<Monster_Base> monstersInRange = new List<Monster_Base>();  // 범위 내의 몬스터 리스트
+    private List<Wall_System_Create> WCreateInRange = new List<Wall_System_Create>();//범위 내의 벽 리스트
+    private List<Summon_System> SCreateInRange = new List<Summon_System>(); //범위 내의 소환수 리스트
     private Coroutine periodicDamageCoroutine;
 
     public GameObject createPrefab; //Create 타입 프리팹
@@ -73,7 +75,14 @@ public class Skill_Range_System : MonoBehaviour
                     monster.ApplyBlindEffect(tmpblind);
                 }
             }
-            ApplyDamageInRange();
+            if (skillData.skillEffect == Skill_Data.SkillEffect.Heal)
+            {
+                ApplyHealingInRange();
+            }
+            else
+            {
+                ApplyDamageInRange();
+            }
             elapsedTime += interval;
             yield return new WaitForSeconds(interval);
         }
@@ -111,8 +120,20 @@ public class Skill_Range_System : MonoBehaviour
             Monster_Base monster = collision.GetComponent<Monster_Base>();
             if (monster != null && !monstersInRange.Contains(monster))
             {
-                monstersInRange.Add(monster);
-                
+                monstersInRange.Add(monster);                
+            }
+        }
+        else if(collision.CompareTag("Create"))
+        {
+            Wall_System_Create WCreate = collision.GetComponent<Wall_System_Create>();
+            Summon_System SCreate = collision.GetComponent<Summon_System>();
+            if(WCreate != null && !WCreateInRange.Contains(WCreate))
+            {
+                WCreateInRange.Add(WCreate);
+            }
+            if(SCreate != null && !SCreateInRange.Contains(SCreate))
+            {
+                SCreateInRange.Add(SCreate);
             }
         }
     }
@@ -126,6 +147,19 @@ public class Skill_Range_System : MonoBehaviour
             {
                 monstersInRange.Remove(monster);
                 
+            }
+        }
+        else if (collision.CompareTag("Create"))
+        {
+            Wall_System_Create WCreate = collision.GetComponent<Wall_System_Create>();
+            Summon_System SCreate = collision.GetComponent<Summon_System>();
+            if (WCreate != null && !WCreateInRange.Contains(WCreate))
+            {
+                WCreateInRange.Remove(WCreate);
+            }
+            if (SCreate != null && !SCreateInRange.Contains(SCreate))
+            {
+                SCreateInRange.Remove(SCreate);
             }
         }
     }
@@ -331,4 +365,27 @@ public class Skill_Range_System : MonoBehaviour
         }
     }
 
+    //Heal 기능
+    private void ApplyHealingInRange()
+    {
+        List<Wall_System_Create> WCreatetoHeal = new List<Wall_System_Create>(WCreateInRange);
+        List<Summon_System> SCreatetoHeal = new List<Summon_System>(SCreateInRange);
+
+        foreach(Wall_System_Create WCreate in WCreatetoHeal)
+        {
+            if(WCreate != null)
+            {
+                Debug.Log("Heal:" + WCreate);
+                WCreate.Heal_Create(skillData.damage);
+            }
+        }
+        foreach(Summon_System SCreate in SCreatetoHeal)
+        {
+            if(SCreate != null)
+            {
+                Debug.Log("Heal:" + SCreate);
+                SCreate.Heal_Summon(skillData.damage);
+            }
+        }
+    }
 }

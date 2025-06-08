@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 1719992427870369063}
   m_Layer: 0
   m_Name: Summon_IceFlower
-  m_TagString: Skill
+  m_TagString: Create
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

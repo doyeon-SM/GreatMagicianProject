@@ -117,4 +117,13 @@ public class Summon_System : MonoBehaviour
             Destroy(healthText);  // 체력 텍스트도 제거
         }
     }
+
+    public void Heal_Summon(int amount)
+    {
+        currentHealth = Mathf.Min(currentHealth + amount, SummonMaxHP);
+        if (healthTextInstance != null)
+        {
+            healthText.text = currentHealth.ToString();
+        }
+    }
 }

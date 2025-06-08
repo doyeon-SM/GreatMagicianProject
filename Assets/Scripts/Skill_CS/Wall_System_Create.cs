@@ -125,4 +125,13 @@ public class Wall_System_Create : MonoBehaviour
             }
         }
     }
+
+    public void Heal_Create(int amount)
+    {
+        currentHealth = Mathf.Min(currentHealth + amount, maxHealth);
+        if (healthTextInstance != null)
+        {
+            healthText.text = currentHealth.ToString();
+        }
+    }
 }
