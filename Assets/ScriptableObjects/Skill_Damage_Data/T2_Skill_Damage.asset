@@ -75,3 +75,13 @@ MonoBehaviour:
     damageMultiplier: 1
   - skillName: Electirc_Wires
     damageMultiplier: 1
+  - skillName: Tornado(Terra)
+    damageMultiplier: 1
+  - skillName: Restriction(Ice)
+    damageMultiplier: 1
+  - skillName: High_Pressure
+    damageMultiplier: 1
+  - skillName: JackNBeanstalk
+    damageMultiplier: 1
+  - skillName: Typhoon
+    damageMultiplier: 1
