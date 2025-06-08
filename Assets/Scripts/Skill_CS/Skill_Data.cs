@@ -54,7 +54,9 @@ public class Skill_Data : ScriptableObject
         Burn,               //화상: 스킬의 10% 데미지 지속시간동안 도트뎀
         Bind,               //속박: 몬스터 이동속도 0
         Fear,               //공포: 뒤로 몬스터 강제 이동
-        Gravity             //중력: 중심으로 끌어당김
+        Gravity,            //중력: 중심으로 끌어당김
+        Posion,             //독
+        Blind               //실명
     }
     private void OnEnable()
     {
@@ -133,6 +135,10 @@ public class Skill_Data : ScriptableObject
         {
             ApplyGravity(monster, origin);
         }
+        else if(skillEffect == SkillEffect.Posion)
+        {
+            ApplyPosion(monster);
+        }
     }
 
     public int ApplyCreate()
@@ -182,6 +188,13 @@ public class Skill_Data : ScriptableObject
         int i = damage / 10;
         monster.ApplyContinuousDamage(Effect_Value, i);
         monster.ApplyElement("Ignis");
+    }
+    public void ApplyPosion(Monster_Base monster)
+    {
+        if (monster == null) return;
+        int i = damage / 10;
+        monster.ApplyContinuousDamage(Effect_Value, i);
+        monster.ApplyElement("Terra");
     }
 
     public void ApplyGravity(Monster_Base monster, Vector3 origin)

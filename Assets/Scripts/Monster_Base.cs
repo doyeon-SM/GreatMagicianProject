@@ -24,12 +24,16 @@ public class Monster_Base : MonoBehaviour
     private bool isMoveEffect = false;
     private Vector3 MoveEffectVelocity;
     private float MoveEffectTimeRemaining = 0f;
+    //실명 관련 변수
+    public bool isBlind = false;
 
     // 드롭 아이템 prefab (Inspector에서 할당)
     public GameObject normalSpherePrefab;   // 20% 확률 드롭 (일반 구체)
     public GameObject advancedSpherePrefab;   // 5% 확률 드롭 (고급 구체)
     // 지속 데미지
     private Coroutine periodicDamageCoroutine;
+
+
 
     public enum MonsterElement
     {
@@ -209,5 +213,14 @@ public class Monster_Base : MonoBehaviour
                 monsterElement = MonsterElement.None;
                 break;
         }
+    }
+
+    public void ApplyBlindEffect(bool tmp)
+    {
+        isBlind = tmp;
+    }
+    public void RemoveBlindEffect()
+    {
+        isBlind = false;
     }
 }

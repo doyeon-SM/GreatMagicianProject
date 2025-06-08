@@ -34,6 +34,7 @@ public class Skill_Range_System : MonoBehaviour
     {
         float elapsedTime = 0f;
         float effectvalue = 0f;
+        bool tmpblind = false;
         string monster_Element_String = "None";
 
         if (skillData == null) yield break;
@@ -45,6 +46,9 @@ public class Skill_Range_System : MonoBehaviour
                 break;
             case "Bind":
                 effectvalue = 0f;
+                break;
+            case "Blind":
+                tmpblind = true;
                 break;
             default:
                 effectvalue = 1.0f;
@@ -66,6 +70,7 @@ public class Skill_Range_System : MonoBehaviour
                     if (monster_Element_String != "None")
                         monster.ApplyElement(monster_Element_String);
                     monster.ApplySlowEffect(effectvalue);
+                    monster.ApplyBlindEffect(tmpblind);
                 }
             }
             ApplyDamageInRange();
@@ -78,6 +83,7 @@ public class Skill_Range_System : MonoBehaviour
             if (monster != null)
             {
                 monster.RemoveSlowEffect();
+                monster.RemoveBlindEffect();
             }
         }
         
