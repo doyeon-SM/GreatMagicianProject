@@ -23,6 +23,7 @@ MonoBehaviour:
   attackPrefab: {fileID: 0}
   skillType: 2
   skillEffect: 5
+  skillElement: 3
   t1SkillDamageData: {fileID: 0}
   t2SkillDamageData: {fileID: 0}
   isCombinationSkill: 0

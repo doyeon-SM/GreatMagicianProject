@@ -17,6 +17,7 @@ public class Skill_Data : ScriptableObject
 
     public SkillType skillType;  // 스킬 타입을 설정
     public SkillEffect skillEffect; //스킬 효과 설정
+    public SkillElement skillElement; //스킬 속성 설정
     public T1_SkillDamage_Data t1SkillDamageData;  // 티어 1 스킬 데미지 데이터 참조
     public T2_SkillDamage_Data t2SkillDamageData;   // 티어 2 스킬 데미지 데이터 참조
 
@@ -59,6 +60,12 @@ public class Skill_Data : ScriptableObject
         Blind,              //실명
         Heal                //회복: 벽, 소환수의 체력 회복
     }
+
+    public enum SkillElement
+    {
+        Ignis, Aqua, Terra, Ventus
+    }    
+
     private void OnEnable()
     {
         UpdateDamage();
@@ -77,14 +84,39 @@ public class Skill_Data : ScriptableObject
 
     public void ApplyDamage(Monster_Base monster)
     {
-        int calculatedDamage = damage;  // 기본적으로 스킬의 데미지 사용
+        if (monster == null) return;
 
-        /*if (isCombinationSkill && Tier == 1 && t1SkillDamageData != null)
+        int baseDamage = damage;
+        float multiplier = GetElementalMultiplier(skillElement, monster.monsterElement);
+        int finalDamage = Mathf.RoundToInt(baseDamage * multiplier);
+
+        Debug.Log($"속성 데미지 계산: 기본={baseDamage}, 배율={multiplier}, 최종={finalDamage}");
+        monster.TakeDamage(finalDamage);
+    }
+    private float GetElementalMultiplier(SkillElement skillElement, Monster_Base.MonsterElement monsterElement)
+    {
+        if (monsterElement == Monster_Base.MonsterElement.None) return 1f;
+
+        switch (skillElement)
         {
-            calculatedDamage = t1SkillDamageData.CalculateT1SkillDamage(skillName, requiredBaseSkills);            
-        }*/
-        Debug.Log("적용된 데미지: "+calculatedDamage);
-        monster.TakeDamage(calculatedDamage);
+            case SkillElement.Ignis:
+                if (monsterElement == Monster_Base.MonsterElement.Ventus) return 1.5f;
+                if (monsterElement == Monster_Base.MonsterElement.Aqua) return 0.5f;
+                break;
+            case SkillElement.Aqua:
+                if (monsterElement == Monster_Base.MonsterElement.Ignis) return 1.5f;
+                if (monsterElement == Monster_Base.MonsterElement.Terra) return 0.5f;
+                break;
+            case SkillElement.Terra:
+                if (monsterElement == Monster_Base.MonsterElement.Aqua) return 1.5f;
+                if (monsterElement == Monster_Base.MonsterElement.Ventus) return 0.5f;
+                break;
+            case SkillElement.Ventus:
+                if (monsterElement == Monster_Base.MonsterElement.Terra) return 1.5f;
+                if (monsterElement == Monster_Base.MonsterElement.Ignis) return 0.5f;
+                break;
+        }
+        return 1f;
     }
 
     public void ApplyKnockback(Monster_Base monster, Vector3 origin)

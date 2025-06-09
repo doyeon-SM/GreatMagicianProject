@@ -23,11 +23,12 @@ MonoBehaviour:
   attackPrefab: {fileID: 3387846282096477600, guid: 6404f6e1b39e6014c9d65ff9e77ed228, type: 3}
   skillType: 0
   skillEffect: 1
+  skillElement: 2
   t1SkillDamageData: {fileID: 0}
   t2SkillDamageData: {fileID: 0}
   isCombinationSkill: 0
   requiredBaseSkills: []
-  Knockback_Value: 0
+  Effect_Value: 0
   AreaTime: 0
   skillscript: "\uB545\uC18D\uC131, \uD2B9\uC218\uC2A4\uD0AC \uD2B9\uD654"
   isKnow: 1
