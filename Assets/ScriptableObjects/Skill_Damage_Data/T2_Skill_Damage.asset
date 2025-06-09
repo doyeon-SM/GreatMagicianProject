@@ -97,3 +97,29 @@ MonoBehaviour:
     damageMultiplier: 1
   - skillName: Mud
     damageMultiplier: 1
+  - skillName: Spore(Poison)
+    damageMultiplier: 1
+  - skillName: Seasonal_Wind
+    damageMultiplier: 1
+  - skillName: Smoke_Bomb
+    damageMultiplier: 1
+  - skillName: Fire_Wall
+    damageMultiplier: 1
+  - skillName: Water_Wall
+    damageMultiplier: 1
+  - skillName: Electricity_Wall
+    damageMultiplier: 1
+  - skillName: Mountain
+    damageMultiplier: 1
+  - skillName: Ice_Wall
+    damageMultiplier: 1
+  - skillName: Fountain
+    damageMultiplier: 1
+  - skillName: Vaines
+    damageMultiplier: 1
+  - skillName: Wind_Wall
+    damageMultiplier: 1
+  - skillName: Sandcastle
+    damageMultiplier: 1
+  - skillName: Reinforced_Wall
+    damageMultiplier: 1
