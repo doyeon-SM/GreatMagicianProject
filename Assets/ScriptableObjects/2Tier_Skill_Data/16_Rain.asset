@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef714f9c6556df94cbbaaa55d6c297d0, type: 3}
+  m_Name: 16_Rain
+  m_EditorClassIdentifier: 
+  skillName: Rain
+  damage: 9
+  Tier: 2
+  level: 1
+  NeedLevelUP_Gold: 1
+  skillIcon: {fileID: 21300000, guid: a3fe4f730bd24914cadc616ecbc39754, type: 3}
+  rangePrefab: {fileID: 845473151264501715, guid: 96aed0eeab929d14aaa661a7d619be2a, type: 3}
+  useableRangePrefab: {fileID: 590556380511742590, guid: 0a6d49ab7a626fa4f83ed05e36ac845e, type: 3}
+  attackPrefab: {fileID: 0}
+  skillType: 3
+  skillEffect: 0
+  skillElement: 1
+  t1SkillDamageData: {fileID: 0}
+  t2SkillDamageData: {fileID: 11400000, guid: 72533718fb6edd3428173bf7970cd06c, type: 2}
+  isCombinationSkill: 1
+  requiredBaseSkills:
+  - {fileID: 11400000, guid: 796ad30d6187afb4f873484875d3ca14, type: 2}
+  - {fileID: 11400000, guid: 796ad30d6187afb4f873484875d3ca14, type: 2}
+  Effect_Value: 0
+  AreaTime: 8
+  skillscript: 
+  isKnow: 0

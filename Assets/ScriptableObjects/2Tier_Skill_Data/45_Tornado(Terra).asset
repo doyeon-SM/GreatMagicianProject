@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef714f9c6556df94cbbaaa55d6c297d0, type: 3}
+  m_Name: 45_Tornado(Terra)
+  m_EditorClassIdentifier: 
+  skillName: Tornado(Terra)
+  damage: 31
+  Tier: 2
+  level: 1
+  NeedLevelUP_Gold: 1
+  skillIcon: {fileID: 21300000, guid: a07c70d812d51564e9e6617b33f8f15a, type: 3}
+  rangePrefab: {fileID: 845473151264501715, guid: 950377a601ddbc14cae1aea6871ac351, type: 3}
+  useableRangePrefab: {fileID: 590556380511742590, guid: 0a6d49ab7a626fa4f83ed05e36ac845e, type: 3}
+  attackPrefab: {fileID: 0}
+  skillType: 2
+  skillEffect: 5
+  skillElement: 3
+  t1SkillDamageData: {fileID: 0}
+  t2SkillDamageData: {fileID: 11400000, guid: 72533718fb6edd3428173bf7970cd06c, type: 2}
+  isCombinationSkill: 1
+  requiredBaseSkills:
+  - {fileID: 11400000, guid: 7a339c104bb7d854db1aaf44f8cbdb29, type: 2}
+  - {fileID: 11400000, guid: e371c33aa863b1a498019613ea6a4def, type: 2}
+  Effect_Value: 5
+  AreaTime: 0
+  skillscript: 
+  isKnow: 0

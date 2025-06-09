@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef714f9c6556df94cbbaaa55d6c297d0, type: 3}
+  m_Name: 21_Earthquake
+  m_EditorClassIdentifier: 
+  skillName: Earthquake
+  damage: 22
+  Tier: 2
+  level: 1
+  NeedLevelUP_Gold: 1
+  skillIcon: {fileID: 21300000, guid: c6f3bcbef1a86e244b0720fad1153ff0, type: 3}
+  rangePrefab: {fileID: 845473151264501715, guid: c9c65f64a69cf3141b1858b411e36187, type: 3}
+  useableRangePrefab: {fileID: 590556380511742590, guid: 0a6d49ab7a626fa4f83ed05e36ac845e, type: 3}
+  attackPrefab: {fileID: 0}
+  skillType: 3
+  skillEffect: 0
+  skillElement: 2
+  t1SkillDamageData: {fileID: 0}
+  t2SkillDamageData: {fileID: 11400000, guid: 72533718fb6edd3428173bf7970cd06c, type: 2}
+  isCombinationSkill: 1
+  requiredBaseSkills:
+  - {fileID: 11400000, guid: 796ad30d6187afb4f873484875d3ca14, type: 2}
+  - {fileID: 11400000, guid: e371c33aa863b1a498019613ea6a4def, type: 2}
+  Effect_Value: 0
+  AreaTime: 5
+  skillscript: 
+  isKnow: 0

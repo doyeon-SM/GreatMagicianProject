@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef714f9c6556df94cbbaaa55d6c297d0, type: 3}
+  m_Name: 40_Restricion
+  m_EditorClassIdentifier: 
+  skillName: Restricion
+  damage: 15
+  Tier: 2
+  level: 1
+  NeedLevelUP_Gold: 1
+  skillIcon: {fileID: 21300000, guid: 8f6050c2bce2eaf41ab887322e19c233, type: 3}
+  rangePrefab: {fileID: 5982334104922324997, guid: 917203fad8fc1724ab511b4d7bfb5ab0, type: 3}
+  useableRangePrefab: {fileID: 590556380511742590, guid: 0a6d49ab7a626fa4f83ed05e36ac845e, type: 3}
+  attackPrefab: {fileID: 0}
+  skillType: 4
+  skillEffect: 8
+  skillElement: 2
+  t1SkillDamageData: {fileID: 0}
+  t2SkillDamageData: {fileID: 11400000, guid: 72533718fb6edd3428173bf7970cd06c, type: 2}
+  isCombinationSkill: 1
+  requiredBaseSkills:
+  - {fileID: 11400000, guid: 913e169a24362454687a8e4f2b961867, type: 2}
+  - {fileID: 11400000, guid: 2b1185529fec9bb42956eaaba0029717, type: 2}
+  Effect_Value: 0
+  AreaTime: 0
+  skillscript: 
+  isKnow: 0
