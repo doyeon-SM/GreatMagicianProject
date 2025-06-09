@@ -219,6 +219,7 @@ public class Skill_Data : ScriptableObject
     {
         if (monster == null) return;
         int i = damage / 10;
+        Effect_Value = damage;
         monster.ApplyContinuousDamage(Effect_Value, i);
         monster.ApplyElement("Ignis");
     }
@@ -226,6 +227,7 @@ public class Skill_Data : ScriptableObject
     {
         if (monster == null) return;
         int i = damage / 10;
+        Effect_Value = damage;
         monster.ApplyContinuousDamage(Effect_Value, i);
         monster.ApplyElement("Terra");
     }
