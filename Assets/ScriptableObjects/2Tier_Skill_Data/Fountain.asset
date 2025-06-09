@@ -30,6 +30,6 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 260d1f9095ca9454f9081dead2568783, type: 2}
   - {fileID: 11400000, guid: 2b1185529fec9bb42956eaaba0029717, type: 2}
   Effect_Value: 0
-  AreaTime: 0
+  AreaTime: 5
   skillscript: 
   isKnow: 0
