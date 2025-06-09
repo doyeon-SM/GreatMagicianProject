@@ -30,7 +30,7 @@ MonoBehaviour:
   requiredBaseSkills:
   - {fileID: 11400000, guid: 1b604f97287ec884b94d887793a25e5c, type: 2}
   - {fileID: 11400000, guid: 913e169a24362454687a8e4f2b961867, type: 2}
-  Effect_Value: 0
+  Effect_Value: 5
   AreaTime: 5
   skillscript: 
   isKnow: 0
