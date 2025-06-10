@@ -14,22 +14,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   t1SkillDamageEntries:
   - skillName: Fire
-    damageMultiplier: 1.2
+    damageMultiplier: 1
   - skillName: Steam
-    damageMultiplier: 0.3
+    damageMultiplier: 1
   - skillName: Electricity
-    damageMultiplier: 1.2
+    damageMultiplier: 1
   - skillName: Rock
-    damageMultiplier: 1.2
+    damageMultiplier: 1
   - skillName: Ice
-    damageMultiplier: 1.2
+    damageMultiplier: 1
   - skillName: Water_Cannon
-    damageMultiplier: 1.2
+    damageMultiplier: 1
   - skillName: Plants
-    damageMultiplier: 0.5
+    damageMultiplier: 1
   - skillName: Tornado
-    damageMultiplier: 1.2
+    damageMultiplier: 1
   - skillName: Dust
-    damageMultiplier: 0.3
+    damageMultiplier: 1
   - skillName: Wall
-    damageMultiplier: 2
+    damageMultiplier: 1
