@@ -40,6 +40,60 @@ public class Skill_Drag_System : MonoBehaviour
 
         InitializeComponents();
     }
+    void Update()
+    {
+        if (HasInput())
+        {
+            Vector3 screenPos = GetInputPosition();
+            Vector3 worldPos = Camera.main.ScreenToWorldPoint(screenPos);
+            worldPos.z = 0f;
+
+            Collider2D hit = Physics2D.OverlapPoint(worldPos);
+            if (hit != null && hit.gameObject == gameObject)
+            {
+                if (!isDragging && InputStarted())
+                {
+                    TryStartDrag(worldPos);
+                }
+                else if (isDragging)
+                {
+                    OnDragging(worldPos);
+                }
+            }
+        }
+        else if (isDragging)
+        {
+            OnRelease();
+        }
+    }
+
+
+    private bool HasInput()
+    {
+#if UNITY_EDITOR
+        return Input.GetMouseButton(0);
+#else
+        return Input.touchCount > 0;
+#endif
+    }
+
+    private bool InputStarted()
+    {
+#if UNITY_EDITOR
+        return Input.GetMouseButtonDown(0);
+#else
+        return Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began;
+#endif
+    }
+
+    private Vector3 GetInputPosition()
+    {
+#if UNITY_EDITOR
+        return Input.mousePosition;
+#else
+        return Input.GetTouch(0).position;
+#endif
+    }
 
     private void InitializeComponents()
     {
@@ -72,7 +126,17 @@ public class Skill_Drag_System : MonoBehaviour
             currentSlotData = FindSlotDataFromPosition();
         }
     }
-
+    private void TryStartDrag(Vector3 pos)
+    {
+        if (spriteRenderer.sprite.name != "Blank_Skill_Icon")
+        {
+            if (Vector2.Distance(transform.position, pos) < 1f) // 근접한 터치일 경우만 시작
+            {
+                InitializeDrag();
+                currentSlotData = FindSlotDataFromPosition();
+            }
+        }
+    }
     private void InitializeDrag()
     {
         zCoordinate = Camera.main.WorldToScreenPoint(transform.position).z;
@@ -136,6 +200,49 @@ public class Skill_Drag_System : MonoBehaviour
             }
         }
     }
+    private void OnDragging(Vector3 pos)
+    {
+        Vector3 clampedPos = ClampToUseableRange(pos + offset);
+        transform.position = clampedPos;
+
+        GameObject overlapping = FindOverlappingSkill();
+        if (overlapping != null)
+        {
+            Skill_Data currentSkill = GetSkillDataForCurrentSkill();
+            UnderUI_Slot_System otherSlot = overlapping.GetComponent<UnderUI_Slot_System>();
+            if (otherSlot != null && otherSlot.GetSkillIndex() != -1)
+            {
+                Skill_Data otherSkill = skillDataArray[otherSlot.GetSkillIndex()];
+                Skill_Combination_Data combo = FindCombinationForSkills(currentSkill, otherSkill);
+                if (combo != null)
+                {
+                    pendingCombination = combo;
+                    pendingOtherSlot = otherSlot;
+                    ShowCombinationDescriptionUI(currentSkill, otherSkill, combo.resultSkill);
+                }
+                else
+                {
+                    ClearCombinationState();
+                }
+            }
+        }
+        else
+        {
+            ClearCombinationState();
+        }
+
+        if (!underUISprite.bounds.Contains(pos))
+        {
+            spriteRenderer.enabled = false;
+            CreateRangeAndUseableRange(clampedPos);
+        }
+        else
+        {
+            spriteRenderer.enabled = true;
+            DestroyRangeAndUseableRange();
+        }
+    }
+
     private void OnMouseUp()
     {
         if (isDragging && spriteRenderer.sprite.name != "Blank_Skill_Icon")
@@ -164,19 +271,49 @@ public class Skill_Drag_System : MonoBehaviour
             pendingOtherSlot = null;
         }
     }
-
-    private bool IsCollidingWithAnotherSkill()
+    private void OnRelease()
     {
-        GameObject[] slotObjects = GameObject.FindGameObjectsWithTag("Skill");
-        foreach (GameObject slotObject in slotObjects)
+        isDragging = false;
+        HideCombinationDescriptionUI();
+
+        if (pendingCombination != null && pendingOtherSlot != null)
         {
-            if (slotObject != gameObject && Vector3.Distance(slotObject.transform.position, transform.position) < 0.5f)
-            {
-                return true;
-            }
+            ApplyCombinedSkill(pendingCombination.resultSkill, pendingOtherSlot);
+            ResetIconToOriginalPosition();
         }
-        return false;
+        else if (instantiatedRange != null)
+        {
+            ApplySkillEffect();
+            ResetIconToOriginalPosition();
+        }
+        else
+        {
+            ReturnIconToOriginalPosition();
+        }
+
+        ClearCombinationState();
     }
+    private void ClearCombinationState()
+    {
+        HideCombinationDescriptionUI();
+        pendingCombination = null;
+        pendingOtherSlot = null;
+    }
+
+    private Vector3 ClampToUseableRange(Vector3 pos)
+    {
+        if (instantiatedUseableRange == null) return pos;
+
+        Vector3 center = instantiatedUseableRange.transform.position;
+        float radius = instantiatedUseableRange.GetComponent<CircleCollider2D>().radius * instantiatedUseableRange.transform.localScale.x;
+        Vector3 direction = pos - center;
+
+        if (direction.magnitude > radius)
+            return center + direction.normalized * radius;
+
+        return pos;
+    }
+
 
     private void ApplySkillEffect()
     {
@@ -427,57 +564,6 @@ public class Skill_Drag_System : MonoBehaviour
         mouseWorldPosition.z = 0f;
         return underUISprite.bounds.Contains(mouseWorldPosition);
     }
-    private bool IsWithinUnderUI()
-    {
-        Vector3 mouseWorldPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        mouseWorldPosition.z = 0f;
-        return underUISprite.bounds.Contains(mouseWorldPosition);
-    }
-
-    /*private Skill_Data TryCombineSkills()
-    {
-        if (currentSlotData == null || currentSlotData.GetSkillIndex() == -1)
-        {
-            Debug.LogError("Invalid skill index for current slot.");
-            return null;
-        }
-
-        Skill_Data currentSkillData = skillDataArray[currentSlotData.GetSkillIndex()];
-
-        if (currentSkillData == null)
-        {
-            Debug.LogError("No skill data found for current slot.");
-            return null;
-        }
-
-        foreach (var combination in skillCombinations)
-        {
-            GameObject[] slotObjects = GameObject.FindGameObjectsWithTag("Skill");
-            foreach (GameObject slotObject in slotObjects)
-            {
-                UnderUI_Slot_System otherSlotData = slotObject.GetComponent<UnderUI_Slot_System>();
-                if (otherSlotData != null && otherSlotData != currentSlotData && otherSlotData.GetSkillIndex() != -1)
-                {
-                    Skill_Data otherSkillData = skillDataArray[otherSlotData.GetSkillIndex()];
-
-                    // 두 스킬이 겹쳤는지 확인하고 UnderUI 안에 있는지 확인
-                    if (combination.IsCombination(currentSkillData, otherSkillData) && IsCollidingWithAnotherSkill() && IsWithinUnderUI())
-                    {
-                        otherSlotData.skillIndex = skillDataArray.IndexOf(combination.resultSkill);
-                        otherSlotData.slotObject.GetComponent<SpriteRenderer>().sprite = combination.resultSkill.skillIcon;
-
-                        currentSlotData.skillIndex = -1; // 현재 슬롯은 빈 슬롯으로
-                        currentSlotData.slotObject.GetComponent<SpriteRenderer>().sprite = blankSkillIconSprite;
-
-                        return combination.resultSkill;
-                    }
-                }
-            }
-        }
-
-        ReturnIconToOriginalPosition();
-        return null;
-    }*/
 
     private void ApplyCombinedSkill(Skill_Data combinedSkill, UnderUI_Slot_System otherSlot)
     {

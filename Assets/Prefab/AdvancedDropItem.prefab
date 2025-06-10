@@ -29,7 +29,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -0.05279015, y: 0.5064743, z: 0}
-  m_LocalScale: {x: 0.8, y: 0.8, z: 1}
+  m_LocalScale: {x: 0.8, y: 0.8, z: 2}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -98,7 +98,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1be2189eb53cb04498398fa4575f0d59, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  underUI: {fileID: 150169689988498276, guid: 259a9c259248e5145b0334c0d82d0630, type: 3}
   itemType: 1
   scoreSystem: {fileID: 1729787502847079638, guid: 3281504f39627b845ba945c89bcc1641, type: 3}
 --- !u!58 &-137830427630834294
