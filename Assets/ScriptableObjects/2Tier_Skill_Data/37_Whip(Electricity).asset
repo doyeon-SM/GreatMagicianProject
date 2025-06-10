@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: 37_Whip(Electricity)
   m_EditorClassIdentifier: 
   skillName: Whip(Electricity)
-  damage: 0
+  damage: 979
   Tier: 2
   level: 1
   NeedLevelUP_Gold: 1
@@ -23,12 +23,13 @@ MonoBehaviour:
   attackPrefab: {fileID: 0}
   skillType: 2
   skillEffect: 4
+  skillElement: 0
   t1SkillDamageData: {fileID: 0}
   t2SkillDamageData: {fileID: 11400000, guid: 72533718fb6edd3428173bf7970cd06c, type: 2}
   isCombinationSkill: 1
   requiredBaseSkills:
   - {fileID: 11400000, guid: 913e169a24362454687a8e4f2b961867, type: 2}
-  - {fileID: 11400000}
+  - {fileID: 11400000, guid: 781445394b95f944280a4b61985c9cfc, type: 2}
   Effect_Value: 0
   AreaTime: 0
   skillscript: 

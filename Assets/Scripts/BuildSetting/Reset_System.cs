@@ -6,6 +6,7 @@ public class Reset_System : MonoBehaviour
 {
     // Character 스크립트가 부착된 오브젝트를 할당 (0Tier 스킬 배열 포함)
     public Character character;
+    public SaveSystem save;
 
     // 각 스킬의 데미지를 저장할 배열
     private int[] initialDamages = {10, 5, 3, 5};
@@ -25,6 +26,7 @@ public class Reset_System : MonoBehaviour
                 }
             }
             Debug.Log("모든 0Tier 스킬이 초기화되었습니다.");
+            save.SaveGameData();
         }
         else
         {
@@ -45,6 +47,7 @@ public class Reset_System : MonoBehaviour
             character.Character_Int = 1;
             character.Character_Int_Level = 1;
             Debug.Log("모든 캐릭터 설정이 초기화 되었습니다.");
+            save.SaveGameData();
         }
         else
         {
@@ -64,5 +67,6 @@ public class Reset_System : MonoBehaviour
                 character.tier2Skills[i].isKnow = false;
             }
         }
+        save.SaveGameData();
     }
 }
