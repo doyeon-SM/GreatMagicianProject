@@ -122,6 +122,41 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &76535979
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 76535980}
+  m_Layer: 5
+  m_Name: PopupTransform
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &76535980
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 76535979}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1531121877}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &202269215
 GameObject:
   m_ObjectHideFlags: 0
@@ -903,6 +938,8 @@ MonoBehaviour:
   skillIconPrefab: {fileID: 7326874187021534855, guid: acaf1c6db188cef43a39b2929fdff539, type: 3}
   previousButton: {fileID: 296367364}
   nextButton: {fileID: 667194439}
+  popupParent: {fileID: 76535980}
+  skillUpgradeUIPrefab: {fileID: 8186011270353780682, guid: e38929d14c2c3a44ca167e14db8c3f9e, type: 3}
 --- !u!114 &1125707258
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1228,6 +1265,7 @@ RectTransform:
   - {fileID: 202269216}
   - {fileID: 1690362558}
   - {fileID: 1081356059}
+  - {fileID: 76535980}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}

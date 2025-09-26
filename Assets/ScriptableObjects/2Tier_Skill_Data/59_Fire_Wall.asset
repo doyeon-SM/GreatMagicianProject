@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: 59_Fire_Wall
   m_EditorClassIdentifier: 
   skillName: Fire_Wall
-  damage: 0
+  skillIndex: 59
+  damage: 46
   Tier: 2
   level: 1
   NeedLevelUP_Gold: 1
@@ -23,6 +24,7 @@ MonoBehaviour:
   attackPrefab: {fileID: 0}
   skillType: 5
   skillEffect: 7
+  skillElement: 0
   t1SkillDamageData: {fileID: 0}
   t2SkillDamageData: {fileID: 11400000, guid: 72533718fb6edd3428173bf7970cd06c, type: 2}
   isCombinationSkill: 1

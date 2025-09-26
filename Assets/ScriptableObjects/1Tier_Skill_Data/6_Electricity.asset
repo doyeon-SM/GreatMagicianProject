@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: 6_Electricity
   m_EditorClassIdentifier: 
   skillName: Electricity
-  damage: 17
+  skillIndex: 6
+  damage: 14
   Tier: 1
   level: 1
   NeedLevelUP_Gold: 1
@@ -23,13 +24,14 @@ MonoBehaviour:
   attackPrefab: {fileID: 0}
   skillType: 4
   skillEffect: 0
+  skillElement: 0
   t1SkillDamageData: {fileID: 11400000, guid: 889463f5caf395e4c8a9a431fe4c40f6, type: 2}
   t2SkillDamageData: {fileID: 0}
   isCombinationSkill: 1
   requiredBaseSkills:
   - {fileID: 11400000, guid: a3018a307d23370448eb0e615b1b53a5, type: 2}
   - {fileID: 11400000, guid: 702b6d2af190e1546825cdbf021a264f, type: 2}
-  Knockback_Value: 0
+  Effect_Value: 0
   AreaTime: 0
   skillscript: "\uC9C1\uC120\uBC94\uC704\uACF5\uACA9"
   isKnow: 1

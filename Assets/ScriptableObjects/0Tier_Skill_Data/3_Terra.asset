@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: 3_Terra
   m_EditorClassIdentifier: 
   skillName: Terra
+  skillIndex: 3
   damage: 5
   Tier: 0
   level: 1

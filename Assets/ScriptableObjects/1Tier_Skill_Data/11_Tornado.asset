@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: 11_Tornado
   m_EditorClassIdentifier: 
   skillName: Tornado
-  damage: 12
+  skillIndex: 11
+  damage: 10
   Tier: 1
   level: 1
   NeedLevelUP_Gold: 1

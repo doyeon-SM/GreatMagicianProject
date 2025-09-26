@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: 63_Ice_Wall
   m_EditorClassIdentifier: 
   skillName: Ice_Wall
-  damage: 32
+  skillIndex: 63
+  damage: 20
   Tier: 2
   level: 1
   NeedLevelUP_Gold: 1

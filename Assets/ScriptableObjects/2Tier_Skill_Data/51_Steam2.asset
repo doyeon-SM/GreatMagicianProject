@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: 51_Steam2
   m_EditorClassIdentifier: 
   skillName: Steam2
-  damage: 0
+  skillIndex: 51
+  damage: 7
   Tier: 2
   level: 1
   NeedLevelUP_Gold: 1
@@ -23,6 +24,7 @@ MonoBehaviour:
   attackPrefab: {fileID: 0}
   skillType: 3
   skillEffect: 7
+  skillElement: 0
   t1SkillDamageData: {fileID: 0}
   t2SkillDamageData: {fileID: 11400000, guid: 72533718fb6edd3428173bf7970cd06c, type: 2}
   isCombinationSkill: 1

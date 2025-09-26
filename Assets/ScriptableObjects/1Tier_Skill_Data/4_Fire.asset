@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: 4_Fire
   m_EditorClassIdentifier: 
   skillName: Fire
-  damage: 26
+  skillIndex: 4
+  damage: 22
   Tier: 1
   level: 1
   NeedLevelUP_Gold: 1
@@ -23,12 +24,14 @@ MonoBehaviour:
   attackPrefab: {fileID: 6741384463573389708, guid: 46773633a68edb449a16f9a817b0f8df, type: 3}
   skillType: 0
   skillEffect: 3
+  skillElement: 0
   t1SkillDamageData: {fileID: 11400000, guid: 889463f5caf395e4c8a9a431fe4c40f6, type: 2}
   t2SkillDamageData: {fileID: 0}
   isCombinationSkill: 1
   requiredBaseSkills:
   - {fileID: 11400000, guid: a3018a307d23370448eb0e615b1b53a5, type: 2}
   - {fileID: 11400000, guid: a3018a307d23370448eb0e615b1b53a5, type: 2}
-  Knockback_Value: 0
+  Effect_Value: 0
   AreaTime: 0
   skillscript: "\uD3ED\uBC1C"
+  isKnow: 0

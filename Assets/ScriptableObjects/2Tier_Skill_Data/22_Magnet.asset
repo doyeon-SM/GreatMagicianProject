@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: 22_Magnet
   m_EditorClassIdentifier: 
   skillName: Magnet
-  damage: 25
+  skillIndex: 22
+  damage: 36
   Tier: 2
   level: 1
   NeedLevelUP_Gold: 1

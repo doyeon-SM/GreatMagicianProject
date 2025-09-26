@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: 40_Restricion
   m_EditorClassIdentifier: 
   skillName: Restricion
-  damage: 15
+  skillIndex: 40
+  damage: 20
   Tier: 2
   level: 1
   NeedLevelUP_Gold: 1

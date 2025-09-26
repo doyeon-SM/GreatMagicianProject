@@ -24,12 +24,6 @@ public class SceneLoader : MonoBehaviour
         SceneManager.LoadScene("SampleScene");
     }
 
-    public void LoadEnhanceMenuScene()
-    {
-        ReloadAllSkillData();
-        SceneManager.LoadScene("EnhanceMenu");
-    }
-
     public void LoadLobyScene()
     {
         ReloadAllSkillData();

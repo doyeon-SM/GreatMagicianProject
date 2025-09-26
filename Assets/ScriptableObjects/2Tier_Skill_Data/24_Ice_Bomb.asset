@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: 24_Ice_Bomb
   m_EditorClassIdentifier: 
   skillName: Ice_Bomb
-  damage: 53
+  skillIndex: 24
+  damage: 32
   Tier: 2
   level: 1
   NeedLevelUP_Gold: 1

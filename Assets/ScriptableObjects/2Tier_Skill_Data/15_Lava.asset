@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: 15_Lava
   m_EditorClassIdentifier: 
   skillName: Lava
-  damage: 28
+  skillIndex: 15
+  damage: 31
   Tier: 2
   level: 1
   NeedLevelUP_Gold: 1
@@ -23,13 +24,14 @@ MonoBehaviour:
   attackPrefab: {fileID: 0}
   skillType: 3
   skillEffect: 2
+  skillElement: 0
   t1SkillDamageData: {fileID: 0}
   t2SkillDamageData: {fileID: 11400000, guid: 72533718fb6edd3428173bf7970cd06c, type: 2}
   isCombinationSkill: 1
   requiredBaseSkills:
   - {fileID: 11400000, guid: f79541974eaa9d0499d2ca29b2a40dcd, type: 2}
   - {fileID: 11400000, guid: 796ad30d6187afb4f873484875d3ca14, type: 2}
-  Knockback_Value: 0
+  Effect_Value: 0
   AreaTime: 5
   skillscript: 
   isKnow: 0

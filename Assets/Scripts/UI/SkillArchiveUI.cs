@@ -21,6 +21,11 @@ public class SkillArchiveUI : MonoBehaviour
     public Button previousButton;
     public Button nextButton;
 
+    [Header("Popup")]
+    public Transform popupParent;              // 팝업을 붙일 부모(FullScreen Canvas 밑)
+    public GameObject skillUpgradeUIPrefab;    // SkillUpgradeUI 프리팹
+    private SkillUpgradeUI currentPopup;       // 중복 생성 방지/관리
+
     // 페이징 및 필터 관련 변수
     private int currentPage = 0;
     private int skillsPerPage = 16;
@@ -100,22 +105,159 @@ public class SkillArchiveUI : MonoBehaviour
             filteredSkills.AddRange(tier2Skills);
         }
 
-        // 페이지 단위로 스킬 아이콘 출력 (4x4 그리드 = 16개씩)
         int startIndex = currentPage * skillsPerPage;
-        for (int i = startIndex; i < startIndex + skillsPerPage && i < filteredSkills.Count; i++)
+        int endIndex = Mathf.Min(startIndex + skillsPerPage, filteredSkills.Count);
+
+        int t0Count = tier0Skills.Count;
+        int t1Count = tier1Skills.Count;
+        int t2Count = tier2Skills.Count;
+
+        for (int i = startIndex; i < endIndex; i++)
         {
-            // 스킬 데이터로 아이콘 프리팹 인스턴스 생성
+            Skill_Data skillData = filteredSkills[i];
+
+            // 현재 아이템의 실제 (tier, localIndex) 계산
+            int tier, localIndex;
+            if (filterTier >= 0)
+            {
+                tier = filterTier;
+                // 필터링 된 리스트는 해당 티어의 순서를 그대로 따르므로
+                localIndex = i; // i가 0부터 시작하지 않으니 보정 필요
+                // i는 filteredSkills 기준 인덱스이므로, localIndex는 (i - startIndex) 가 아님
+                // → 실제 localIndex는 "필터 전체에서의 i"이므로 그냥 i가 맞음.
+                // 다만 페이지가 바뀌면 i는 커지니, tier 리스트의 실제 인덱스를 써야 함:
+                // filteredSkills == tierXSkills와 동일 순서이므로 아래처럼 재계산:
+                if (tier == 0) localIndex = i;                       // 0..tier0Count-1
+                if (tier == 1) localIndex = i;                       // 0..tier1Count-1
+                if (tier == 2) localIndex = i;                       // 0..tier2Count-1
+
+                // 하지만 페이지 시작점이 0이 아닐 때도, filteredSkills[i]의 "원래 리스트 인덱스"는 i가 맞음.
+                // 단, 안전하게 원 리스트에서 IndexOf로 역참조하는 방법도 가능:
+                // localIndex = GetLocalIndexByRef(skillData, tier);
+                localIndex = GetLocalIndexByRef(skillData, tier);
+            }
+            else
+            {
+                // 전체 보기: tier0 → tier1 → tier2 순으로 이어붙였음
+                if (i < t0Count)
+                {
+                    tier = 0;
+                    localIndex = i;
+                }
+                else if (i < t0Count + t1Count)
+                {
+                    tier = 1;
+                    localIndex = i - t0Count;
+                }
+                else
+                {
+                    tier = 2;
+                    localIndex = i - t0Count - t1Count;
+                }
+            }
+
+            // 아이콘 생성 및 이미지 표시
             GameObject icon = Instantiate(skillIconPrefab, gridParent);
-            // icon의 Image 컴포넌트에 스킬 아이콘 할당 (skillData.skillIcon)
-            Image iconImage = icon.GetComponent<Image>();
+            var iconImage = icon.GetComponent<Image>();
             if (iconImage != null)
             {
-                iconImage.sprite = (filteredSkills[i].isKnow) ? filteredSkills[i].skillIcon : UnknowSkillIcon;
+                iconImage.sprite = (skillData.isKnow) ? skillData.skillIcon : UnknowSkillIcon;
             }
+
+            // 클릭 리스너 등록
+            var btn = icon.GetComponent<Button>();
+            if (btn == null) btn = icon.AddComponent<Button>();
+
+            // 캡쳐 변수 백업
+            int capturedTier = tier;
+            int capturedLocalIndex = localIndex;
+            Skill_Data capturedRef = skillData;
+
+            btn.onClick.AddListener(() =>
+            {
+                // 1) 미습득(unknown) 스킬은 무시 (원하면 토스트/팝업으로 가이드 출력)
+                if (!capturedRef.isKnow)
+                {
+                    Debug.Log("아직 알지 못하는 스킬입니다.");
+                    return;
+                }
+
+                // 2) 중복 팝업 방지
+                if (currentPopup != null)
+                {
+                    Destroy(currentPopup.gameObject);
+                    currentPopup = null;
+                }
+
+                // 3) 팝업 생성
+                if (skillUpgradeUIPrefab == null)
+                {
+                    Debug.LogError("[SkillArchiveUI] skillUpgradeUIPrefab이 설정되지 않았습니다.");
+                    return;
+                }
+                Transform parent = popupParent != null ? popupParent : this.transform.root;
+                var go = Instantiate(skillUpgradeUIPrefab, parent);
+                currentPopup = go.GetComponent<SkillUpgradeUI>();
+                if (currentPopup == null)
+                {
+                    Debug.LogError("[SkillArchiveUI] SkillUpgradeUI 컴포넌트가 프리팹에 없습니다.");
+                    return;
+                }
+
+                // 4) 팝업 초기화
+                currentPopup.Init(
+                    character,
+                    capturedTier,
+                    capturedLocalIndex,
+                    GetSkillFromCharacter,      // 최신 스킬 참조를 다시 뽑아오는 함수
+                    onClosed: () =>
+                    {
+                        currentPopup = null;
+                        // 닫힐 때 그리드 갱신
+                        RefreshSkillGrid();
+                    },
+                    onUpgraded: () =>
+                    {
+                        // 강화 직후에도 그리드 갱신(아이콘 표시 변동 등 대비)
+                        RefreshSkillGrid();
+                    }
+                );
+            });
         }
 
         // 페이지 이동 버튼 활성화/비활성화 처리
         previousButton.interactable = (currentPage > 0);
         nextButton.interactable = (startIndex + skillsPerPage) < filteredSkills.Count;
+    }
+
+    // 원본 리스트 내 "로컬 인덱스" 찾기 (참조 동등성 기준)
+    private int GetLocalIndexByRef(Skill_Data skill, int tier)
+    {
+        if (tier == 0) return tier0Skills.IndexOf(skill);
+        if (tier == 1) return tier1Skills.IndexOf(skill);
+        if (tier == 2) return tier2Skills.IndexOf(skill);
+        return -1;
+    }
+
+    // 팝업에서 최신 데이터를 읽어오기 위한 함수
+    private Skill_Data GetSkillFromCharacter(int tier, int localIndex)
+    {
+        if (character == null) return null;
+        switch (tier)
+        {
+            case 0:
+                if (character.tier0Skills != null && localIndex >= 0 && localIndex < character.tier0Skills.Length)
+                    return character.tier0Skills[localIndex];
+                break;
+            case 1:
+                if (character.tier1Skills != null && localIndex >= 0 && localIndex < character.tier1Skills.Length)
+                    return character.tier1Skills[localIndex];
+                break;
+            case 2:
+                if (character.tier2Skills != null && localIndex >= 0 && localIndex < character.tier2Skills.Length)
+                    return character.tier2Skills[localIndex];
+                break;
+        }
+        return null;
     }
 }

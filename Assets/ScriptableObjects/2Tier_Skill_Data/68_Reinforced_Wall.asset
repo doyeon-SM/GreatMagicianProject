@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: 68_Reinforced_Wall
   m_EditorClassIdentifier: 
   skillName: Reinforced_Wall
+  skillIndex: 68
   damage: 40
   Tier: 2
   level: 1

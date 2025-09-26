@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: 2_Ventus
   m_EditorClassIdentifier: 
   skillName: Ventus
+  skillIndex: 2
   damage: 3
   Tier: 0
   level: 1

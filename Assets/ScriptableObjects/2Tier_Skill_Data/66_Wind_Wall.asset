@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: 66_Wind_Wall
   m_EditorClassIdentifier: 
   skillName: Wind_Wall
-  damage: 32
+  skillIndex: 66
+  damage: 30
   Tier: 2
   level: 1
   NeedLevelUP_Gold: 1

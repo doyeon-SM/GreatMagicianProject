@@ -6,6 +6,7 @@ using UnityEngine;
 public class Skill_Data : ScriptableObject
 {
     public string skillName;  // 스킬 이름
+    public int skillIndex;
     public int damage;  // 스킬의 기본 공격력
     public int Tier;
     public int level = 1;  // 기본 레벨 0

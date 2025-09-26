@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: 60_Water_Wall
   m_EditorClassIdentifier: 
   skillName: Water_Wall
+  skillIndex: 60
   damage: 25
   Tier: 2
   level: 1

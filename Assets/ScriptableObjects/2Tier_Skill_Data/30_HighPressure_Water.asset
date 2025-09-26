@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: 30_HighPressure_Water
   m_EditorClassIdentifier: 
   skillName: HighPressure_Water
-  damage: 21
+  skillIndex: 30
+  damage: 15
   Tier: 2
   level: 1
   NeedLevelUP_Gold: 1

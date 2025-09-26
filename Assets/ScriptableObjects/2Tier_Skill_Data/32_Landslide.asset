@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: 32_Landslide
   m_EditorClassIdentifier: 
   skillName: Landslide
-  damage: 35
+  skillIndex: 32
+  damage: 24
   Tier: 2
   level: 1
   NeedLevelUP_Gold: 1

@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: 14_Bomb
   m_EditorClassIdentifier: 
   skillName: Bomb
-  damage: 73
+  skillIndex: 14
+  damage: 44
   Tier: 2
   level: 1
   NeedLevelUP_Gold: 1
@@ -23,12 +24,14 @@ MonoBehaviour:
   attackPrefab: {fileID: 6741384463573389708, guid: 46caf2f4217658b498cf07f7c11f42ad, type: 3}
   skillType: 0
   skillEffect: 3
+  skillElement: 0
   t1SkillDamageData: {fileID: 0}
   t2SkillDamageData: {fileID: 11400000, guid: 72533718fb6edd3428173bf7970cd06c, type: 2}
   isCombinationSkill: 1
   requiredBaseSkills:
   - {fileID: 11400000, guid: f79541974eaa9d0499d2ca29b2a40dcd, type: 2}
   - {fileID: 11400000, guid: f79541974eaa9d0499d2ca29b2a40dcd, type: 2}
-  Knockback_Value: 0
+  Effect_Value: 0
   AreaTime: 0
   skillscript: Fire * 2 * 1.4
+  isKnow: 0

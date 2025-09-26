@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: 9_Water_Cannon
   m_EditorClassIdentifier: 
   skillName: Water_Cannon
-  damage: 10
+  skillIndex: 9
+  damage: 8
   Tier: 1
   level: 1
   NeedLevelUP_Gold: 1

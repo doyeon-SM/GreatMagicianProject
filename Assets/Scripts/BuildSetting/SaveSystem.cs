@@ -27,8 +27,24 @@ public class SaveSystem : MonoBehaviour
             Destroy(gameObject);
         }
     }
+
+    // 어디서든 쉽게 저장을 호출하게 하는 정적 헬퍼
+    public static void SaveGame()
+    {
+        if (Instance != null)
+            Instance.SaveGameData();
+        else
+            Debug.LogWarning("[SaveSystem] Instance가 없습니다. 씬에 SaveSystem가 배치되어 있는지 확인하세요.");
+    }
+
     public void SaveGameData()
     {
+        if (character == null)
+        {
+            Debug.LogWarning("[SaveSystem] Character가 연결되지 않았습니다.");
+            return;
+        }
+
         CharacterSaveData data = new CharacterSaveData();
 
         data.Player_level = character.Character_Level;
@@ -74,6 +90,28 @@ public class SaveSystem : MonoBehaviour
                 Player_know = skill.isKnow
             });
         }
+        // Character_HaveSkill 저장
+        int totalSkillCount =
+            (character.tier0Skills?.Length ?? 0) +
+            (character.tier1Skills?.Length ?? 0) +
+            (character.tier2Skills?.Length ?? 0);
+
+        if (character.Character_HaveSkill == null || character.Character_HaveSkill.Length < totalSkillCount)
+        {
+            // 길이가 부족하면 0으로 채워 저장
+            data.Player_haveSkills = new int[totalSkillCount];
+            if (character.Character_HaveSkill != null)
+            {
+                System.Array.Copy(character.Character_HaveSkill, data.Player_haveSkills,
+                    Mathf.Min(character.Character_HaveSkill.Length, data.Player_haveSkills.Length));
+            }
+        }
+        else
+        {
+            // 길이가 충분하면 그대로 복사하여 저장
+            data.Player_haveSkills = new int[totalSkillCount];
+            System.Array.Copy(character.Character_HaveSkill, data.Player_haveSkills, totalSkillCount);
+        }
 
         string json = JsonUtility.ToJson(data, true);
         File.WriteAllText(savePath, json);
@@ -117,6 +155,28 @@ public class SaveSystem : MonoBehaviour
         {
             if (skillIndex >= data.learnedSkills.Count) break;
             ApplySkillData(skill, data.learnedSkills[skillIndex++]);
+        }
+        // Character_HaveSkill 복원
+        int expectedLen =
+            (character.tier0Skills?.Length ?? 0) +
+            (character.tier1Skills?.Length ?? 0) +
+            (character.tier2Skills?.Length ?? 0);
+
+        if (data.Player_haveSkills != null && data.Player_haveSkills.Length > 0)
+        {
+            // 세이브 데이터 길이와 현재 기대 길이가 다를 수 있으니 안전하게 복사
+            character.Character_HaveSkill = new int[expectedLen];
+            int copyLen = Mathf.Min(expectedLen, data.Player_haveSkills.Length);
+            System.Array.Copy(data.Player_haveSkills, character.Character_HaveSkill, copyLen);
+
+            // 남는 구간이 있으면 0으로 초기화(신규 스킬이 늘어난 경우 등)
+            for (int i = copyLen; i < expectedLen; i++)
+                character.Character_HaveSkill[i] = 0;
+        }
+        else
+        {
+            // 세이브에 없으면(구버전) 현재 길이에 맞춰 0으로 초기화
+            character.Character_HaveSkill = new int[expectedLen];
         }
 
         Debug.Log("불러오기 완료");

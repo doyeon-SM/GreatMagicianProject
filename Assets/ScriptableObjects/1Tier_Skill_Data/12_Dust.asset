@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: 12_Dust
   m_EditorClassIdentifier: 
   skillName: Dust
-  damage: 2
+  skillIndex: 12
+  damage: 8
   Tier: 1
   level: 1
   NeedLevelUP_Gold: 1

@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: 21_Earthquake
   m_EditorClassIdentifier: 
   skillName: Earthquake
-  damage: 22
+  skillIndex: 21
+  damage: 21
   Tier: 2
   level: 1
   NeedLevelUP_Gold: 1

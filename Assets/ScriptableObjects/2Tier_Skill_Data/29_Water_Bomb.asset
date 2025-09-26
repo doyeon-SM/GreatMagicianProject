@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: 29_Water_Bomb
   m_EditorClassIdentifier: 
   skillName: Water_Bomb
-  damage: 50
+  skillIndex: 29
+  damage: 36
   Tier: 2
   level: 1
   NeedLevelUP_Gold: 1

@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: 27_Snowball
   m_EditorClassIdentifier: 
   skillName: Snowball
-  damage: 37
+  skillIndex: 27
+  damage: 31
   Tier: 2
   level: 1
   NeedLevelUP_Gold: 1

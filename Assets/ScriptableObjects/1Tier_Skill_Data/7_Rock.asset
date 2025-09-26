@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: 7_Rock
   m_EditorClassIdentifier: 
   skillName: Rock
-  damage: 19
+  skillIndex: 7
+  damage: 16
   Tier: 1
   level: 1
   NeedLevelUP_Gold: 1

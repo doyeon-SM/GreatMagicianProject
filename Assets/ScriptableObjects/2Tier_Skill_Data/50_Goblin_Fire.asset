@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: 50_Goblin_Fire
   m_EditorClassIdentifier: 
   skillName: Goblin_Fire
-  damage: 0
+  skillIndex: 50
+  damage: 28
   Tier: 2
   level: 1
   NeedLevelUP_Gold: 1
@@ -23,6 +24,7 @@ MonoBehaviour:
   attackPrefab: {fileID: 6741384463573389708, guid: c3e403252785f344a8f00e0bf89bf95a, type: 3}
   skillType: 8
   skillEffect: 7
+  skillElement: 0
   t1SkillDamageData: {fileID: 0}
   t2SkillDamageData: {fileID: 11400000, guid: 72533718fb6edd3428173bf7970cd06c, type: 2}
   isCombinationSkill: 1

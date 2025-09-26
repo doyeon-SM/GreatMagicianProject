@@ -31,7 +31,7 @@ public class T2_SkillDamage_Data : ScriptableObject
                 }
                 // 최종 데미지 계산
                 int finalDamage = Mathf.RoundToInt(baseDamageSum * entry.damageMultiplier);
-                Debug.Log($"Final calculated damage: {finalDamage}");
+                //Debug.Log($"Final calculated damage: {finalDamage}");
                 return finalDamage;
             }
         }

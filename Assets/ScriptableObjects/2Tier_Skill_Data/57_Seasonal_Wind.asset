@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: 57_Seasonal_Wind
   m_EditorClassIdentifier: 
   skillName: Seasonal_Wind
-  damage: 14
+  skillIndex: 57
+  damage: 12
   Tier: 2
   level: 1
   NeedLevelUP_Gold: 1

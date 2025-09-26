@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: 55_Mud
   m_EditorClassIdentifier: 
   skillName: Mud
+  skillIndex: 55
   damage: 12
   Tier: 2
   level: 1

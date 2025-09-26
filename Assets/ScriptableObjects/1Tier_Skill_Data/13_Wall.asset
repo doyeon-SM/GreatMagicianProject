@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: 13_Wall
   m_EditorClassIdentifier: 
   skillName: Wall
-  damage: 20
+  skillIndex: 13
+  damage: 10
   Tier: 1
   level: 1
   NeedLevelUP_Gold: 1

@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: 19_Chainlighting
   m_EditorClassIdentifier: 
   skillName: Chainlighting
-  damage: 0
+  skillIndex: 19
+  damage: 34
   Tier: 2
   level: 1
   NeedLevelUP_Gold: 1
@@ -23,13 +24,14 @@ MonoBehaviour:
   attackPrefab: {fileID: 6741384463573389708, guid: 8aaf4b504fef85f4da3caf5e5de13481, type: 3}
   skillType: 1
   skillEffect: 0
+  skillElement: 0
   t1SkillDamageData: {fileID: 0}
   t2SkillDamageData: {fileID: 11400000, guid: 72533718fb6edd3428173bf7970cd06c, type: 2}
   isCombinationSkill: 1
   requiredBaseSkills:
   - {fileID: 11400000, guid: 781445394b95f944280a4b61985c9cfc, type: 2}
   - {fileID: 11400000, guid: 781445394b95f944280a4b61985c9cfc, type: 2}
-  Knockback_Value: 0
+  Effect_Value: 0
   AreaTime: 0
   skillscript: 
   isKnow: 0

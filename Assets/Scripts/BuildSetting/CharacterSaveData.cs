@@ -16,6 +16,8 @@ public class CharacterSaveData
     public int Player_int_level;
     public int Player_NextEXP;
 
+    public int[] Player_haveSkills;
+
     public List<SkillSaveData> learnedSkills;
 }
 

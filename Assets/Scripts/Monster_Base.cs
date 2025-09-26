@@ -141,7 +141,7 @@ public class Monster_Base : MonoBehaviour
     private void Die()
     {
         // 기본 점수 증가
-        scoreSystem.score += 1;
+        scoreSystem.score += maxHealth;
         Debug.Log("몬스터가 죽었습니다! Score: " + scoreSystem.score);
 
         // 아이템 드롭 확률 처리

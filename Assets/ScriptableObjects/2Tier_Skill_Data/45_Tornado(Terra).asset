@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: 45_Tornado(Terra)
   m_EditorClassIdentifier: 
   skillName: Tornado(Terra)
-  damage: 31
+  skillIndex: 45
+  damage: 29
   Tier: 2
   level: 1
   NeedLevelUP_Gold: 1

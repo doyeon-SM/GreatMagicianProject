@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: 31_Rail_Gun
   m_EditorClassIdentifier: 
   skillName: Rail_Gun
-  damage: 0
+  skillIndex: 31
+  damage: 27
   Tier: 2
   level: 1
   NeedLevelUP_Gold: 1
@@ -23,13 +24,14 @@ MonoBehaviour:
   attackPrefab: {fileID: 0}
   skillType: 4
   skillEffect: 0
+  skillElement: 0
   t1SkillDamageData: {fileID: 0}
   t2SkillDamageData: {fileID: 11400000, guid: 72533718fb6edd3428173bf7970cd06c, type: 2}
   isCombinationSkill: 1
   requiredBaseSkills:
   - {fileID: 11400000, guid: 2b1185529fec9bb42956eaaba0029717, type: 2}
   - {fileID: 11400000, guid: 781445394b95f944280a4b61985c9cfc, type: 2}
-  Knockback_Value: 0
+  Effect_Value: 0
   AreaTime: 0
   skillscript: 
   isKnow: 0

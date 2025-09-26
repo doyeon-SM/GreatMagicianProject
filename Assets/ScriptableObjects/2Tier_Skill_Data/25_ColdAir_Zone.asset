@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: 25_ColdAir_Zone
   m_EditorClassIdentifier: 
   skillName: ColdAir_Zone
-  damage: 7
+  skillIndex: 25
+  damage: 17
   Tier: 2
   level: 1
   NeedLevelUP_Gold: 1

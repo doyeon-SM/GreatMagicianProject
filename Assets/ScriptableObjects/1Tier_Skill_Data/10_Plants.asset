@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: 10_Plants
   m_EditorClassIdentifier: 
   skillName: Plants
-  damage: 5
+  skillIndex: 10
+  damage: 10
   Tier: 1
   level: 1
   NeedLevelUP_Gold: 1

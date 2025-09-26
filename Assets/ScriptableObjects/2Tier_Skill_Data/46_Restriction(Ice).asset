@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: 46_Restriction(Ice)
   m_EditorClassIdentifier: 
   skillName: Restriction(Ice)
-  damage: 24
+  skillIndex: 46
+  damage: 20
   Tier: 2
   level: 1
   NeedLevelUP_Gold: 1

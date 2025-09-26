@@ -46,6 +46,7 @@ public class Reset_System : MonoBehaviour
             character.Character_Stat = 0;
             character.Character_Int = 1;
             character.Character_Int_Level = 1;
+            character.Character_HaveSkill = new int[] {0};
             Debug.Log("모든 캐릭터 설정이 초기화 되었습니다.");
             save.SaveGameData();
         }

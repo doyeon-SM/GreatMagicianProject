@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: 23_Iron
   m_EditorClassIdentifier: 
   skillName: Iron
-  damage: 53
+  skillIndex: 23
+  damage: 32
   Tier: 2
   level: 1
   NeedLevelUP_Gold: 1

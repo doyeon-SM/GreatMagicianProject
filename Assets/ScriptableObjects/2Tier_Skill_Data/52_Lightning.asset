@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: 52_Lightning
   m_EditorClassIdentifier: 
   skillName: Lightning
-  damage: 0
+  skillIndex: 52
+  damage: 19
   Tier: 2
   level: 1
   NeedLevelUP_Gold: 1
@@ -23,6 +24,7 @@ MonoBehaviour:
   attackPrefab: {fileID: 6741384463573389708, guid: 841a860c46f2eb240a8b41c8da72cd47, type: 3}
   skillType: 1
   skillEffect: 0
+  skillElement: 0
   t1SkillDamageData: {fileID: 0}
   t2SkillDamageData: {fileID: 11400000, guid: 72533718fb6edd3428173bf7970cd06c, type: 2}
   isCombinationSkill: 1
