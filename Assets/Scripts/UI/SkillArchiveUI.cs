@@ -26,11 +26,30 @@ public class SkillArchiveUI : MonoBehaviour
     public GameObject skillUpgradeUIPrefab;    // SkillUpgradeUI 프리팹
     private SkillUpgradeUI currentPopup;       // 중복 생성 방지/관리
 
+    private string exclamationChildName = "bUpgrade";   //프리팹 업그레이드 가능 확인 이미지 이름
+
     // 페이징 및 필터 관련 변수
     private int currentPage = 0;
     private int skillsPerPage = 16;
     // filterTier 값: -1 (또는 0)인 경우 전체 스킬, 그 외 0, 1, 2 등 특정 티어만 필터
     private int filterTier = -1;
+    private enum FilterMode
+    {
+        AllTiers,       // 기존: 전체 보기(티어 0→1→2 순)
+        Tier0Only,
+        Tier1Only,
+        Tier2Only,
+        LearnedOnly,    // 티어 무시, 배운 스킬만
+        UpgradableOnly  // 티어 무시, 업그레이드 가능한 스킬만
+    }
+    private FilterMode filterMode = FilterMode.AllTiers;
+    private struct SkillRef
+    {
+        public Skill_Data data;
+        public int tier;
+        public int localIndex; // 각 tier 리스트 안의 인덱스
+        public SkillRef(Skill_Data d, int t, int li) { data = d; tier = t; localIndex = li; }
+    }
 
     void Start()
     {
@@ -50,7 +69,7 @@ public class SkillArchiveUI : MonoBehaviour
     // 특정 티어 버튼에서 호출할 메서드 예시
     public void OnTierFilterButtonClicked(int tier)
     {
-        filterTier = tier;   // 예: 0이면 tier0, 1이면 tier1, 2이면 tier2
+        filterMode = (FilterMode)(tier + 1);   // 예: 0이면 tier0, 1이면 tier1, 2이면 tier2
         currentPage = 0;     // 필터 변경 시 첫 페이지부터 시작
         RefreshSkillGrid();
     }
@@ -58,7 +77,21 @@ public class SkillArchiveUI : MonoBehaviour
     // 전체 보기 버튼을 위한 메서드 (티어 필터 해제)
     public void OnClearFilterButtonClicked()
     {
-        filterTier = -1; // 전체 스킬 보기
+        filterMode = FilterMode.AllTiers;
+        currentPage = 0;
+        RefreshSkillGrid();
+    }
+    // 배운것만 보기
+    public void OnShowLearnedOnly()
+    {
+        filterMode = FilterMode.LearnedOnly;
+        currentPage = 0;
+        RefreshSkillGrid();
+    }
+    //업그레이드 가능한 것만 보기
+    public void OnShowUpgradableOnly()
+    {
+        filterMode = FilterMode.UpgradableOnly;
         currentPage = 0;
         RefreshSkillGrid();
     }
@@ -79,122 +112,77 @@ public class SkillArchiveUI : MonoBehaviour
     // 스킬 그리드를 갱신하는 메서드
     public void RefreshSkillGrid()
     {
-        // 기존 아이콘 삭제
-        foreach (Transform child in gridParent)
+        // 기존 아이콘 제거
+        foreach (Transform child in gridParent) Destroy(child.gameObject);
+
+        // 필터 결과
+        List<SkillRef> filtered = BuildFilteredList();
+
+        // 페이징 계산(4x4 = 16)
+        int startIndex = currentPage * skillsPerPage;      // skillsPerPage=16
+        int endIndex = Mathf.Min(startIndex + skillsPerPage, filtered.Count);
+
+        // 페이지 범위 보정(현재 페이지가 너무 뒤로 가있을 때)
+        if (startIndex >= filtered.Count && filtered.Count > 0)
         {
-            Destroy(child.gameObject);
+            currentPage = Mathf.Max(0, (filtered.Count - 1) / skillsPerPage);
+            startIndex = currentPage * skillsPerPage;
+            endIndex = Mathf.Min(startIndex + skillsPerPage, filtered.Count);
         }
 
-        // 필터 조건에 따라 스킬 목록 구성
-        List<Skill_Data> filteredSkills = new List<Skill_Data>();
-        if (filterTier >= 0)
-        {
-            // 특정 티어만 보기: 각 티어 배열은 이미 원하는 순서로 정렬되어 있다고 가정
-            if (filterTier == 0)
-                filteredSkills.AddRange(tier0Skills);
-            else if (filterTier == 1)
-                filteredSkills.AddRange(tier1Skills);
-            else if (filterTier == 2)
-                filteredSkills.AddRange(tier2Skills);
-        }
-        else
-        {
-            // 전체보기: 낮은 티어부터 높은 티어 순으로 배열의 순서를 그대로 유지
-            filteredSkills.AddRange(tier0Skills);
-            filteredSkills.AddRange(tier1Skills);
-            filteredSkills.AddRange(tier2Skills);
-        }
-
-        int startIndex = currentPage * skillsPerPage;
-        int endIndex = Mathf.Min(startIndex + skillsPerPage, filteredSkills.Count);
-
-        int t0Count = tier0Skills.Count;
-        int t1Count = tier1Skills.Count;
-        int t2Count = tier2Skills.Count;
-
+        // 아이콘 생성
         for (int i = startIndex; i < endIndex; i++)
         {
-            Skill_Data skillData = filteredSkills[i];
+            var sref = filtered[i];
+            Skill_Data skillData = sref.data;
 
-            // 현재 아이템의 실제 (tier, localIndex) 계산
-            int tier, localIndex;
-            if (filterTier >= 0)
-            {
-                tier = filterTier;
-                // 필터링 된 리스트는 해당 티어의 순서를 그대로 따르므로
-                localIndex = i; // i가 0부터 시작하지 않으니 보정 필요
-                // i는 filteredSkills 기준 인덱스이므로, localIndex는 (i - startIndex) 가 아님
-                // → 실제 localIndex는 "필터 전체에서의 i"이므로 그냥 i가 맞음.
-                // 다만 페이지가 바뀌면 i는 커지니, tier 리스트의 실제 인덱스를 써야 함:
-                // filteredSkills == tierXSkills와 동일 순서이므로 아래처럼 재계산:
-                if (tier == 0) localIndex = i;                       // 0..tier0Count-1
-                if (tier == 1) localIndex = i;                       // 0..tier1Count-1
-                if (tier == 2) localIndex = i;                       // 0..tier2Count-1
-
-                // 하지만 페이지 시작점이 0이 아닐 때도, filteredSkills[i]의 "원래 리스트 인덱스"는 i가 맞음.
-                // 단, 안전하게 원 리스트에서 IndexOf로 역참조하는 방법도 가능:
-                // localIndex = GetLocalIndexByRef(skillData, tier);
-                localIndex = GetLocalIndexByRef(skillData, tier);
-            }
-            else
-            {
-                // 전체 보기: tier0 → tier1 → tier2 순으로 이어붙였음
-                if (i < t0Count)
-                {
-                    tier = 0;
-                    localIndex = i;
-                }
-                else if (i < t0Count + t1Count)
-                {
-                    tier = 1;
-                    localIndex = i - t0Count;
-                }
-                else
-                {
-                    tier = 2;
-                    localIndex = i - t0Count - t1Count;
-                }
-            }
-
-            // 아이콘 생성 및 이미지 표시
             GameObject icon = Instantiate(skillIconPrefab, gridParent);
+
+            // 아이콘 이미지
             var iconImage = icon.GetComponent<Image>();
             if (iconImage != null)
             {
+                // LearnedOnly/UpgradableOnly에서는 대부분 isKnow=true지만, 안전하게 처리
                 iconImage.sprite = (skillData.isKnow) ? skillData.skillIcon : UnknowSkillIcon;
             }
 
-            // 클릭 리스너 등록
-            var btn = icon.GetComponent<Button>();
-            if (btn == null) btn = icon.AddComponent<Button>();
+            // 느낌표(bUpgrade) 토글
+            Transform exMarkTr = icon.transform.Find(exclamationChildName);
+            if (exMarkTr != null)
+            {
+                bool canUpgrade = IsUpgradable(skillData, sref.tier, sref.localIndex);
+                exMarkTr.gameObject.SetActive(canUpgrade);
+            }
 
-            // 캡쳐 변수 백업
-            int capturedTier = tier;
-            int capturedLocalIndex = localIndex;
+            // 버튼 연결
+            var btn = icon.GetComponent<Button>() ?? icon.AddComponent<Button>();
+            int capturedTier = sref.tier;
+            int capturedLocalIndex = sref.localIndex;
             Skill_Data capturedRef = skillData;
+
+            // 배운 것만 보기 모드에서는 사실상 전부 isKnow지만, 기본 로직은 유지
+            btn.interactable = capturedRef.isKnow;
 
             btn.onClick.AddListener(() =>
             {
-                // 1) 미습득(unknown) 스킬은 무시 (원하면 토스트/팝업으로 가이드 출력)
                 if (!capturedRef.isKnow)
                 {
                     Debug.Log("아직 알지 못하는 스킬입니다.");
                     return;
                 }
 
-                // 2) 중복 팝업 방지
                 if (currentPopup != null)
                 {
                     Destroy(currentPopup.gameObject);
                     currentPopup = null;
                 }
 
-                // 3) 팝업 생성
                 if (skillUpgradeUIPrefab == null)
                 {
                     Debug.LogError("[SkillArchiveUI] skillUpgradeUIPrefab이 설정되지 않았습니다.");
                     return;
                 }
+
                 Transform parent = popupParent != null ? popupParent : this.transform.root;
                 var go = Instantiate(skillUpgradeUIPrefab, parent);
                 currentPopup = go.GetComponent<SkillUpgradeUI>();
@@ -204,39 +192,27 @@ public class SkillArchiveUI : MonoBehaviour
                     return;
                 }
 
-                // 4) 팝업 초기화
                 currentPopup.Init(
                     character,
                     capturedTier,
                     capturedLocalIndex,
-                    GetSkillFromCharacter,      // 최신 스킬 참조를 다시 뽑아오는 함수
+                    GetSkillFromCharacter,
                     onClosed: () =>
                     {
                         currentPopup = null;
-                        // 닫힐 때 그리드 갱신
-                        RefreshSkillGrid();
-                    },
+                        RefreshSkillGrid();   // 닫힐 때 갱신
+                },
                     onUpgraded: () =>
                     {
-                        // 강화 직후에도 그리드 갱신(아이콘 표시 변동 등 대비)
-                        RefreshSkillGrid();
-                    }
+                        RefreshSkillGrid();   // 강화 직후 갱신
+                }
                 );
             });
         }
 
-        // 페이지 이동 버튼 활성화/비활성화 처리
+        // 페이지 버튼 활성화
         previousButton.interactable = (currentPage > 0);
-        nextButton.interactable = (startIndex + skillsPerPage) < filteredSkills.Count;
-    }
-
-    // 원본 리스트 내 "로컬 인덱스" 찾기 (참조 동등성 기준)
-    private int GetLocalIndexByRef(Skill_Data skill, int tier)
-    {
-        if (tier == 0) return tier0Skills.IndexOf(skill);
-        if (tier == 1) return tier1Skills.IndexOf(skill);
-        if (tier == 2) return tier2Skills.IndexOf(skill);
-        return -1;
+        nextButton.interactable = (startIndex + skillsPerPage) < filtered.Count;
     }
 
     // 팝업에서 최신 데이터를 읽어오기 위한 함수
@@ -260,4 +236,84 @@ public class SkillArchiveUI : MonoBehaviour
         }
         return null;
     }
+
+    // Character의 전역 인덱스 계산 (Tier0 → Tier1 → Tier2 순)
+    private int GetGlobalIndexFromTierLocal(int tier, int localIndex)
+    {
+        if (character == null) return -1;
+        int offset = 0;
+        if (tier > 0) offset += (character.tier0Skills?.Length ?? 0);
+        if (tier > 1) offset += (character.tier1Skills?.Length ?? 0);
+        return offset + localIndex;
+    }
+
+    private int GetHaveCount(int globalIndex)
+    {
+        if (character == null || character.Character_HaveSkill == null) return 0;
+        if (globalIndex < 0 || globalIndex >= character.Character_HaveSkill.Length) return 0;
+        return character.Character_HaveSkill[globalIndex];
+    }
+
+    private bool IsUpgradable(Skill_Data s, int tier, int localIndex)
+    {
+        if (s == null) return false;
+
+        // 1) 모르는 스킬은 업그레이드 X
+        if (!s.isKnow) return false;
+
+        // 2) (선택) 최대 레벨 체크 로직이 있다면 여기서 걸러주기
+        // if (s.maxLevel > 0 && s.level >= s.maxLevel) return false;
+
+        // 3) Need / Have 계산 (SkillUpgradeUI와 동일한 해석)
+        int need = Mathf.Max(1, s.NeedLevelUP_Gold);
+        int globalIndex = GetGlobalIndexFromTierLocal(tier, localIndex);
+        int have = GetHaveCount(globalIndex);
+
+        return have >= need;
+    }
+
+    //필터 리스트
+    private List<SkillRef> BuildFilteredList()
+    {
+        var list = new List<SkillRef>();
+
+        void AddTierList(List<Skill_Data> source, int tierId)
+        {
+            for (int idx = 0; idx < source.Count; idx++)
+            {
+                var s = source[idx];
+                // LearnedOnly
+                if (filterMode == FilterMode.LearnedOnly && !s.isKnow) continue;
+                // UpgradableOnly
+                if (filterMode == FilterMode.UpgradableOnly && !IsUpgradable(s, tierId, idx)) continue;
+
+                list.Add(new SkillRef(s, tierId, idx));
+            }
+        }
+
+        switch (filterMode)
+        {
+            case FilterMode.Tier0Only:
+                AddTierList(tier0Skills, 0);
+                break;
+            case FilterMode.Tier1Only:
+                AddTierList(tier1Skills, 1);
+                break;
+            case FilterMode.Tier2Only:
+                AddTierList(tier2Skills, 2);
+                break;
+            case FilterMode.LearnedOnly:
+            case FilterMode.UpgradableOnly:
+            case FilterMode.AllTiers:
+            default:
+                // 티어 순서 유지 (0→1→2)
+                AddTierList(tier0Skills, 0);
+                AddTierList(tier1Skills, 1);
+                AddTierList(tier2Skills, 2);
+                break;
+        }
+
+        return list;
+    }
+
 }

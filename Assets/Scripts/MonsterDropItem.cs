@@ -47,7 +47,7 @@ public class MonsterDropItem : MonoBehaviour
         {
             if (outcome < 0.5f)
             {
-                scoreSystem.score += 1;
+                scoreSystem.score += 100;
                 Debug.Log("ÀÏ¹Ý ±¸Ã¼: Á¡¼ö 1 È¹µæ");
             }
             else
@@ -61,7 +61,7 @@ public class MonsterDropItem : MonoBehaviour
         {
             if (outcome < 0.5f)
             {
-                scoreSystem.score += 3;
+                scoreSystem.score += 300;
                 Debug.Log("°í±Þ ±¸Ã¼: Á¡¼ö 3 È¹µæ");
             }
             else if (outcome < 0.75f)

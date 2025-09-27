@@ -7,12 +7,14 @@ public class Wall_System_Base : MonoBehaviour
 {
     public Character character;
     public Score_System scoreSystem;
+    public Monster_Spawn monsterspawn;
     public GameObject gameResultUIPrefab;
     public int maxHealth = 10; // 벽의 최대 체력
     public int currentHealth; // 현재 체력
     public Text healthText; // 체력을 표시할 UI 텍스트
     public Text ScoreText;  // 점수를 표시할 UI
     public Text TimerText;  // 시간을 표시할 UI
+    public Text WaveText;   // 웨이브를 표시할 UI
     public float PlayTime = 0f;
 
     //private bool isUnderAttack = false; // 적이 충돌하고 있는지 확인
@@ -114,6 +116,7 @@ public class Wall_System_Base : MonoBehaviour
     {
         healthText.text = "Wall Health: " + currentHealth.ToString();
         ScoreText.text = "Score: " + scoreSystem.score.ToString();
+        WaveText.text = "Wave: " + monsterspawn.currentWave.ToString();
         int minutes = Mathf.FloorToInt(PlayTime / 60f);
         int seconds = Mathf.FloorToInt(PlayTime % 60f);
         TimerText.text = string.Format("{0:00}:{1:00}", minutes, seconds);

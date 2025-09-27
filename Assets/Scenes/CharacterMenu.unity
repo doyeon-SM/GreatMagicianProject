@@ -205,9 +205,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 433580490}
-        m_TargetAssemblyTypeName: CharacterMenuUI, Assembly-CSharp
-        m_MethodName: UpdateUI
+      - m_Target: {fileID: 3443930130645529466, guid: c892dc471f46e894bb4ad5fbf72dc345, type: 3}
+        m_TargetAssemblyTypeName: Character, Assembly-CSharp
+        m_MethodName: CharacterStatIntUP
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -217,9 +217,9 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-      - m_Target: {fileID: 3443930130645529466, guid: c892dc471f46e894bb4ad5fbf72dc345, type: 3}
-        m_TargetAssemblyTypeName: Character, Assembly-CSharp
-        m_MethodName: CharacterStatIntUP
+      - m_Target: {fileID: 433580490}
+        m_TargetAssemblyTypeName: CharacterMenuUI, Assembly-CSharp
+        m_MethodName: UpdateUI
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1174,9 +1174,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 433580490}
-        m_TargetAssemblyTypeName: CharacterMenuUI, Assembly-CSharp
-        m_MethodName: UpdateUI
+      - m_Target: {fileID: 3443930130645529466, guid: c892dc471f46e894bb4ad5fbf72dc345, type: 3}
+        m_TargetAssemblyTypeName: Character, Assembly-CSharp
+        m_MethodName: CharacterStatManaUP
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1186,9 +1186,9 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-      - m_Target: {fileID: 3443930130645529466, guid: c892dc471f46e894bb4ad5fbf72dc345, type: 3}
-        m_TargetAssemblyTypeName: Character, Assembly-CSharp
-        m_MethodName: CharacterStatManaUP
+      - m_Target: {fileID: 433580490}
+        m_TargetAssemblyTypeName: CharacterMenuUI, Assembly-CSharp
+        m_MethodName: UpdateUI
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1398,9 +1398,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 433580490}
-        m_TargetAssemblyTypeName: CharacterMenuUI, Assembly-CSharp
-        m_MethodName: UpdateUI
+      - m_Target: {fileID: 3443930130645529466, guid: c892dc471f46e894bb4ad5fbf72dc345, type: 3}
+        m_TargetAssemblyTypeName: Character, Assembly-CSharp
+        m_MethodName: CharacterStatWallHPUP
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1410,9 +1410,9 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-      - m_Target: {fileID: 3443930130645529466, guid: c892dc471f46e894bb4ad5fbf72dc345, type: 3}
-        m_TargetAssemblyTypeName: Character, Assembly-CSharp
-        m_MethodName: CharacterStatWallHPUP
+      - m_Target: {fileID: 433580490}
+        m_TargetAssemblyTypeName: CharacterMenuUI, Assembly-CSharp
+        m_MethodName: UpdateUI
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
