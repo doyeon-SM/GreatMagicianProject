@@ -1,37 +1,54 @@
-using System.Collections;
+ï»¿using System.Collections.Generic;
 using UnityEngine;
 
 public class Monster_Spawn : MonoBehaviour
 {
-    [Header("Normal Monster")]
-    [Tooltip("ÀÏ¹İ ¸ó½ºÅÍ ÇÁ¸®ÆÕ")]
-    public GameObject monsterPrefab;
+    [System.Serializable]
+    public struct MonsterVariant
+    {
+        [Tooltip("ì†Œí™˜í•  ëª¬ìŠ¤í„° í”„ë¦¬íŒ¹")]
+        public GameObject prefab;
 
-    [Header("Boss Monsters (10,20,30...¿şÀÌºê ¼ø¼­)")]
+        [Tooltip("ê°€ì¤‘ì¹˜(í™•ë¥ ). ê°’ì´ í´ìˆ˜ë¡ ì˜ ë½‘í˜")]
+        public int weight;
+
+        [Tooltip("ì´ ëª¬ìŠ¤í„°ê°€ ë“±ì¥ ê°€ëŠ¥í•œ ìµœì†Œ/ìµœëŒ€ ì›¨ì´ë¸Œ (í¬í•¨)")]
+        public int minWave;
+        public int maxWave;
+
+        [Header("ì˜µì…˜")]
+        [Tooltip("ì²´ë ¥ ì¶”ê°€ ë°°ìœ¨ (ìµœì¢… HP *= ì´ ê°’) â€” 1ì´ë©´ ê¸°ë³¸")]
+        public float hpMultiplier;
+    }
+
+    [Header("Monster Pool (ì¼ë°˜ ì›¨ì´ë¸Œìš©)")]
+    [Tooltip("ì—¬ëŸ¬ ëª¬ìŠ¤í„° ë³€ì¢…ì„ ë“±ë¡í•˜ì„¸ìš”")]
+    public List<MonsterVariant> normalMonsterPool = new List<MonsterVariant>();
+
+    [Header("Boss Monsters (10,20,30... ì›¨ì´ë¸Œ ìˆœì„œ)")]
     public GameObject[] bossPrefabs;
 
     [Header("Wave Settings")]
+    [Tooltip("ì›¨ì´ë¸Œ í•˜ë‚˜ì˜ ì§„í–‰ ì‹œê°„(ì´ˆ) - ìš”êµ¬: 10ì´ˆ")]
     public float waveDuration = 10f;
-
-    [Tooltip("½ÃÀÛ ¿şÀÌºê(º¸Åë 1)")]
+    [Tooltip("ì‹œì‘ ì›¨ì´ë¸Œ(ë³´í†µ 1)")]
     public int currentWave = 1;
 
     [Header("Spawn Area")]
-    [Tooltip("ÀÏ¹İ/º¸½º ½ºÆù XÁÂÇ¥ ÃÖ¼Ò~ÃÖ´ë, Y´Â °íÁ¤")]
+    [Tooltip("ì¼ë°˜/ë³´ìŠ¤ ìŠ¤í° Xì¢Œí‘œ ìµœì†Œ~ìµœëŒ€, YëŠ” ê³ ì •")]
     public Vector2 spawnXRange = new Vector2(-5f, 5f);
     public float spawnY = 8f;
 
-    [Header("Debug")]
-    [SerializeField] private int targetSpawnCountThisWave; // ÀÌ¹ø ¿şÀÌºê ¸ñÇ¥ ½ºÆù ¼ö(ÀÏ¹İ ¸ó½ºÅÍ)
-    [SerializeField] private int spawnedThisWave;          // ÀÌ¹ø ¿şÀÌºê ½ÇÁ¦ ½ºÆùµÈ ¼ö
-    [SerializeField] private float waveTimer;              // ¿şÀÌºê °æ°ú ½Ã°£(ÃÊ)
-    [SerializeField] private bool isBossWave;              // º¸½º ¿şÀÌºê ¿©ºÎ
-    [SerializeField] private GameObject aliveBoss;         // ÇöÀç »ì¾ÆÀÖ´Â º¸½º ÀÎ½ºÅÏ½º(ÀÖÀ¸¸é À¯Áö)
-
-    // ±ÔÄ¢: 1¿şÀÌºê Ã¼·Â=10, 11¿şÀÌºê=20, 21¿şÀÌºê=40 ...
-    // => health = baseHealth(=10) * 2^( (wave-1)/10 )
     [Header("HP Scaling")]
-    public int baseHealthPerTier = 10; // 1~10¿şÀÌºê ±¸°£ÀÇ ±âº» Ã¼·Â(=10)
+    [Tooltip("1~10ì›¨: 10, 11~20ì›¨: 20, 21~30ì›¨: 40 ... (10 * 2^í‹°ì–´)")]
+    public int baseHealthPerTier = 10;
+
+    [Header("Debug (ì½ê¸°ì „ìš©)")]
+    [SerializeField] private int targetSpawnCountThisWave; // ì´ë²ˆ ì›¨ì´ë¸Œ ëª©í‘œ ìŠ¤í° ìˆ˜(ì¼ë°˜)
+    [SerializeField] private int spawnedThisWave;          // ì´ë²ˆ ì›¨ì´ë¸Œ ì‹¤ì œ ìŠ¤í° ìˆ˜
+    [SerializeField] private float waveTimer;              // ì›¨ì´ë¸Œ ê²½ê³¼ ì‹œê°„
+    [SerializeField] private bool isBossWave;              // ë³´ìŠ¤ ì›¨ì´ë¸Œ ì—¬ë¶€
+    [SerializeField] private GameObject aliveBoss;         // í˜„ì¬ ì‚´ì•„ìˆëŠ” ë³´ìŠ¤ ì¸ìŠ¤í„´ìŠ¤
 
     void Start()
     {
@@ -42,8 +59,7 @@ public class Monster_Spawn : MonoBehaviour
     {
         if (isBossWave)
         {
-            // ÀÏ¹İ ¸ó½ºÅÍ´Â ¼ÒÈ¯ÇÏÁö ¾ÊÀ½. º¸½º°¡ Ã³Ä¡µÇ¾î¾ß ´ÙÀ½ ¿şÀÌºê·Î ÁøÇà.
-            // º¸½º »ıÁ¸ ¿©ºÎ È®ÀÎ(º¸½º°¡ ÆÄ±«µÇ¸é ÂüÁ¶°¡ nullÀÌ µÊ)
+            // ë³´ìŠ¤ê°€ ì²˜ì¹˜ë˜ì–´ì•¼ë§Œ ë‹¤ìŒ ì›¨ì´ë¸Œ
             if (aliveBoss == null)
             {
                 NextWave();
@@ -51,23 +67,20 @@ public class Monster_Spawn : MonoBehaviour
             return;
         }
 
-        // ÀÏ¹İ ¿şÀÌºê ÁøÇà(10ÃÊ Å¸ÀÌ¸Ó)
+        // ì¼ë°˜ ì›¨ì´ë¸Œ ì§„í–‰
         waveTimer += Time.deltaTime;
 
-        // 10ÃÊ ³»¿¡ ¸ñÇ¥ ¼ö¸¸Å­ °í¸£°Ô ¼ÒÈ¯
+        // 10ì´ˆ ë‚´ì— ëª©í‘œ ìˆ˜ë§Œí¼ ê· ë“± ë¶„ë°° ì†Œí™˜
         if (targetSpawnCountThisWave > 0 && spawnedThisWave < targetSpawnCountThisWave)
         {
-            // ½ºÆù Å¸ÀÌ¹Ö °è»ê: ÇöÀç ÁøÇà ºñÀ² * ¸ñÇ¥°³¼ö > ÀÌ¹Ì ½ºÆùÇÑ °³¼ö ÀÌ¸é Ãß°¡ ½ºÆù
-            // Áï, ±Õµî ¹èºĞ(10ÃÊ µ¿¾È ÀÏÁ¤ °£°İ)À¸·Î ¶³¾îÁöµµ·Ï ÇÔ.
             float expectedSpawnCount = Mathf.Floor((waveTimer / waveDuration) * targetSpawnCountThisWave);
             while (spawnedThisWave < expectedSpawnCount)
             {
-                SpawnNormal();
+                SpawnNormalRandom(); // ëœë¤ ë³€ì¢… ì†Œí™˜
                 spawnedThisWave++;
             }
         }
 
-        // ¿şÀÌºê ½Ã°£ ³¡³µÀ¸¸é ´ÙÀ½ ¿şÀÌºê·Î
         if (waveTimer >= waveDuration)
         {
             NextWave();
@@ -76,31 +89,22 @@ public class Monster_Spawn : MonoBehaviour
 
     void BeginWave(int wave)
     {
-        // ÃÊ±âÈ­
         waveTimer = 0f;
         spawnedThisWave = 0;
         aliveBoss = null;
 
-        // º¸½º ¿şÀÌºê ÆÇ´Ü(10,20,30...)
+        // ë³´ìŠ¤ ì›¨ì´ë¸Œ íŒë‹¨(10, 20, 30...)
         isBossWave = (wave % 10 == 0);
 
         if (isBossWave)
         {
-            // º¸½º¸¸ ¼ÒÈ¯, ÀÏ¹İ ¸ó½ºÅÍ 0
             targetSpawnCountThisWave = 0;
             SpawnBossForWave(wave);
         }
         else
         {
-            // ÀÏ¹İ ¸ó½ºÅÍ ½ºÆù ¼ö: (wave%10)*10  (¿¹: 14¿şÀÌºê -> 40)
-            targetSpawnCountThisWave = (wave % 10) * 10;
-            // ¾ÈÀüÀåÄ¡(ÀÌ °ªÀÌ 0ÀÌ µÇ´Â °Ç 10ÀÇ ¹è¼ö ¿şÀÌºêÀÎµ¥ ÀÌ¹Ì À§¿¡¼­ º¸½º ¿şÀÌºê·Î Ã³¸®µÊ)
-            targetSpawnCountThisWave = Mathf.Max(0, targetSpawnCountThisWave);
-
-            // °£°İÀº 10ÃÊ/¸ñÇ¥¼ö. 0 ³ª´°¼À ¹æÁö
-            spawnInterval = (targetSpawnCountThisWave > 0) ? (waveDuration / targetSpawnCountThisWave) : 0f;
-
-            // ½ÃÀÛ Á÷ÈÄ Ã¹ ¸¶¸®¸¦ ¹Ù·Î »ÌÁö ¾Ê°í ±Õµî ºĞ¹è ·ÎÁ÷À¸·Î¸¸ °ü¸®ÇÏ¹Ç·Î ¿©±â¼­´Â ¾Æ¹«°Íµµ ¾È ÇÔ
+            // (wave % 10) * 10
+            targetSpawnCountThisWave = Mathf.Max(0, (wave % 10) * 10);
         }
 
         Debug.Log($"[Wave] Start Wave {wave} | BossWave={isBossWave} | target={targetSpawnCountThisWave}");
@@ -112,18 +116,67 @@ public class Monster_Spawn : MonoBehaviour
         BeginWave(currentWave);
     }
 
-    void SpawnNormal()
+    // ====== ëœë¤ ë³€ì¢… ì†Œí™˜ ======
+    void SpawnNormalRandom()
     {
-        if (!monsterPrefab) return;
+        var eligible = GetEligibleVariants(currentWave);
+        if (eligible.Count == 0)
+        {
+            Debug.LogWarning("[Wave] Eligible normal monster not found. Skip spawn.");
+            return;
+        }
+
+        // ê°€ì¤‘ì¹˜ ëœë¤ ì„ íƒ
+        int pickIndex = WeightedPickIndex(eligible);
+        var variant = eligible[pickIndex];
 
         Vector3 pos = new Vector3(Random.Range(spawnXRange.x, spawnXRange.y), spawnY, 0f);
-        GameObject m = Instantiate(monsterPrefab, pos, Quaternion.identity);
+        GameObject m = Instantiate(variant.prefab, pos, Quaternion.identity);
 
-        // Ã¼·Â ½ºÄÉÀÏ Àû¿ë
+        // ì²´ë ¥ ìŠ¤ì¼€ì¼ ì ìš©
         int hp = GetScaledHealthForWave(currentWave);
+        hp = Mathf.RoundToInt(hp * Mathf.Max(variant.hpMultiplier, 0.01f)); // 0 ë³´í˜¸
+
         ApplyHealth(m, hp);
+
+        // ìŠ¤í° ì»¨í…ìŠ¤íŠ¸(ì˜µì…˜): í•„ìš”í•˜ë©´ ìˆ˜ì‹  ì¸¡ì—ì„œ OnSpawned(MonsterSpawnContext) êµ¬í˜„
+        var ctx = new MonsterSpawnContext(currentWave, hp, isBoss: false);
+        m.SendMessage("OnSpawned", ctx, SendMessageOptions.DontRequireReceiver);
     }
 
+    // í˜„ì¬ ì›¨ì´ë¸Œì— ë“±ì¥ ê°€ëŠ¥í•œ ë³€ì¢… í•„í„°ë§
+    List<MonsterVariant> GetEligibleVariants(int wave)
+    {
+        var list = new List<MonsterVariant>();
+        foreach (var v in normalMonsterPool)
+        {
+            if (v.prefab == null) continue;
+            if (wave < Mathf.Max(1, v.minWave)) continue;
+            if (v.maxWave > 0 && wave > v.maxWave) continue; // maxWave=0ì´ë©´ ë¬´ì œí•œ
+            list.Add(v);
+        }
+        return list;
+    }
+
+    int WeightedPickIndex(List<MonsterVariant> variants)
+    {
+        int total = 0;
+        for (int i = 0; i < variants.Count; i++)
+            total += Mathf.Max(0, variants[i].weight);
+
+        if (total <= 0) return 0;
+
+        int r = Random.Range(0, total);
+        int acc = 0;
+        for (int i = 0; i < variants.Count; i++)
+        {
+            acc += Mathf.Max(0, variants[i].weight);
+            if (r < acc) return i;
+        }
+        return variants.Count - 1;
+    }
+
+    // ====== ë³´ìŠ¤ ì†Œí™˜ ======
     void SpawnBossForWave(int wave)
     {
         if (bossPrefabs == null || bossPrefabs.Length == 0)
@@ -132,42 +185,57 @@ public class Monster_Spawn : MonoBehaviour
             return;
         }
 
-        // 10¿şÀÌºê -> index 0, 20¿şÀÌºê -> index 1, ...
         int tierIndex = (wave / 10) - 1;
         if (tierIndex < 0) tierIndex = 0;
-
-        // º¸½º ¹è¿­ ±æÀÌ¸¦ ³Ñ¾î°¡¸é ¼øÈ¯(mod) »ç¿ë
         int bossIndex = tierIndex % bossPrefabs.Length;
 
         Vector3 pos = new Vector3(Random.Range(spawnXRange.x, spawnXRange.y), spawnY, 0f);
         aliveBoss = Instantiate(bossPrefabs[bossIndex], pos, Quaternion.identity);
 
-        // º¸½ºµµ µ¿ÀÏÇÑ Ã¼·Â ±ÔÄ¢(¿øÇÑ´Ù¸é º°µµ ¹èÀ²À» µÎ¾îµµ µÊ)
         int hp = GetScaledHealthForWave(wave);
         ApplyHealth(aliveBoss, hp);
+
+        var ctx = new MonsterSpawnContext(wave, hp, isBoss: true);
+        aliveBoss.SendMessage("OnSpawned", ctx, SendMessageOptions.DontRequireReceiver);
 
         Debug.Log($"[Wave] Boss Spawned for Wave {wave} (index={bossIndex}) with HP {hp}");
     }
 
+    // ====== HP ì ìš© ======
     int GetScaledHealthForWave(int wave)
     {
-        // (wave-1)/10 ÀÇ ³»¸² °ªÀÌ Æ¼¾î ÀÎµ¦½º(0:1~10, 1:11~20, 2:21~30...)
+        // (wave-1)/10 ë‚´ë¦¼ â†’ 0:1~10, 1:11~20, 2:21~30...
         int tier = Mathf.FloorToInt((wave - 1) / 10f);
-        // 10 * 2^tier
-        int hp = baseHealthPerTier * (1 << tier);
-        return hp;
+        return baseHealthPerTier * (1 << tier); // 10 * 2^tier
     }
 
     void ApplyHealth(GameObject obj, int hp)
     {
         if (!obj) return;
-
-        // »ç¿ëÀÚ°¡ ¾²´Â Monster_Base¿¡ ¸ÂÃç Àû¿ë
         var monsterBase = obj.GetComponent<Monster_Base>();
         if (monsterBase != null)
         {
             monsterBase.maxHealth = hp;
+            // í•„ìš”í•˜ë©´ InitializeHealth(hp) ê°™ì€ ì´ˆê¸°í™” ë©”ì„œë“œë¥¼ ë§Œë“¤ì–´ í˜¸ì¶œ ê¶Œì¥
         }
 
+        // ë‹¤ë¥¸ ìŠ¤í¬ë¦½íŠ¸ í˜•íƒœë¼ë©´ ì—¬ê¸°ì— ë§ì¶° ì„¸í„° í˜¸ì¶œ ì¶”ê°€
+        // var enemy = obj.GetComponent<Enemy>();
+        // if (enemy != null) enemy.SetMaxAndCurrentHP(hp);
+    }
+
+    // ====== ìŠ¤í° ì»¨í…ìŠ¤íŠ¸(ì˜µì…˜) ======
+    public struct MonsterSpawnContext
+    {
+        public int wave;
+        public int hp;
+        public bool isBoss;
+
+        public MonsterSpawnContext(int wave, int hp, bool isBoss)
+        {
+            this.wave = wave;
+            this.hp = hp;
+            this.isBoss = isBoss;
+        }
     }
 }

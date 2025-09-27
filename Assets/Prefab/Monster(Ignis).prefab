@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: -4932612282564971601}
   - component: {fileID: 5914265774075559566}
   m_Layer: 6
-  m_Name: Monster
+  m_Name: Monster(Ignis)
   m_TagString: Monster
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -77,7 +77,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_Sprite: {fileID: -2413806693520163455, guid: a86470a33a6bf42c4b3595704624658b, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 1, g: 0.25943398, b: 0.25943398, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -163,10 +163,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   character: {fileID: 3443930130645529466, guid: c892dc471f46e894bb4ad5fbf72dc345, type: 3}
   maxHealth: 10
-  monsterElement: 0
+  monsterElement: 1
   healthTextPrefab: {fileID: 6626607115327785779, guid: cb8b6ee9cd0cdd24a83fa600865a2323, type: 3}
   scoreSystem: {fileID: 1729787502847079638, guid: 3281504f39627b845ba945c89bcc1641, type: 3}
-  moveSpeed: 1
+  moveSpeed: 0.8
   isBlind: 0
   normalSpherePrefab: {fileID: 7365884234219019472, guid: 8db9cb3e5c06c884a9372704eddfb62a, type: 3}
   advancedSpherePrefab: {fileID: 4306010834490960934, guid: 3e673a4045568324cbe14a73dbdd18f6, type: 3}

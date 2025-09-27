@@ -32,7 +32,6 @@ public class SkillArchiveUI : MonoBehaviour
     private int currentPage = 0;
     private int skillsPerPage = 16;
     // filterTier 값: -1 (또는 0)인 경우 전체 스킬, 그 외 0, 1, 2 등 특정 티어만 필터
-    private int filterTier = -1;
     private enum FilterMode
     {
         AllTiers,       // 기존: 전체 보기(티어 0→1→2 순)

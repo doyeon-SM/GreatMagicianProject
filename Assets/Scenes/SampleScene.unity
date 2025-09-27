@@ -336,24 +336,33 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eaeefc56d75792643a811e81d582a7b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  monsterPrefab: {fileID: 1036661608251385216, guid: 5db9230f890dcae48901380e46a2f0f8, type: 3}
+  normalMonsterPool:
+  - prefab: {fileID: 1036661608251385216, guid: 5db9230f890dcae48901380e46a2f0f8, type: 3}
+    weight: 10
+    minWave: 1
+    maxWave: 0
+    hpMultiplier: 1
+  - prefab: {fileID: 1036661608251385216, guid: 84d98d92943d4834ba0e050a6ec9c826, type: 3}
+    weight: 3
+    minWave: 1
+    maxWave: 0
+    hpMultiplier: 1
   bossPrefabs:
   - {fileID: 1036661608251385216, guid: df2b943ea147bb44f8bb1d92b57892a2, type: 3}
   - {fileID: 1036661608251385216, guid: df2b943ea147bb44f8bb1d92b57892a2, type: 3}
   - {fileID: 1036661608251385216, guid: df2b943ea147bb44f8bb1d92b57892a2, type: 3}
   - {fileID: 1036661608251385216, guid: df2b943ea147bb44f8bb1d92b57892a2, type: 3}
   - {fileID: 1036661608251385216, guid: df2b943ea147bb44f8bb1d92b57892a2, type: 3}
-  waveDuration: 10
+  waveDuration: 15
   currentWave: 1
   spawnXRange: {x: -5, y: 5}
   spawnY: 8
+  baseHealthPerTier: 10
   targetSpawnCountThisWave: 0
   spawnedThisWave: 0
   waveTimer: 0
-  spawnInterval: 2
   isBossWave: 0
   aliveBoss: {fileID: 0}
-  baseHealthPerTier: 10
 --- !u!4 &406770176
 Transform:
   m_ObjectHideFlags: 0

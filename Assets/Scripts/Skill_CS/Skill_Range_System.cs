@@ -344,6 +344,7 @@ public class Skill_Range_System : MonoBehaviour
         int numberOfOrbitProjectiles = 3;
         float orbitRadius = 7.0f;
         float orbitSpeed = 180.0f;
+        float duration = 10f;
         Debug.Log("Around Center 생성 완료");
 
         for (int i = 0; i < numberOfOrbitProjectiles; i++)
@@ -362,7 +363,13 @@ public class Skill_Range_System : MonoBehaviour
             orbitScript.radius = orbitRadius;
             orbitScript.angularSpeed = orbitSpeed;
             orbitScript.startAngle = angleOffset; // 각도 분배로 위상 차이 부여
+            
+            // 투사체도 지속시간 후 제거
+            Destroy(orbitProjectile, duration);
         }
+
+        // 중심 오브젝트도 일정 시간 뒤 제거
+        Destroy(centerObject, duration);
     }
 
     //Heal 기능

@@ -33,7 +33,7 @@ public class Monster_Base : MonoBehaviour
     // 지속 데미지
     private Coroutine periodicDamageCoroutine;
 
-
+    public GameObject damageTextPrefab;
 
     public enum MonsterElement
     {
@@ -91,15 +91,38 @@ public class Monster_Base : MonoBehaviour
 
     public void TakeDamage(int damage)
     {
-        currentHealth -= damage + character.Character_Int;
+        int finalDamage = damage + character.Character_Int;
+        currentHealth -= finalDamage;
         Debug.Log("몬스터가 데미지를 받았습니다! 현재 체력: " + currentHealth);
 
+        // 데미지 텍스트 출력
+        ShowDamageText(finalDamage);
         if (currentHealth <= 0)
         {
             Die();  // 체력이 0 이하이면 죽음 처리
         }
     }
-    
+    private void ShowDamageText(int damageValue)
+    {
+        if (damageTextPrefab == null) return;
+
+        GameObject dmgTextObj = Instantiate(damageTextPrefab, transform.position, Quaternion.identity);
+        dmgTextObj.transform.SetParent(GameObject.Find("Canvas").transform, false);
+
+        Text dmgText = dmgTextObj.GetComponent<Text>();
+        if (dmgText != null)
+        {
+            dmgText.text = damageValue.ToString();
+        }
+
+        // 화면 좌표에 배치
+        Vector3 screenPosition = Camera.main.WorldToScreenPoint(transform.position + new Vector3(0, 0.5f, 0));
+        dmgTextObj.transform.position = screenPosition;
+
+        // 1초 후 삭제
+        Destroy(dmgTextObj, 1f);
+    }
+
     // 넉백 효과 적용 메서드: knockbackVelocity는 넉백 방향과 크기를 나타내고, duration은 넉백 지속 시간입니다.
     public void ApplyMoveEffect(Vector3 velocity, float duration)
     {
