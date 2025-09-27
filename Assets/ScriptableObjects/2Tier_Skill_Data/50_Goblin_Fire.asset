@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   skillName: Goblin_Fire
   skillIndex: 50
-  damage: 28
+  damage: 30
   Tier: 2
   level: 1
   NeedLevelUP_Gold: 1
@@ -32,6 +32,6 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 1b604f97287ec884b94d887793a25e5c, type: 2}
   - {fileID: 11400000, guid: f79541974eaa9d0499d2ca29b2a40dcd, type: 2}
   Effect_Value: 0
-  AreaTime: 0
+  AreaTime: 10
   skillscript: 
-  isKnow: 0
+  isKnow: 1

@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   skillName: High_Pressure
   skillIndex: 47
-  damage: 20
+  damage: 23
   Tier: 2
   level: 1
   NeedLevelUP_Gold: 1
@@ -32,6 +32,6 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 7a339c104bb7d854db1aaf44f8cbdb29, type: 2}
   - {fileID: 11400000, guid: 2b1185529fec9bb42956eaaba0029717, type: 2}
   Effect_Value: 5
-  AreaTime: 0
+  AreaTime: 5
   skillscript: 
-  isKnow: 0
+  isKnow: 1

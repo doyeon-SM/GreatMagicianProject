@@ -64,21 +64,40 @@ public class Character : MonoBehaviour
         // 4) 성장 처리 (기존 규칙 유지: 10레벨 단위 큰 상승, 그 외 +1)
         int prevLevel = skill.level;
 
-        if (prevLevel > 0 && prevLevel % 10 == 0)
+        if (tier == 0)
         {
-            // 10,20,30...에서 강화 → 데미지 2배 & 비용 큰 폭 증가
-            skill.damage *= 2;
-            skill.NeedLevelUP_Gold += (prevLevel / 10) * 10;
+            if (prevLevel > 0 && prevLevel % 10 == 0)
+            {
+                // 10,20,30...에서 강화 → 데미지 2배 & 비용 큰 폭 증가
+                skill.damage *= 2;
+                skill.NeedLevelUP_Gold += (prevLevel / 10) * 10;
+            }
+            else
+            {
+                // 그 외 구간 → 데미지 +1 & 비용 소폭 증가
+                skill.damage += 1;
+                skill.NeedLevelUP_Gold += 2;
+            }
         }
         else
         {
-            // 그 외 구간 → 데미지 +1 & 비용 소폭 증가
-            skill.damage += 1;
-            skill.NeedLevelUP_Gold += 2;
+            // 1t 이상 스킬 강화
+            if (prevLevel > 0 && prevLevel % 10 == 0)
+            {
+                // 10,20,30...에서 강화 → 데미지 2배 & 비용 큰 폭 증가
+                skill.damage *= 2;
+                skill.NeedLevelUP_Gold += (prevLevel / 10) * 10;
+            }
+            else
+            {
+                // 그 외 구간 → 데미지 +1 & 비용 소폭 증가
+                skill.damage += 5;
+                skill.NeedLevelUP_Gold += 1;
+            }
         }
 
         // 레벨 증가
-        skill.level++;
+        skill.Skill_LevelUP();
 
         // 5) 결과 반영 (배열에 다시 써주기: struct/class 모두 안전)
         skillArr[index] = skill;

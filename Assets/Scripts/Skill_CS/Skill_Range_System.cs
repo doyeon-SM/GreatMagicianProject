@@ -344,7 +344,7 @@ public class Skill_Range_System : MonoBehaviour
         int numberOfOrbitProjectiles = 3;
         float orbitRadius = 7.0f;
         float orbitSpeed = 180.0f;
-        float duration = 10f;
+        float duration = skillData.AreaTime;
         Debug.Log("Around Center 생성 완료");
 
         for (int i = 0; i < numberOfOrbitProjectiles; i++)

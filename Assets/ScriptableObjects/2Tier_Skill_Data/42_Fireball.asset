@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   skillName: Fireball
   skillIndex: 42
-  damage: 32
+  damage: 34
   Tier: 2
   level: 1
   NeedLevelUP_Gold: 1
@@ -32,6 +32,6 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 7a339c104bb7d854db1aaf44f8cbdb29, type: 2}
   - {fileID: 11400000, guid: f79541974eaa9d0499d2ca29b2a40dcd, type: 2}
   Effect_Value: 0
-  AreaTime: 0
+  AreaTime: 10
   skillscript: 
   isKnow: 0

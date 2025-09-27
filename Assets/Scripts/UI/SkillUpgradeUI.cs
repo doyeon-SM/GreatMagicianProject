@@ -16,6 +16,8 @@ public class SkillUpgradeUI : MonoBehaviour
     public Text needText;              // 다음 강화 필요 수량 (NeedLevelUP_Gold 해석)
     public Text haveText;              // 내 보유 수량(Character_HaveSkill[globalIndex])
     public Text descText;              // 설명(있다면)
+    public Image requiredskillIconImage1;
+    public Image requiredskillIconImage2;
 
     private Character _character;
     private int _tier;
@@ -59,6 +61,16 @@ public class SkillUpgradeUI : MonoBehaviour
         if (skill == null) return;
 
         if (skillIconImage) skillIconImage.sprite = skill.skillIcon;
+        if (_tier >= 1)
+        {
+            if (requiredskillIconImage1) requiredskillIconImage1.sprite = skill.requiredBaseSkills[0].skillIcon;
+            if (requiredskillIconImage2) requiredskillIconImage2.sprite = skill.requiredBaseSkills[1].skillIcon;
+        }
+        else
+        {
+            if (requiredskillIconImage1) requiredskillIconImage1.gameObject.SetActive(false);
+            if (requiredskillIconImage2) requiredskillIconImage2.gameObject.SetActive(false);
+        }
         if (skillNameText) skillNameText.text = skill.skillName;
         if (tierText) tierText.text = $"Tier {_tier}";
         if (levelText) levelText.text = $"Lv. {skill.level}";
