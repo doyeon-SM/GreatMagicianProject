@@ -12,12 +12,12 @@ EditorBuildSettings:
     path: Assets/Scenes/SampleScene.unity
     guid: 2cda990e2423bbf4892e6590ba056729
   - enabled: 1
-    path: Assets/Scenes/EnhanceMenu.unity
-    guid: 7500dcd4153e4b14f901fc82f1bbcd5d
-  - enabled: 1
     path: Assets/Scenes/CharacterMenu.unity
     guid: 8a7e6f02ed4372b42b13dc18c8546069
   - enabled: 1
     path: Assets/Scenes/SkillArchive.unity
     guid: fc1e38ffbad5095458d005fca462618f
+  - enabled: 1
+    path: Assets/Scenes/Shop.unity
+    guid: ee9ece6600b395d4a8c89789d9e445cd
   m_configObjects: {}
