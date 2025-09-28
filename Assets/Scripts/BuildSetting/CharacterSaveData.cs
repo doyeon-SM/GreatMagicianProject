@@ -9,7 +9,7 @@ public class CharacterSaveData
     public int Player_level;
     public int Player_currentEXP;
     public int Player_HP;
-    public int Player_mana;
+    public float Player_mana;
     public int Player_gold;
     public int Player_stat;
     public int Player_int;

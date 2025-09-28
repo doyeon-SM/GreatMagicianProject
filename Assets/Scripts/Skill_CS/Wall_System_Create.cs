@@ -123,6 +123,7 @@ public class Wall_System_Create : MonoBehaviour
                 monster.ApplyElement(element);
                 monster.TakeDamage(skillData.damage); //반사 데미지
             }
+            else Debug.Log("반사대상이 없습니다.");
         }
     }
 

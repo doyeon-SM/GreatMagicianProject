@@ -7,7 +7,7 @@ public class Character : MonoBehaviour
     public int Character_Level = 1;
     public int Character_EXP = 0;
     public int WallHP = 30;
-    public int Character_Mana = 2;
+    public float Character_Mana = 2.0f;
     public int Character_Gold = 0;
     public int Character_Stat = 0;
     public int Character_Int = 1;
@@ -163,9 +163,9 @@ public class Character : MonoBehaviour
 
     public void CharacterStatManaUP()
     {
-        if (Character_Stat > 5 && Character_Mana > 2)
+        if (Character_Stat > 5 && Character_Mana > 1.0f)
         {
-            Character_Mana--;
+            Character_Mana -= 0.1f;
             Character_Stat -= 5;
         }
         else

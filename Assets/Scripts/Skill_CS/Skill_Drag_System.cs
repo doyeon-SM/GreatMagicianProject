@@ -150,88 +150,146 @@ public class Skill_Drag_System : MonoBehaviour
 
     private void OnMouseDrag()
     {
-        if (isDragging && spriteRenderer.sprite.name != "Blank_Skill_Icon")
-        {
-            Vector3 mousePosition = GetClampedMousePosition();
-            transform.position = mousePosition;
+        if (!isDragging || spriteRenderer.sprite.name == "Blank_Skill_Icon")
+            return;
 
-            // 겹치는 슬롯 검색
-            GameObject overlappingSkill = FindOverlappingSkill();
-            if (overlappingSkill != null)
+        // 위치 갱신 (사거리 제한 고려)
+        Vector3 mousePosition = GetClampedMousePosition();
+        transform.position = mousePosition;
+
+        // 겹치는 슬롯/조합 후보 계산 (UI는 아래에서 한 번에 처리)
+        GameObject overlappingSkill = FindOverlappingSkill();
+        if (overlappingSkill != null)
+        {
+            Skill_Data currentSkillData = GetSkillDataForCurrentSkill();
+            UnderUI_Slot_System otherSlotData = overlappingSkill.GetComponent<UnderUI_Slot_System>();
+
+            if (currentSkillData != null && otherSlotData != null && otherSlotData.GetSkillIndex() != -1)
             {
-                // 현재 슬롯과 겹친 슬롯의 데이터 확보
-                Skill_Data currentSkillData = GetSkillDataForCurrentSkill();
-                UnderUI_Slot_System otherSlotData = overlappingSkill.GetComponent<UnderUI_Slot_System>();
-                if (otherSlotData != null && otherSlotData.GetSkillIndex() != -1)
+                Skill_Data otherSkillData = skillDataArray[otherSlotData.GetSkillIndex()];
+                Skill_Combination_Data combination = FindCombinationForSkills(currentSkillData, otherSkillData);
+
+                if (combination != null)
                 {
-                    Skill_Data otherSkillData = skillDataArray[otherSlotData.GetSkillIndex()];
-                    Skill_Combination_Data combination = FindCombinationForSkills(currentSkillData, otherSkillData);
-                    if (combination != null)
-                    {
-                        // 후보 조합 저장
-                        pendingCombination = combination;
-                        pendingOtherSlot = otherSlotData;
-                        ShowCombinationDescriptionUI(currentSkillData, otherSkillData, combination.resultSkill);
-                    }
-                    else
-                    {
-                        HideCombinationDescriptionUI();
-                        pendingCombination = null;
-                        pendingOtherSlot = null;
-                    }
+                    pendingCombination = combination;
+                    pendingOtherSlot = otherSlotData;
+                }
+                else
+                {
+                    pendingCombination = null;
+                    pendingOtherSlot = null;
                 }
             }
             else
             {
-                HideCombinationDescriptionUI();
                 pendingCombination = null;
                 pendingOtherSlot = null;
             }
+        }
+        else
+        {
+            pendingCombination = null;
+            pendingOtherSlot = null;
+        }
 
-            if (!IsMouseWithinUnderUI())
-            {
-                spriteRenderer.enabled = false;
-                CreateRangeAndUseableRange(mousePosition);
-            }
-            else
-            {
-                spriteRenderer.enabled = true;
-                DestroyRangeAndUseableRange();
-            }
+        // 설명 UI 표시 분기 (조합 > 일반설명 > 숨김)
+        bool insideUnderUI = IsMouseWithinUnderUI();
+        if (pendingCombination != null && pendingOtherSlot != null)
+        {
+            Skill_Data currentSkillData = GetSkillDataForCurrentSkill();
+            Skill_Data otherSkillData = (pendingOtherSlot != null && pendingOtherSlot.GetSkillIndex() != -1)
+                ? skillDataArray[pendingOtherSlot.GetSkillIndex()]
+                : null;
+
+            if (currentSkillData != null && otherSkillData != null)
+                ShowCombinationDescriptionUI(currentSkillData, otherSkillData, pendingCombination.resultSkill);
+        }
+        else if (insideUnderUI)
+        {
+            ShowSkillDescriptionUI(GetSkillDataForCurrentSkill());
+        }
+        else
+        {
+            HideCombinationDescriptionUI();
+        }
+
+        // UnderUI 안/밖에 따른 아이콘 표시 및 범위 오브젝트 관리
+        if (!insideUnderUI)
+        {
+            spriteRenderer.enabled = false;
+            CreateRangeAndUseableRange(mousePosition);
+        }
+        else
+        {
+            spriteRenderer.enabled = true;
+            DestroyRangeAndUseableRange();
         }
     }
+
     private void OnDragging(Vector3 pos)
     {
+        // 위치 갱신 (드래그 오프셋 + 사거리 제한)
         Vector3 clampedPos = ClampToUseableRange(pos + offset);
         transform.position = clampedPos;
 
+        // 겹치는 슬롯/조합 후보 계산 (UI는 아래에서 한 번에 처리)
         GameObject overlapping = FindOverlappingSkill();
         if (overlapping != null)
         {
             Skill_Data currentSkill = GetSkillDataForCurrentSkill();
             UnderUI_Slot_System otherSlot = overlapping.GetComponent<UnderUI_Slot_System>();
-            if (otherSlot != null && otherSlot.GetSkillIndex() != -1)
+
+            if (currentSkill != null && otherSlot != null && otherSlot.GetSkillIndex() != -1)
             {
                 Skill_Data otherSkill = skillDataArray[otherSlot.GetSkillIndex()];
                 Skill_Combination_Data combo = FindCombinationForSkills(currentSkill, otherSkill);
+
                 if (combo != null)
                 {
                     pendingCombination = combo;
                     pendingOtherSlot = otherSlot;
-                    ShowCombinationDescriptionUI(currentSkill, otherSkill, combo.resultSkill);
                 }
                 else
                 {
-                    ClearCombinationState();
+                    pendingCombination = null;
+                    pendingOtherSlot = null;
                 }
+            }
+            else
+            {
+                pendingCombination = null;
+                pendingOtherSlot = null;
             }
         }
         else
         {
-            ClearCombinationState();
+            pendingCombination = null;
+            pendingOtherSlot = null;
         }
 
-        if (!underUISprite.bounds.Contains(pos))
+        // 설명 UI 표시 분기 (조합 > 일반설명 > 숨김)
+        bool insideUnderUI = underUISprite.bounds.Contains(pos);
+        if (pendingCombination != null && pendingOtherSlot != null)
+        {
+            Skill_Data currentSkill = GetSkillDataForCurrentSkill();
+            Skill_Data otherSkill = (pendingOtherSlot != null && pendingOtherSlot.GetSkillIndex() != -1)
+                ? skillDataArray[pendingOtherSlot.GetSkillIndex()]
+                : null;
+
+            if (currentSkill != null && otherSkill != null)
+                ShowCombinationDescriptionUI(currentSkill, otherSkill, pendingCombination.resultSkill);
+        }
+        else if (insideUnderUI)
+        {
+            ShowSkillDescriptionUI(GetSkillDataForCurrentSkill());
+        }
+        else
+        {
+            HideCombinationDescriptionUI();
+        }
+
+        // UnderUI 안/밖에 따른 아이콘 표시 및 범위 오브젝트 관리
+        if (!insideUnderUI)
         {
             spriteRenderer.enabled = false;
             CreateRangeAndUseableRange(clampedPos);
@@ -242,6 +300,7 @@ public class Skill_Drag_System : MonoBehaviour
             DestroyRangeAndUseableRange();
         }
     }
+
 
     private void OnMouseUp()
     {
@@ -567,19 +626,32 @@ public class Skill_Drag_System : MonoBehaviour
 
     private void ApplyCombinedSkill(Skill_Data combinedSkill, UnderUI_Slot_System otherSlot)
     {
-        if (currentSlotData != null && otherSlot != null)
+        if (currentSlotData == null || otherSlot == null || combinedSkill == null)
+            return;
+
+        // 캐논컬 인덱스/인스턴스로 매핑
+        int canonicalIndex = FindCanonicalIndex(combinedSkill);
+        if (canonicalIndex < 0)
         {
-            // 다른 슬롯에 결과 스킬 적용
-            otherSlot.skillIndex = skillDataArray.IndexOf(combinedSkill);
-            otherSlot.slotObject.GetComponent<SpriteRenderer>().sprite = combinedSkill.skillIcon;
-            combinedSkill.isKnow = true;
-
-            // 현재 슬롯은 빈 슬롯으로 설정
-            currentSlotData.skillIndex = -1;
-            currentSlotData.slotObject.GetComponent<SpriteRenderer>().sprite = blankSkillIconSprite;
-
-            DestroyRangeAndUseableRange();
+            Debug.LogError($"[Combine] 캐논컬 인덱스 찾기 실패: {combinedSkill.name}");
+            // 안전하게 빠지되, 범용적으로 빈 슬롯 처리
+            ResetIconToOriginalPosition();
+            return;
         }
+        Skill_Data canonical = skillDataArray[canonicalIndex];
+
+        // 다른 슬롯에 결과 스킬 적용 (캐논컬 기준)
+        otherSlot.skillIndex = canonicalIndex;
+        otherSlot.slotObject.GetComponent<SpriteRenderer>().sprite = canonical.skillIcon;
+
+        // 이제부터 이 스킬을 '앎'
+        canonical.isKnow = true;
+
+        // 현재 슬롯은 빈 슬롯 처리
+        currentSlotData.skillIndex = -1;
+        currentSlotData.slotObject.GetComponent<SpriteRenderer>().sprite = blankSkillIconSprite;
+
+        DestroyRangeAndUseableRange();
     }
 
     // 겹쳐진 스킬 슬롯 검색 (현재 오브젝트와 다른 오브젝트 중 일정 거리 내에 있는 슬롯)
@@ -607,6 +679,47 @@ public class Skill_Drag_System : MonoBehaviour
         }
         return null;
     }
+    // 공통: UI 인스턴스 보장
+    private void EnsureDescriptionUIInstance()
+    {
+        if (combinationDescriptionUIInstance == null && combinationDescriptionUIPrefab != null)
+        {
+            GameObject canvas = GameObject.Find("Canvas");
+            if (canvas != null)
+            {
+                combinationDescriptionUIInstance = Instantiate(combinationDescriptionUIPrefab, canvas.transform);
+            }
+        }
+    }
+
+    // 일반 스킬 설명 표시
+    private void ShowSkillDescriptionUI(Skill_Data skill)
+    {
+        if (skill == null) return;
+        EnsureDescriptionUIInstance();
+        if (combinationDescriptionUIInstance == null) return;
+
+        var uiScript = combinationDescriptionUIInstance.GetComponent<CombinationDescriptionUI>();
+        if (uiScript == null) return;
+
+        // 캐논컬 동기화
+        int idx = FindCanonicalIndex(skill);
+        Skill_Data canonical = (idx >= 0) ? skillDataArray[idx] : skill;
+
+        if (canonical != null && canonical.isKnow)
+        {
+            string name = canonical.skillName;
+            string desc = string.IsNullOrEmpty(canonical.skillscript)
+                ? "No Description."
+                : canonical.skillscript;
+            string dmg = canonical.damage.ToString();
+            uiScript.Setup(name, desc, dmg, canonical.skillIcon);
+        }
+        else
+        {
+            uiScript.Setup("???", "?????", "??", UnknowImage);
+        }
+    }
     // 설명 UI를 생성하고 내용을 설정
     private void ShowCombinationDescriptionUI(Skill_Data currentSkill, Skill_Data otherSkill, Skill_Data resultSkill)
     {
@@ -620,23 +733,21 @@ public class Skill_Drag_System : MonoBehaviour
         }
         if (combinationDescriptionUIInstance != null)
         {
-            // CombinationDescriptionUI 스크립트에 Setup() 메서드를 만들어 둔 것으로 가정합니다.
             var uiScript = combinationDescriptionUIInstance.GetComponent<CombinationDescriptionUI>();
-            string description;
-            string damagetext;
-            if (uiScript != null && resultSkill.isKnow == true)
+            if (uiScript == null) return;
+
+            // 캐논컬로 동기화
+            int idx = FindCanonicalIndex(resultSkill);
+            Skill_Data canonical = (idx >= 0) ? skillDataArray[idx] : resultSkill;
+
+            if (canonical != null && canonical.isKnow)
             {
-                if (resultSkill.skillscript != null)
-                {
-                    description = resultSkill.skillscript;
-                    damagetext = resultSkill.damage.ToString();
-                }
-                else
-                {
-                    description = $"Combine {currentSkill.skillName} and {otherSkill.skillName} to create {resultSkill.skillName}";
-                    damagetext = "";
-                }
-                uiScript.Setup(resultSkill.skillName, description, damagetext, resultSkill.skillIcon);
+                string description = !string.IsNullOrEmpty(canonical.skillscript)
+                    ? canonical.skillscript
+                    : $"Combine {currentSkill.skillName} and {otherSkill.skillName} to create {canonical.skillName}";
+
+                string damagetext = canonical.damage.ToString();
+                uiScript.Setup(canonical.skillName, description, damagetext, canonical.skillIcon);
             }
             else
             {
@@ -652,5 +763,57 @@ public class Skill_Drag_System : MonoBehaviour
             Destroy(combinationDescriptionUIInstance);
             combinationDescriptionUIInstance = null;
         }
+    }
+
+    // 조합 결과 Skill_Data를 skillDataArray/Character 티어 배열 내 "캐논컬 인스턴스" 인덱스로 매핑
+    private int FindCanonicalIndex(Skill_Data sd)
+    {
+        if (sd == null) return -1;
+
+        // 1) 동일 참조가 skillDataArray에 이미 있는지
+        int idx = skillDataArray.IndexOf(sd);
+        if (idx >= 0) return idx;
+
+        // 2) Character의 티어 배열에서 같은 참조 찾기 → 글로벌 인덱스로 변환
+        if (FindSkillIndexInTiers(sd, out int tier, out int local))
+        {
+            int offset = 0;
+            if (tier > 0) offset += (character.tier0Skills?.Length ?? 0);
+            if (tier > 1) offset += (character.tier1Skills?.Length ?? 0);
+            return offset + local; // skillDataArray를 (0→1→2티어 순)로 AddRange 했으니 글로벌 인덱스 = 리스트 인덱스
+        }
+
+        // 3) 마지막으로 이름으로 매칭(동일 SO를 다른 참조로 들고 있을 때)
+        for (int i = 0; i < skillDataArray.Count; i++)
+        {
+            var k = skillDataArray[i];
+            if (k != null && sd != null && k.name == sd.name)
+                return i;
+        }
+
+        return -1;
+    }
+
+    private bool FindSkillIndexInTiers(Skill_Data target, out int tier, out int local)
+    {
+        tier = -1; local = -1;
+        if (character == null || target == null) return false;
+
+        var t0 = character.tier0Skills;
+        if (t0 != null)
+            for (int i = 0; i < t0.Length; i++)
+                if (t0[i] == target) { tier = 0; local = i; return true; }
+
+        var t1 = character.tier1Skills;
+        if (t1 != null)
+            for (int i = 0; i < t1.Length; i++)
+                if (t1[i] == target) { tier = 1; local = i; return true; }
+
+        var t2 = character.tier2Skills;
+        if (t2 != null)
+            for (int i = 0; i < t2.Length; i++)
+                if (t2[i] == target) { tier = 2; local = i; return true; }
+
+        return false;
     }
 }
