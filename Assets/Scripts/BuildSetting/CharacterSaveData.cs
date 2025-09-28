@@ -15,6 +15,7 @@ public class CharacterSaveData
     public int Player_int;
     public int Player_int_level;
     public int Player_NextEXP;
+    public int Player_dust;
 
     public int[] Player_haveSkills;
 

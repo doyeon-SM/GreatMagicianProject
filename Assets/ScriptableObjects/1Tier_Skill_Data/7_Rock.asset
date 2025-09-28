@@ -14,10 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   skillName: Rock
   skillIndex: 7
-  damage: 16
+  damage: 0
   Tier: 1
-  level: 1
-  NeedLevelUP_Gold: 1
+  level: 2
+  NeedLevelUP_Gold: 3
   skillIcon: {fileID: 21300000, guid: 3eb1f01e685416a4c92ca3d2e44f95fb, type: 3}
   rangePrefab: {fileID: 845473151264501715, guid: c3a66ecb6635d5d4487efdde6017a165, type: 3}
   useableRangePrefab: {fileID: 590556380511742590, guid: df2aa2e2add7b8446896c8f9f2289b2f, type: 3}

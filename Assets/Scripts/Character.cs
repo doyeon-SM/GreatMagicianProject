@@ -13,6 +13,7 @@ public class Character : MonoBehaviour
     public int Character_Int = 1;
     public int Character_Int_Level = 1;
     public int[] Character_HaveSkill;
+    public int Character_SkillDust = 0;
 
     public Skill_Data[] tier0Skills; // 0Tier 스킬 배열 (예: 4개)
     public Skill_Data[] tier1Skills;

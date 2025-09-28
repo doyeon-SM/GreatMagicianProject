@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   skillName: Whip(Electricity)
   skillIndex: 37
-  damage: 22
+  damage: 23
   Tier: 2
   level: 1
   NeedLevelUP_Gold: 1

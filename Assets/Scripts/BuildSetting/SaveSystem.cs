@@ -55,6 +55,7 @@ public class SaveSystem : MonoBehaviour
         data.Player_stat = character.Character_Stat;
         data.Player_int = character.Character_Int;
         data.Player_int_level = character.Character_Int_Level;
+        data.Player_dust = character.Character_SkillDust;
 
         data.learnedSkills = new List<SkillSaveData>();
         foreach (var skill in character.tier0Skills)
@@ -138,6 +139,7 @@ public class SaveSystem : MonoBehaviour
         character.Character_Stat = data.Player_stat;
         character.Character_Int = data.Player_int;
         character.Character_Int_Level = data.Player_int_level;
+        character.Character_SkillDust = data.Player_dust;
 
         // 스킬 정보 복원
         int skillIndex = 0;
@@ -191,7 +193,7 @@ public class SaveSystem : MonoBehaviour
             skill.level = savedData.level;
             skill.NeedLevelUP_Gold = savedData.Need_gold;
             skill.isKnow = savedData.Player_know;
-            //skill.UpdateDamage(); // 조합 스킬인 경우 재계산 필요 시
+            skill.UpdateDamage(); // 조합 스킬인 경우 재계산 필요 시
         }
         else
         {

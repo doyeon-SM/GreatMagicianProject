@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   skillName: Lava
   skillIndex: 15
-  damage: 31
+  damage: 0
   Tier: 2
   level: 1
   NeedLevelUP_Gold: 1

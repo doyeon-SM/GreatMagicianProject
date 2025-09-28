@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   skillName: Steam2
   skillIndex: 51
-  damage: 7
+  damage: 0
   Tier: 2
   level: 1
   NeedLevelUP_Gold: 1
