@@ -10,7 +10,7 @@ public class Reset_System : MonoBehaviour
 
     // 각 스킬의 데미지를 저장할 배열 (0티어 전용 초기값)
     [Tooltip("0티어 스킬의 초기 데미지 값. tier0Skills 길이와 맞춰주세요.")]
-    public int[] initialDamages = { 10, 5, 3, 5 };
+    public int[] initialDamages = { 10, 10, 5, 5 };
 
     // 공통 기본 요구량(레벨업 필요 수량). 명시 없으면 1로 초기화
     [Tooltip("레벨업 필요 수량 초기값(모든 티어 공통). 보통 1")]

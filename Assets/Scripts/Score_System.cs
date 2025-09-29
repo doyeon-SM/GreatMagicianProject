@@ -84,11 +84,12 @@ public class Score_System : MonoBehaviour
 
     /// <summary>
     /// 점수에 따른 티어 가중치
+    /// 1티어: 1만점, 2티어: 5만점
     /// </summary>
     private (int w0, int w1, int w2) GetTierWeights(int sc)
     {
-        if (sc <= 1000) return (100, 0, 0);   // 0티어 100%
-        else if (sc <= 10000) return (70, 30, 0);   // 0티어 70%, 1티어 30%
+        if (sc <= 10000) return (100, 0, 0);   // 0티어 100%
+        else if (sc <= 50000) return (70, 30, 0);   // 0티어 70%, 1티어 30%
         else return (40, 35, 25);  // 0티어 40%, 1티어 35%, 2티어 25%
     }
 

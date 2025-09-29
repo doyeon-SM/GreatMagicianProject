@@ -73,6 +73,7 @@ public class SkillUpgradeUI : MonoBehaviour
         {
             if (requiredskillIconImage1) requiredskillIconImage1.sprite = skill.requiredBaseSkills[0].skillIcon;
             if (requiredskillIconImage2) requiredskillIconImage2.sprite = skill.requiredBaseSkills[1].skillIcon;
+            skill.UpdateDamage();
         }
         else
         {

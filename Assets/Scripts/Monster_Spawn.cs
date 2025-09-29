@@ -104,7 +104,7 @@ public class Monster_Spawn : MonoBehaviour
         else
         {
             // (wave % 10) * 10
-            targetSpawnCountThisWave = Mathf.Max(0, (wave % 10) * 10);
+            targetSpawnCountThisWave = Mathf.Max(0, (wave % 10) * 5);
         }
 
         Debug.Log($"[Wave] Start Wave {wave} | BossWave={isBossWave} | target={targetSpawnCountThisWave}");

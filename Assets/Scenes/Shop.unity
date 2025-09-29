@@ -509,7 +509,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cha: {fileID: 3443930130645529466, guid: c892dc471f46e894bb4ad5fbf72dc345, type: 3}
   charactergold: {fileID: 1680891271}
-  tenPullCost: 1000
+  tenPullCost: 10000
+  weightTier0: 70
+  weightTier1: 25
+  weightTier2: 5
   scrollRect: {fileID: 215040947}
   contentRect: {fileID: 1683033539}
   grid: {fileID: 1683033538}

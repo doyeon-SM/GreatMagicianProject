@@ -206,6 +206,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   character: {fileID: 3443930130645529466, guid: c892dc471f46e894bb4ad5fbf72dc345, type: 3}
   save: {fileID: 524345240}
+  initialDamages: 0a0000000a0000000500000005000000
+  defaultNeedLevelUp: 1
 --- !u!114 &77215057
 MonoBehaviour:
   m_ObjectHideFlags: 0

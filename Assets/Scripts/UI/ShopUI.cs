@@ -11,7 +11,7 @@ public class ShopUI : MonoBehaviour
 
     [Header("Gacha Settings")]
     [Tooltip("10연 뽑기 비용(골드)")]
-    public int tenPullCost = 1000;
+    public int tenPullCost = 10000;
 
     [Tooltip("티어 가중치(합계 아무 값이어도 비율만 사용). 예: 70/25/5")]
     public int weightTier0 = 70;

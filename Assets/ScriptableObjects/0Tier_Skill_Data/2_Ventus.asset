@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   skillName: Ventus
   skillIndex: 2
-  damage: 3
+  damage: 5
   Tier: 0
   level: 1
   NeedLevelUP_Gold: 1

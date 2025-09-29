@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: Low_Pressure_Combination
   m_EditorClassIdentifier: 
   baseSkills:
-  - {fileID: 11400000, guid: f79541974eaa9d0499d2ca29b2a40dcd, type: 2}
-  - {fileID: 11400000, guid: 913e169a24362454687a8e4f2b961867, type: 2}
-  resultSkill: {fileID: 11400000, guid: 11fcef8bf9263e84eb6eedd3eba95d25, type: 2}
+  - {fileID: 11400000, guid: 7a339c104bb7d854db1aaf44f8cbdb29, type: 2}
+  - {fileID: 11400000, guid: 796ad30d6187afb4f873484875d3ca14, type: 2}
+  resultSkill: {fileID: 11400000, guid: ce7b77f9117488f42bac5191d09aeb82, type: 2}

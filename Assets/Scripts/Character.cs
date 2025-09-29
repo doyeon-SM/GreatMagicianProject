@@ -52,7 +52,7 @@ public class Character : MonoBehaviour
         var skill = skillArr[index]; // 구조체/클래스 모두 안전: 마지막에 write-back
         int cost = Mathf.Max(1, skill.NeedLevelUP_Gold); // 최소 1 보장
         int have = Character_HaveSkill[globalIndex];
-
+        
         if (have < cost)
         {
             Debug.Log($"[LevelUp] 재료 부족: 필요 {cost}, 보유 {have} (Tier{tier}/{skill.skillName})");
@@ -99,6 +99,7 @@ public class Character : MonoBehaviour
 
         // 레벨 증가
         skill.Skill_LevelUP();
+        
 
         // 5) 결과 반영 (배열에 다시 써주기: struct/class 모두 안전)
         skillArr[index] = skill;
