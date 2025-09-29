@@ -29,6 +29,10 @@ public class Skill_Drag_System : MonoBehaviour
     private bool isDragging = false;  // 드래그 상태를 나타내는 플래그
     private UnderUI_Slot_System currentSlotData;  // 현재 슬롯 데이터 참조
 
+    // 드래그 중 슬로우 관리용
+    private static int s_activeDragCount = 0;
+    private bool slowApplied = false;
+
     void Start()
     {
         skillDataArray.AddRange(character.tier0Skills);
@@ -145,6 +149,14 @@ public class Skill_Drag_System : MonoBehaviour
         spriteRenderer.sortingOrder = 100;
         isDragging = true;
 
+        // 드래그 시작: 슬로우 적용
+        if (!slowApplied)
+        {
+            s_activeDragCount++;
+            slowApplied = true;
+            Time.timeScale = 0.5f;
+        }
+
         DestroyRangeAndUseableRange(); // 드래그 시작 시 초기화
     }
 
@@ -231,6 +243,7 @@ public class Skill_Drag_System : MonoBehaviour
         // 위치 갱신 (드래그 오프셋 + 사거리 제한)
         Vector3 clampedPos = ClampToUseableRange(pos + offset);
         transform.position = clampedPos;
+
 
         // 겹치는 슬롯/조합 후보 계산 (UI는 아래에서 한 번에 처리)
         GameObject overlapping = FindOverlappingSkill();
@@ -324,6 +337,13 @@ public class Skill_Drag_System : MonoBehaviour
             {
                 ReturnIconToOriginalPosition();
             }
+            // 드래그 종료: 슬로우 해제(모든 드래그 끝났을 때만 1로 복귀)
+            if (slowApplied)
+            {
+                s_activeDragCount = Mathf.Max(0, s_activeDragCount - 1);
+                slowApplied = false;
+                if (s_activeDragCount == 0) Time.timeScale = 1f;
+            }
 
             // 후보 변수 초기화
             pendingCombination = null;
@@ -351,6 +371,14 @@ public class Skill_Drag_System : MonoBehaviour
         }
 
         ClearCombinationState();
+
+        // 드래그 종료: 슬로우 해제
+        if (slowApplied)
+        {
+            s_activeDragCount = Mathf.Max(0, s_activeDragCount - 1);
+            slowApplied = false;
+            if (s_activeDragCount == 0) Time.timeScale = 1f;
+        }
     }
     private void ClearCombinationState()
     {
@@ -815,5 +843,26 @@ public class Skill_Drag_System : MonoBehaviour
                 if (t2[i] == target) { tier = 2; local = i; return true; }
 
         return false;
+    }
+    private void OnDisable()
+    {
+        // 드래그 중 비활성화되면 슬로우 복구
+        if (slowApplied)
+        {
+            s_activeDragCount = Mathf.Max(0, s_activeDragCount - 1);
+            slowApplied = false;
+            if (s_activeDragCount == 0) Time.timeScale = 1f;
+        }
+    }
+
+    private void OnDestroy()
+    {
+        // 파괴 시도 동일
+        if (slowApplied)
+        {
+            s_activeDragCount = Mathf.Max(0, s_activeDragCount - 1);
+            slowApplied = false;
+            if (s_activeDragCount == 0) Time.timeScale = 1f;
+        }
     }
 }

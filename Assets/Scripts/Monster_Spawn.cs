@@ -192,8 +192,17 @@ public class Monster_Spawn : MonoBehaviour
         Vector3 pos = new Vector3(Random.Range(spawnXRange.x, spawnXRange.y), spawnY, 0f);
         aliveBoss = Instantiate(bossPrefabs[bossIndex], pos, Quaternion.identity);
 
-        int hp = GetScaledHealthForWave(wave);
-        ApplyHealth(aliveBoss, hp);
+        // 보스의 HP는 프리팹에 설정된 값을 그대로 사용
+        int hp = 0;
+        var monster = aliveBoss.GetComponent<Monster_Base>();
+        if (monster != null)
+        {
+            hp = monster.maxHealth;  // 프리팹에 세팅된 기본 HP
+        }
+        else
+        {
+            hp = GetScaledHealthForWave(wave) * 10;
+        }
 
         var ctx = new MonsterSpawnContext(wave, hp, isBoss: true);
         aliveBoss.SendMessage("OnSpawned", ctx, SendMessageOptions.DontRequireReceiver);
