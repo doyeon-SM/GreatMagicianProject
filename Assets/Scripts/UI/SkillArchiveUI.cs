@@ -252,7 +252,10 @@ public class SkillArchiveUI : MonoBehaviour
         if (globalIndex < 0 || globalIndex >= character.Character_HaveSkill.Length) return 0;
         return character.Character_HaveSkill[globalIndex];
     }
-
+    private int GetMaxLevelByTier(int tier)
+    {
+        return (tier == 0) ? 100 : 50;
+    }
     private bool IsUpgradable(Skill_Data s, int tier, int localIndex)
     {
         if (s == null) return false;
@@ -260,8 +263,8 @@ public class SkillArchiveUI : MonoBehaviour
         // 1) 모르는 스킬은 업그레이드 X
         if (!s.isKnow) return false;
 
-        // 2) (선택) 최대 레벨 체크 로직이 있다면 여기서 걸러주기
-        // if (s.maxLevel > 0 && s.level >= s.maxLevel) return false;
+        // 2) 최대 레벨 체크 로직이 있다면 여기서 걸러주기
+        if (s.level == GetMaxLevelByTier(s.Tier)) return false;
 
         // 3) Need / Have 계산 (SkillUpgradeUI와 동일한 해석)
         int need = Mathf.Max(1, s.NeedLevelUP_Gold);

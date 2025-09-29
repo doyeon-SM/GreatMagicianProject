@@ -8,9 +8,13 @@ public class GameResultUI : MonoBehaviour
 {
     // UI 컴포넌트 (Inspector에서 할당)
     public Text scoreText;     // 점수를 표시할 텍스트
+    public Text waveText;       // 웨이브 표시할 텍스트
+    public Text moneyText;      // 돈 표시할 텍스트
+    public Text EXPText;        // 경험치 표시할 텍스트
 
     public SceneLoader sceneLoader;
     public Score_System scoreSystem;
+    public Monster_Spawn monsterSpawn;
 
     [Header("스크롤 그리드")]
     public ScrollRect scrollRect;               // Scroll View
@@ -19,6 +23,32 @@ public class GameResultUI : MonoBehaviour
     public GameObject skillIconPrefab;          // SkillIconItem 프리팹
     [Range(1, 10)]
     public int columns = 5;                     // 고정 5열
+
+    public void Awake()
+    {
+        // Score_System/SceneLoader가 비어있으면 여기서도 한 번 안전하게 잡아도 됩니다.
+        if (scoreSystem == null) scoreSystem = FindObjectOfType<Score_System>(true);
+        if (sceneLoader == null) sceneLoader = FindObjectOfType<SceneLoader>(true);
+
+        // ===== Monster_Spawn 자동 할당 =====
+        if (monsterSpawn == null)
+        {
+            // 씬 전체에서 컴포넌트 탐색(비활성 포함)
+            monsterSpawn = FindObjectOfType<Monster_Spawn>(true);
+        }
+
+        if (monsterSpawn == null)
+        {
+            // 태그로 재시도: 스포너 오브젝트에 "MonsterSpawner" 태그를 달아두면 확실
+            GameObject tagged = GameObject.FindWithTag("MonsterSpawner");
+            if (tagged != null) monsterSpawn = tagged.GetComponent<Monster_Spawn>();
+        }
+
+        if (monsterSpawn == null)
+        {
+            Debug.LogWarning("[GameResultUI] Monster_Spawn을 씬에서 찾지 못했습니다. Wave 표시는 0으로 대체됩니다.");
+        }
+    }
 
     /// <summary>
     /// GameOver 시 호출하여 결과 UI를 표시합니다.
@@ -31,6 +61,9 @@ public class GameResultUI : MonoBehaviour
 
         if (scoreText != null)
             scoreText.text = "Score: " + scoreSystem.score.ToString();
+        if (waveText != null) waveText.text = "Wave: " + monsterSpawn.currentWave.ToString();
+        if (moneyText != null) moneyText.text = "Money: " + scoreSystem.score.ToString();
+        if (EXPText != null) EXPText.text = "EXP: " + (scoreSystem.score / 100).ToString();
 
         BuildSkillGrid();
     }

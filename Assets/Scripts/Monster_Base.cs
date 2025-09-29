@@ -91,7 +91,7 @@ public class Monster_Base : MonoBehaviour
 
     public void TakeDamage(int damage)
     {
-        int finalDamage = damage + character.Character_Int;
+        int finalDamage = damage + (character.Character_Int / 10);
         currentHealth -= finalDamage;
         Debug.Log("몬스터가 데미지를 받았습니다! 현재 체력: " + currentHealth);
 

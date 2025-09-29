@@ -740,7 +740,7 @@ public class Skill_Drag_System : MonoBehaviour
             string desc = string.IsNullOrEmpty(canonical.skillscript)
                 ? "No Description."
                 : canonical.skillscript;
-            string dmg = canonical.damage.ToString();
+            string dmg = canonical.damage.ToString() + " + " + (character.Character_Int/10).ToString();
             uiScript.Setup(name, desc, dmg, canonical.skillIcon);
         }
         else
@@ -774,7 +774,7 @@ public class Skill_Drag_System : MonoBehaviour
                     ? canonical.skillscript
                     : $"Combine {currentSkill.skillName} and {otherSkill.skillName} to create {canonical.skillName}";
 
-                string damagetext = canonical.damage.ToString();
+                string damagetext = canonical.damage.ToString() + " + " + (character.Character_Int / 10).ToString();
                 uiScript.Setup(canonical.skillName, description, damagetext, canonical.skillIcon);
             }
             else

@@ -48,11 +48,22 @@ public class Character : MonoBehaviour
             return;
         }
 
-        // 2) 비용 확인: NeedLevelUP_Gold == 필요한 조각 수
-        var skill = skillArr[index]; // 구조체/클래스 모두 안전: 마지막에 write-back
+        // 만렙 정의: 0티어=100, 1티어 이상=50
+        int maxLevel = (tier == 0) ? 100 : 50;
+
+        // 스킬 참조
+        var skill = skillArr[index];
+
+        // 이미 만렙?
+        if (skill.level >= maxLevel)
+        {
+            Debug.Log($"[LevelUp] 이미 만렙입니다. (Tier{tier}/{skill.skillName}, Lv.{skill.level}/{maxLevel})");
+            return;
+        }
+
+        // 2) 비용 확인 (NeedLevelUP_Gold == 필요한 조각 수)
         int cost = Mathf.Max(1, skill.NeedLevelUP_Gold); // 최소 1 보장
         int have = Character_HaveSkill[globalIndex];
-        
         if (have < cost)
         {
             Debug.Log($"[LevelUp] 재료 부족: 필요 {cost}, 보유 {have} (Tier{tier}/{skill.skillName})");
@@ -62,53 +73,70 @@ public class Character : MonoBehaviour
         // 3) 소비(조각 차감)
         Character_HaveSkill[globalIndex] -= cost;
 
-        // 4) 성장 처리 (기존 규칙 유지: 10레벨 단위 큰 상승, 그 외 +1)
+        // 현재 레벨(업그레이드 전)
         int prevLevel = skill.level;
+        bool crossingTen = (prevLevel % 10 == 9); // 9->10, 19->20, ...
 
+        // 4) 성장 처리
+        //  - 기본 데미지 증가: 0티어 +1 / 1티어 이상 +5
         if (tier == 0)
         {
-            if (prevLevel > 0 && prevLevel % 10 == 0)
+            skill.damage += 1;
+        }
+        else
+        {
+            skill.damage += 5;
+        }
+
+        //  - 10레벨 단위 보너스
+        if (crossingTen)
+        {
+            if (tier == 0)
             {
-                // 10,20,30...에서 강화 → 데미지 2배 & 비용 큰 폭 증가
-                skill.damage *= 2;
-                skill.NeedLevelUP_Gold += (prevLevel / 10) * 10;
+                // 0티어: 데미지 *2
+                skill.damage = Mathf.RoundToInt(skill.damage * 2f);
             }
             else
             {
-                // 그 외 구간 → 데미지 +1 & 비용 소폭 증가
-                skill.damage += 1;
-                skill.NeedLevelUP_Gold += 2;
+                // 1티어 이상: effect_Value, AreaTime이 0이 아닐 때 각각 *1.2
+                if (skill.Effect_Value != 0f) skill.Effect_Value *= 1.2f;
+                if (skill.AreaTime != 0f) skill.AreaTime *= 1.2f;
+            }
+        }
+
+        // 5) 필요 골드(조각) 갱신 - 다음 레벨 요구치 규칙
+        if (tier == 0)
+        {
+            // 0티어: 레벨업마다 +2, 9->10 등 넘어갈 때 *2
+            skill.NeedLevelUP_Gold += 2;
+            if (crossingTen)
+            {
+                skill.NeedLevelUP_Gold = Mathf.Max(1, skill.NeedLevelUP_Gold * 2);
             }
         }
         else
         {
-            // 1t 이상 스킬 강화
-            if (prevLevel > 0 && prevLevel % 10 == 0)
+            // 1티어 이상: 레벨업마다 +5, 9->10 등 넘어갈 때 +10
+            skill.NeedLevelUP_Gold += 5;
+            if (crossingTen)
             {
-                // 10,20,30...에서 강화 → 데미지 2배 & 비용 큰 폭 증가
-                skill.damage *= 2;
-                skill.NeedLevelUP_Gold += (prevLevel / 10) * 10;
-            }
-            else
-            {
-                // 그 외 구간 → 데미지 +1 & 비용 소폭 증가
-                skill.damage += 5;
-                skill.NeedLevelUP_Gold += 1;
+                skill.NeedLevelUP_Gold += 10;
             }
         }
 
-        // 레벨 증가
+        // 6) 레벨 증가 (최대치 보정)
         skill.Skill_LevelUP();
-        
+        if (skill.level > maxLevel) skill.level = maxLevel;
 
-        // 5) 결과 반영 (배열에 다시 써주기: struct/class 모두 안전)
+        // 7) 결과 반영
         skillArr[index] = skill;
 
         Debug.Log($"[LevelUp] (Tier{tier}) {skill.skillName} 강화 완료! " +
                   $"소비:{cost}, 잔량:{Character_HaveSkill[globalIndex]}, " +
-                  $"레벨:{skill.level}, 다음요구치:{skill.NeedLevelUP_Gold}, 데미지:{skill.damage}");
-
+                  $"레벨:{skill.level}/{maxLevel}, 다음요구치:{skill.NeedLevelUP_Gold}, " +
+                  $"데미지:{skill.damage}, 효과값:{skill.Effect_Value}, 지속:{skill.AreaTime}");
     }
+
     // 헬퍼: 티어 배열 접근
     private Skill_Data[] GetTierArray(int tier)
     {
@@ -150,7 +178,7 @@ public class Character : MonoBehaviour
                 Character_Level++;
                 Character_Stat += 2;
                 score_tmp -= Character_NextEXP;
-                Character_NextEXP = Mathf.RoundToInt(Character_NextEXP * 1.5f);
+                Character_NextEXP = Mathf.RoundToInt(Character_NextEXP * 1.1f);
                 Debug.Log("레벨업했습니다" + Character_Level + "||" + Character_EXP + "/" + Character_NextEXP);
             }
             else
@@ -164,7 +192,7 @@ public class Character : MonoBehaviour
 
     public void CharacterStatManaUP()
     {
-        if (Character_Stat > 5 && Character_Mana > 1.0f)
+        if (Character_Stat > 5 && Character_Mana > 1.0f && Character_Level >= 10)
         {
             Character_Mana -= 0.1f;
             Character_Stat -= 5;
@@ -180,7 +208,7 @@ public class Character : MonoBehaviour
         if(Character_Stat > 0)
         {
             Character_Stat--;
-            WallHP += 10;
+            WallHP += 5;
         }
         else
         {
@@ -193,13 +221,13 @@ public class Character : MonoBehaviour
         if(Character_Stat > 0)
         {
             Character_Stat--;
-            if (Character_Int_Level % 10 == 9)
+            if (Character_Int_Level % 10 == 0)
             {
-                Character_Int += 10;
+                Character_Int *= 2;
             }
             else
             {
-                Character_Int++;
+                Character_Int += 2;
             }
             Character_Int_Level++;
         }

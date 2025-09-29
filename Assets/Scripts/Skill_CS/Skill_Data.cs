@@ -122,15 +122,6 @@ public class Skill_Data : ScriptableObject
     public void Skill_LevelUP()
     {
         level++;
-        if (level % 10 != 0) return;    //10레벨 단위 스킬 효과 증가
-        if (AreaTime != 0f)
-        {
-            AreaTime += 5f;
-        }
-        if(Effect_Value != 0f)
-        {
-            Effect_Value += 1f;
-        }
     }
     public void ApplyKnockback(Monster_Base monster, Vector3 origin)
     {

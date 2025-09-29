@@ -73,7 +73,7 @@ public class Reset_System : MonoBehaviour
         character.WallHP = 30;
         character.Character_Gold = 0;
         character.Character_Stat = 0;
-        character.Character_Int = 1;
+        character.Character_Int = 10;
         character.Character_Int_Level = 1;
         character.Character_SkillDust = 0;
 

@@ -60,7 +60,10 @@ public class SkillUpgradeUI : MonoBehaviour
 
         RefreshUI();
     }
-
+    private int GetMaxLevelByTier(int tier)
+    {
+        return (tier == 0) ? 100 : 50;
+    }
     private void RefreshUI()
     {
         if (_character == null || _getSkill == null) return;
@@ -69,6 +72,7 @@ public class SkillUpgradeUI : MonoBehaviour
         if (skill == null) return;
 
         if (skillIconImage) skillIconImage.sprite = skill.skillIcon;
+
         if (_tier >= 1)
         {
             if (requiredskillIconImage1) requiredskillIconImage1.sprite = skill.requiredBaseSkills[0].skillIcon;
@@ -80,9 +84,14 @@ public class SkillUpgradeUI : MonoBehaviour
             if (requiredskillIconImage1) requiredskillIconImage1.gameObject.SetActive(false);
             if (requiredskillIconImage2) requiredskillIconImage2.gameObject.SetActive(false);
         }
+
         if (skillNameText) skillNameText.text = skill.skillName;
         if (tierText) tierText.text = $"Tier {_tier}";
-        if (levelText) levelText.text = $"Lv. {skill.level}";
+
+        // 만렙 계산 및 표기
+        int maxLevel = GetMaxLevelByTier(_tier);
+        if (levelText) levelText.text = $"Lv. {skill.level}/{maxLevel}";
+
         if (damageText) damageText.text = $"Damage: {skill.damage}";
         if (descText) descText.text = string.IsNullOrEmpty(skill.skillscript) ? "" : skill.skillscript;
 
@@ -93,16 +102,19 @@ public class SkillUpgradeUI : MonoBehaviour
                    ? _character.Character_HaveSkill[_globalIndex]
                    : 0;
 
-        if (needText) needText.text = $"Need: {need}";
+        // 만렙이면 필요표시를 MAX로
+        if (needText) needText.text = (skill.level >= maxLevel) ? "Need: MAX" : $"Need: {need}";
         if (haveText) haveText.text = $"Have: {have}";
+
         if (skilldustText && _tier >= 1) skilldustText.text = $"Dust: {_character.Character_SkillDust}";
-        else skilldustText.gameObject.SetActive(false);
+        else if (skilldustText) skilldustText.gameObject.SetActive(false);
 
-        // 보유 부족 시 버튼 비활성/상태 처리
-        if (upgradeButton) upgradeButton.interactable = (have >= need);
+        // 보유 부족/만렙 시 버튼 비활성화
+        if (upgradeButton) upgradeButton.interactable = (skill.level < maxLevel) && (have >= need);
 
-        if (combineButton) combineButton.gameObject.SetActive(_tier>=1);
+        if (combineButton) combineButton.gameObject.SetActive(_tier >= 1);
         if (breakdownButton) breakdownButton.gameObject.SetActive(_tier >= 1);
+
         if (_tier >= 1 && requiredskillhaveText1 && requiredskillhaveText2)
         {
             int baseHave1 = 0;
@@ -110,7 +122,6 @@ public class SkillUpgradeUI : MonoBehaviour
 
             if (skill.requiredBaseSkills != null)
             {
-                // 첫 번째 베이스
                 if (skill.requiredBaseSkills[0] != null &&
                     FindSkillIndex(skill.requiredBaseSkills[0], out int bTier0, out int bLocal0))
                 {
@@ -118,7 +129,6 @@ public class SkillUpgradeUI : MonoBehaviour
                     baseHave1 = GetHave(g0);
                 }
 
-                // 두 번째 베이스
                 if (skill.requiredBaseSkills[1] != null &&
                     FindSkillIndex(skill.requiredBaseSkills[1], out int bTier1, out int bLocal1))
                 {
@@ -137,22 +147,29 @@ public class SkillUpgradeUI : MonoBehaviour
             if (requiredskillhaveText1) requiredskillhaveText1.gameObject.SetActive(false);
             if (requiredskillhaveText2) requiredskillhaveText2.gameObject.SetActive(false);
         }
-
     }
+
 
     private void HandleUpgrade()
     {
         if (_character == null) return;
 
-        // 요구사항: Character.cs 속 LevelUpSkill(tier, index) 사용
+        var skill = _getSkill?.Invoke(_tier, _localIndex);
+        if (skill == null) return;
+
+        int maxLevel = GetMaxLevelByTier(_tier);
+        if (skill.level >= maxLevel)
+        {
+            Debug.Log("[Upgrade] 만렙입니다. 업그레이드 불가.");
+            RefreshUI();
+            return;
+        }
+
         _character.LevelUpSkill(_tier, _localIndex);
-
-        // 강화 후 UI 갱신
         RefreshUI();
-
-        // 도감 등 상위 뷰도 갱신하고 싶을 때
         _onUpgraded?.Invoke();
     }
+
     private void HandleCombine()
     {
         if (_character == null) return;

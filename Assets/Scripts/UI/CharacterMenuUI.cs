@@ -14,6 +14,8 @@ public class CharacterMenuUI : MonoBehaviour
     public Text CharacterWallHPText;
     public Text CharacterStatPointText;
 
+    public Button CharacterManaUpgradeButton;
+
     public void Start()
     {
         UpdateUI();
@@ -30,5 +32,6 @@ public class CharacterMenuUI : MonoBehaviour
             CharacterWallHPText.text = "WallHP: " + cha.WallHP.ToString();
             CharacterStatPointText.text = "º¸À¯ÇÑ ½ºÅÈ: " + cha.Character_Stat.ToString();
         }
+        if (CharacterManaUpgradeButton != null) CharacterManaUpgradeButton.gameObject.SetActive(cha.Character_Level >= 10 && cha.Character_Stat >= 5);
     }
 }

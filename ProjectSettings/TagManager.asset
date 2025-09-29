@@ -9,6 +9,7 @@ TagManager:
   - AroundCenter
   - AroundProjectile
   - Create
+  - MonsterSpawner
   layers:
   - Default
   - TransparentFX
