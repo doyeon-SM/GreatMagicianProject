@@ -28,6 +28,11 @@ public class Skill_Drag_System : MonoBehaviour
     private UnderUI_Slot_System pendingOtherSlot;
     private bool isDragging = false;  // 드래그 상태를 나타내는 플래그
     private UnderUI_Slot_System currentSlotData;  // 현재 슬롯 데이터 참조
+    
+    // === 안내 UI 프리팹 & 인스턴스 ===
+    [Header("Learned Skill Info UI")]
+    public GameObject informationCombinedSkillUIPrefab; // 미리 만든 프리팹 할당
+    private GameObject informationCombinedSkillUIInstance;
 
     // 드래그 중 슬로우 관리용
     private static int s_activeDragCount = 0;
@@ -342,13 +347,18 @@ public class Skill_Drag_System : MonoBehaviour
             {
                 s_activeDragCount = Mathf.Max(0, s_activeDragCount - 1);
                 slowApplied = false;
-                if (s_activeDragCount == 0) Time.timeScale = 1f;
+
+                if (s_activeDragCount == 0 && !InformationCombinedSkillUI.IsModalPause)
+                {
+                    Time.timeScale = 1f;
+                }
             }
 
             // 후보 변수 초기화
             pendingCombination = null;
             pendingOtherSlot = null;
         }
+        
     }
     private void OnRelease()
     {
@@ -377,7 +387,11 @@ public class Skill_Drag_System : MonoBehaviour
         {
             s_activeDragCount = Mathf.Max(0, s_activeDragCount - 1);
             slowApplied = false;
-            if (s_activeDragCount == 0) Time.timeScale = 1f;
+
+            if (s_activeDragCount == 0 && !InformationCombinedSkillUI.IsModalPause)
+            {
+                Time.timeScale = 1f;
+            }
         }
     }
     private void ClearCombinationState()
@@ -673,6 +687,7 @@ public class Skill_Drag_System : MonoBehaviour
         otherSlot.slotObject.GetComponent<SpriteRenderer>().sprite = canonical.skillIcon;
 
         // 이제부터 이 스킬을 '앎'
+        bool wasKnown = canonical.isKnow;
         canonical.isKnow = true;
 
         // 현재 슬롯은 빈 슬롯 처리
@@ -680,6 +695,10 @@ public class Skill_Drag_System : MonoBehaviour
         currentSlotData.slotObject.GetComponent<SpriteRenderer>().sprite = blankSkillIconSprite;
 
         DestroyRangeAndUseableRange();
+        if (!wasKnown)
+        {
+            ShowCombinedSkillInfoUI(canonical);
+        }
     }
 
     // 겹쳐진 스킬 슬롯 검색 (현재 오브젝트와 다른 오브젝트 중 일정 거리 내에 있는 슬롯)
@@ -851,7 +870,11 @@ public class Skill_Drag_System : MonoBehaviour
         {
             s_activeDragCount = Mathf.Max(0, s_activeDragCount - 1);
             slowApplied = false;
-            if (s_activeDragCount == 0) Time.timeScale = 1f;
+
+            if (s_activeDragCount == 0 && !InformationCombinedSkillUI.IsModalPause)
+            {
+                Time.timeScale = 1f;
+            }
         }
     }
 
@@ -862,7 +885,53 @@ public class Skill_Drag_System : MonoBehaviour
         {
             s_activeDragCount = Mathf.Max(0, s_activeDragCount - 1);
             slowApplied = false;
-            if (s_activeDragCount == 0) Time.timeScale = 1f;
+
+            if (s_activeDragCount == 0 && !InformationCombinedSkillUI.IsModalPause)
+            {
+                Time.timeScale = 1f;
+            }
         }
     }
+
+    private void ShowCombinedSkillInfoUI(Skill_Data learnedSkill)
+    {
+        if (informationCombinedSkillUIPrefab == null)
+        {
+            Debug.LogError("[InfoUI] informationCombinedSkillUIPrefab 가 비어있습니다. 인스펙터에 할당하세요.");
+            return;
+        }
+
+        // 기존 인스턴스가 떠 있다면 정리 (중복 방지)
+        if (informationCombinedSkillUIInstance != null)
+        {
+            Destroy(informationCombinedSkillUIInstance);
+            informationCombinedSkillUIInstance = null;
+        }
+
+        // Canvas 찾기
+        GameObject canvas = GameObject.Find("Canvas");
+        Transform parent = canvas != null ? canvas.transform : null;
+
+        informationCombinedSkillUIInstance = Instantiate(informationCombinedSkillUIPrefab, parent);
+
+        // 타임스케일 저장 → 0으로 멈춤
+        float prevScale = Time.timeScale;
+        InformationCombinedSkillUI.IsModalPause = true;
+
+        Time.timeScale = 0f;
+
+        // 세팅
+        var ui = informationCombinedSkillUIInstance.GetComponent<InformationCombinedSkillUI>();
+        if (ui != null)
+        {
+            string skillName = learnedSkill != null ? learnedSkill.skillName : "Unknown Skill";
+            Sprite icon = learnedSkill != null ? learnedSkill.skillIcon : null;
+            ui.Setup(skillName, icon, prevScale);
+        }
+        else
+        {
+            Debug.LogError("[InfoUI] InformationCombinedSkillUI 컴포넌트를 프리팹에 붙이세요.");
+        }
+    }
+
 }
