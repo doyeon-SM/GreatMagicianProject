@@ -418,11 +418,27 @@ public class Skill_Drag_System : MonoBehaviour
 
     private void ApplySkillEffect()
     {
-        Skill_Range_System rangeHandler = instantiatedRange.GetComponent<Skill_Range_System>();
-        if (rangeHandler != null)
+        // 항상 유효한(사거리 내) 시전 좌표를 사용
+        Vector3 castPos = GetValidCastPosition();
+
+        if (instantiatedRange != null)
         {
-            rangeHandler.skillData = GetSkillDataForCurrentSkill();
-            rangeHandler.ApplySkillEffect(GetMouseWorldPosition());
+            Skill_Range_System rangeHandler = instantiatedRange.GetComponent<Skill_Range_System>();
+            if (rangeHandler != null)
+            {
+                rangeHandler.skillData = GetSkillDataForCurrentSkill();
+                rangeHandler.ApplySkillEffect(castPos);
+            }
+        }
+        else
+        {
+            // 혹시라도 range가 없더라도 안전하게 처리
+            Skill_Data sd = GetSkillDataForCurrentSkill();
+            if (sd != null)
+            {
+                // range 없이 직접 처리한다면, 여기서도 castPos 사용
+                // 예: Instantiate(sd.attackPrefab, castPos, Quaternion.identity);
+            }
         }
 
         DestroyRangeAndUseableRange(); // 범위와 사거리 오브젝트 제거
@@ -447,6 +463,48 @@ public class Skill_Drag_System : MonoBehaviour
         }
 
         return mousePosition;
+    }
+    // 마우스 위치를 스킬 사거리(UseableRange) 내로 강제 클램프해서 '실제로 시전할 좌표'를 반환
+    private Vector3 GetValidCastPosition()
+    {
+        // 기본: 현재 마우스 월드 좌표
+        Vector3 mouse = GetMouseWorldPosition();
+        mouse.z = 0f;
+
+        Skill_Data skill = GetSkillDataForCurrentSkill();
+        if (skill == null) return mouse;
+
+        // 1) Around 타입은 고정 중심 사용
+        if (skill.skillType == Skill_Data.SkillType.Around)
+        {
+            // 고정 중심 (현재 코드 기준)
+            return new Vector3(0f, -8f, 0f);
+        }
+
+        // 2) 사거리 오브젝트가 없으면(이상 케이스) 그냥 마우스 좌표 사용
+        if (instantiatedUseableRange == null)
+            return mouse;
+
+        // 3) 원형 사거리 기준으로 클램프
+        Vector3 center = instantiatedUseableRange.transform.position;
+        float radius = 0f;
+
+        var cc = instantiatedUseableRange.GetComponent<CircleCollider2D>();
+        if (cc != null)
+            radius = cc.radius * instantiatedUseableRange.transform.localScale.x;
+
+        // 안정적 안쪽 배치(콜라이더 경계 살짝 안쪽)
+        const float innerPadding = 0.01f;
+        float maxDist = Mathf.Max(radius - innerPadding, 0f);
+
+        Vector3 dir = mouse - center;
+        float dist = dir.magnitude;
+
+        // 사거리 안이면 그대로, 밖이면 경계로 보정
+        if (dist <= maxDist || dist == 0f)
+            return mouse;
+
+        return center + dir.normalized * maxDist;
     }
 
     private void CreateRangeAndUseableRange(Vector3 mousePosition)

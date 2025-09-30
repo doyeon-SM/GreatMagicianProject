@@ -215,42 +215,50 @@ public class Skill_Range_System : MonoBehaviour
     }
     public void ApplySkillEffect(Vector3 mousePosition)
     {
-
-        if (skillData != null)
-        {
-            switch (skillData.skillType.ToString())
-            {
-                case "Projectile":
-                case "Chain":
-                    LaunchProjectile(mousePosition);
-                    break;
-                case "Area":
-                    CreateArea(mousePosition);
-                    break;
-                case "Create":
-                case "Summon":
-                    CreateSkillPrefab(mousePosition);
-                    break;
-                case "Scattered":
-                    for(int i=0;i<5;i++)
-                    {
-                        Vector3 randomOffset = new Vector3(Random.Range(-1f, 1f), 0f, 0f);
-                        LaunchProjectile(mousePosition + randomOffset);
-                    }
-                    break;
-                case "Around":
-                    CreateAroundSkill();
-                    break;
-                default:        //AraeOfEffect, StraightLine
-                    ApplyDamageToMonsters();
-                    break;
-            }  
-        }
-        else
+        if (skillData == null)
         {
             Debug.LogError("SkillData is not assigned.");
+            return;
+        }
+
+        switch (skillData.skillType.ToString())
+        {
+            case "Projectile":
+            case "Chain":
+                LaunchProjectile(mousePosition);
+                break;
+
+            case "Area":
+                CreateArea(mousePosition);
+                break;
+
+            case "Create":
+            case "Summon":
+                CreateSkillPrefab(mousePosition);
+                break;
+
+            case "Scattered":
+                for (int i = 0; i < 5; i++)
+                {
+                    Vector3 randomOffset = new Vector3(Random.Range(-1f, 1f), 0f, 0f);
+                    LaunchProjectile(mousePosition + randomOffset);
+                }
+                break;
+
+            case "Around":
+                CreateAroundSkill();
+                break;
+
+            case "StraightLine":   // ★ 추가: 직선형은 캐스트 위치로 다시 조준 후 타격
+                AimAndApplyStraightLine(mousePosition);
+                break;
+
+            default:               // AreaOfEffect 등
+                ApplyDamageToMonsters();
+                break;
         }
     }
+
     private void LaunchProjectile(Vector3 mousePosition)
     {
         if (skillData != null && skillData.attackPrefab != null)
@@ -394,5 +402,25 @@ public class Skill_Range_System : MonoBehaviour
                 SCreate.Heal_Summon(skillData.damage);
             }
         }
+    }
+    private void AimAndApplyStraightLine(Vector3 castPos)
+    {
+        // 드래그 시스템과 동일한 ‘아랫변 중앙’ 기준점
+        Vector3 bottomCenter = new Vector3(0f, -8f, 0f);
+
+        // 이 Range 오브젝트(직사각형 프리팹)가 바로 회전/적용의 주체
+        transform.position = bottomCenter;
+
+        Vector3 dir = castPos - bottomCenter;
+        if (dir.sqrMagnitude < 0.0001f)
+        {
+            dir = Vector3.right; // 방어적: 0벡터면 오른쪽으로
+        }
+
+        float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+        transform.rotation = Quaternion.Euler(0f, 0f, angle);
+
+        // 현재 콜라이더에 겹쳐진 대상들에게 적용
+        ApplyDamageToMonsters();
     }
 }
