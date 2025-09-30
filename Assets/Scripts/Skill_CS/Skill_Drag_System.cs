@@ -818,11 +818,13 @@ public class Skill_Drag_System : MonoBehaviour
                 ? "No Description."
                 : canonical.skillscript;
             string dmg = canonical.damage.ToString() + " + " + (character.Character_Int/10).ToString();
-            uiScript.Setup(name, desc, dmg, canonical.skillIcon);
+            string eff = canonical.skillEffect.ToString();
+            string type = canonical.skillType.ToString();
+            uiScript.Setup(name, desc, dmg, canonical.skillIcon, canonical.Effect_Value, canonical.AreaTime, eff, type);
         }
         else
         {
-            uiScript.Setup("???", "?????", "??", UnknowImage);
+            uiScript.Setup("???", "?????", "??", UnknowImage,0,0,"??","??");
         }
     }
     // 설명 UI를 생성하고 내용을 설정
@@ -852,11 +854,13 @@ public class Skill_Drag_System : MonoBehaviour
                     : $"Combine {currentSkill.skillName} and {otherSkill.skillName} to create {canonical.skillName}";
 
                 string damagetext = canonical.damage.ToString() + " + " + (character.Character_Int / 10).ToString();
-                uiScript.Setup(canonical.skillName, description, damagetext, canonical.skillIcon);
+                string eff = canonical.skillEffect.ToString();
+                string type = canonical.skillType.ToString();
+                uiScript.Setup(canonical.skillName, description, damagetext, canonical.skillIcon, canonical.Effect_Value, canonical.AreaTime, eff, type);
             }
             else
             {
-                uiScript.Setup("???", "?????", "??", UnknowImage);
+                uiScript.Setup("???", "?????", "??", UnknowImage,0,0,"??","??");
             }
         }
     }
@@ -869,6 +873,8 @@ public class Skill_Drag_System : MonoBehaviour
             combinationDescriptionUIInstance = null;
         }
     }
+
+
 
     // 조합 결과 Skill_Data를 skillDataArray/Character 티어 배열 내 "캐논컬 인스턴스" 인덱스로 매핑
     private int FindCanonicalIndex(Skill_Data sd)

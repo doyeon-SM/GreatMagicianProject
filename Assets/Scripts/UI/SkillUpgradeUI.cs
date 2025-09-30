@@ -23,6 +23,9 @@ public class SkillUpgradeUI : MonoBehaviour
     public Text skilldustText;
     public Text requiredskillhaveText1;
     public Text requiredskillhaveText2;
+    public Text skillEffectText;
+    public Text skillAreaTimeText;
+    public Text skillElementText;
 
 
     private Character _character;
@@ -92,8 +95,20 @@ public class SkillUpgradeUI : MonoBehaviour
         int maxLevel = GetMaxLevelByTier(_tier);
         if (levelText) levelText.text = $"Lv. {skill.level}/{maxLevel}";
 
-        if (damageText) damageText.text = $"Damage: {skill.damage}";
+        if (damageText) 
+        {
+            string dam;
+            if (skill.skillType == Skill_Data.SkillType.Create || skill.skillType == Skill_Data.SkillType.Summon) dam = "HP: ";
+            else dam = "Damage: ";
+            damageText.text = $"{dam}{skill.damage}"; 
+        }
         if (descText) descText.text = string.IsNullOrEmpty(skill.skillscript) ? "" : skill.skillscript;
+
+        if (skillEffectText && skill.Effect_Value > 0) skillEffectText.text = $"{skilleffecttext(skill.skillEffect)}{skill.Effect_Value}";
+        else skillEffectText.gameObject.SetActive(false);
+        if (skillAreaTimeText && skill.AreaTime > 0) skillAreaTimeText.text = $"지속시간: {skill.AreaTime}초";
+        else skillAreaTimeText.gameObject.SetActive(false);
+        if (skillElementText) skillElementText.text = $"Element: {skill.skillElement}";
 
         int need = Mathf.Max(1, skill.NeedLevelUP_Gold);
         int have = (_character.Character_HaveSkill != null &&
@@ -102,8 +117,12 @@ public class SkillUpgradeUI : MonoBehaviour
                    ? _character.Character_HaveSkill[_globalIndex]
                    : 0;
 
-        // 만렙이면 필요표시를 MAX로
-        if (needText) needText.text = (skill.level >= maxLevel) ? "Need: MAX" : $"Need: {need}";
+        // 만렙이면 필요표시를 MAX
+        if (needText) 
+        {
+            needText.text = $"{have} / ";
+            needText.text += (skill.level >= maxLevel) ? "MAX" : $"{need}"; 
+        }
         if (haveText) haveText.text = $"Have: {have}";
 
         if (skilldustText && _tier >= 1) skilldustText.text = $"Dust: {_character.Character_SkillDust}";
@@ -149,6 +168,24 @@ public class SkillUpgradeUI : MonoBehaviour
         }
     }
 
+    private string skilleffecttext(Skill_Data.SkillEffect eff)
+    {
+        switch(eff)
+        {
+            case Skill_Data.SkillEffect.Knockback:
+                return "넉백량: ";
+            case Skill_Data.SkillEffect.Fear:
+                return "공포 지속시간: ";
+            case Skill_Data.SkillEffect.Burn:
+                return "화상 지속시간: ";
+            case Skill_Data.SkillEffect.Posion:
+                return "독 지속시간: ";
+            case Skill_Data.SkillEffect.Gravity:
+                return "중력: ";
+            default:
+                return "???";
+        }
+    }
 
     private void HandleUpgrade()
     {

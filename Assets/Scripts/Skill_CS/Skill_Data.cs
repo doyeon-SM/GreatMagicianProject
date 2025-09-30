@@ -222,17 +222,17 @@ public class Skill_Data : ScriptableObject
     public void ApplyBurn(Monster_Base monster)
     {
         if (monster == null) return;
-        int i = damage / 10;
-        Effect_Value = damage;
-        monster.ApplyContinuousDamage(Effect_Value, i);
+        float burnapplytime = Effect_Value;
+        int burnapplydamage = damage / 10;
+        monster.ApplyContinuousDamage(burnapplytime, burnapplydamage);
         monster.ApplyElement("Ignis");
     }
     public void ApplyPosion(Monster_Base monster)
     {
         if (monster == null) return;
-        int i = damage / 10;
-        Effect_Value = damage;
-        monster.ApplyContinuousDamage(Effect_Value, i);
+        float posionapplytime = Effect_Value;
+        int posionapplydamage = damage / 10;
+        monster.ApplyContinuousDamage(posionapplytime, posionapplydamage);
         monster.ApplyElement("Terra");
     }
 
