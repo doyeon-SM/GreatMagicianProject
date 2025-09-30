@@ -50,6 +50,19 @@ public class Monster_Spawn : MonoBehaviour
     [SerializeField] private bool isBossWave;              // 보스 웨이브 여부
     [SerializeField] private GameObject aliveBoss;         // 현재 살아있는 보스 인스턴스
 
+    [Header("Story Mode (Scripted)")]
+    public bool useScriptedWaves = false;
+    public float scriptedWaveDuration = 15f;
+
+    [System.Serializable]
+    public class ScriptedSpawn { public GameObject prefab; public int count = 1; public float hpMultiplier = 1f; }
+    [System.Serializable]
+    public class ScriptedWave { public List<ScriptedSpawn> spawns = new List<ScriptedSpawn>(); }
+
+    // 런타임 진행용 큐
+    private List<ScriptedWave> _scriptedWaves;
+    private List<ScriptedSpawn> _currentWaveSpawns; // 진행 중 웨이브의 잔여 스폰(작업용 복제)
+
     void Start()
     {
         BeginWave(currentWave);
@@ -57,30 +70,46 @@ public class Monster_Spawn : MonoBehaviour
 
     void Update()
     {
+        if (useScriptedWaves)
+        {
+            // 스토리 웨이브 진행
+            waveTimer += Time.deltaTime;
+
+            if (targetSpawnCountThisWave > 0 && spawnedThisWave < targetSpawnCountThisWave)
+            {
+                float expectedSpawnCount = Mathf.Floor((waveTimer / waveDuration) * targetSpawnCountThisWave);
+                while (spawnedThisWave < expectedSpawnCount)
+                {
+                    SpawnOneFromScripted(); // 라운드 로빈으로 하나씩
+                    spawnedThisWave++;
+                }
+            }
+
+            if (waveTimer >= waveDuration)
+            {
+                NextWave(); // 다음 스크립트 웨이브
+            }
+            return; // 스토리 모드일 땐 여기서 반환
+        }
+
+        // ===== 기존 일반 모드 =====
         if (isBossWave)
         {
-            // 보스가 처치되어야만 다음 웨이브
             if (aliveBoss == null)
-            {
                 NextWave();
-            }
             return;
         }
 
-        // 일반 웨이브 진행
         waveTimer += Time.deltaTime;
-
-        // 10초 내에 목표 수만큼 균등 분배 소환
         if (targetSpawnCountThisWave > 0 && spawnedThisWave < targetSpawnCountThisWave)
         {
             float expectedSpawnCount = Mathf.Floor((waveTimer / waveDuration) * targetSpawnCountThisWave);
             while (spawnedThisWave < expectedSpawnCount)
             {
-                SpawnNormalRandom(); // 랜덤 변종 소환
+                SpawnNormalRandom();
                 spawnedThisWave++;
             }
         }
-
         if (waveTimer >= waveDuration)
         {
             NextWave();
@@ -93,7 +122,46 @@ public class Monster_Spawn : MonoBehaviour
         spawnedThisWave = 0;
         aliveBoss = null;
 
-        // 보스 웨이브 판단(10, 20, 30...)
+        if (useScriptedWaves)
+        {
+            // 스토리: 보스 개념 사용하지 않음(보스도 일반 prefab처럼 스폰)
+            isBossWave = false;
+
+            // 범위 체크
+            if (_scriptedWaves == null || wave < 1 || wave > _scriptedWaves.Count)
+            {
+                Debug.Log($"[Wave] Scripted waves finished at {wave - 1}");
+                // 모든 웨이브 종료 → StoryModeManager에 알림
+                var sm = FindObjectOfType<StoryModeManager>(true);
+                if (sm) sm.OnAllScriptedWavesFinished();
+                return;
+            }
+
+            // 진행중 웨이브 데이터 준비
+            _currentWaveSpawns = new List<ScriptedSpawn>();
+            int total = 0;
+            foreach (var s in _scriptedWaves[wave - 1].spawns)
+            {
+                if (s.prefab && s.count > 0)
+                {
+                    _currentWaveSpawns.Add(new ScriptedSpawn
+                    {
+                        prefab = s.prefab,
+                        count = s.count,
+                        hpMultiplier = s.hpMultiplier
+                    });
+                    total += s.count;
+                }
+            }
+
+            targetSpawnCountThisWave = total;
+            waveDuration = scriptedWaveDuration;
+
+            Debug.Log($"[StoryWave] Start {wave} | target={targetSpawnCountThisWave} | duration={waveDuration}");
+            return;
+        }
+
+        // ===== 기존 일반 모드 =====
         isBossWave = (wave % 10 == 0);
 
         if (isBossWave)
@@ -103,7 +171,6 @@ public class Monster_Spawn : MonoBehaviour
         }
         else
         {
-            // (wave % 10) * 10
             targetSpawnCountThisWave = Mathf.Max(0, (wave % 10) * 5);
         }
 
@@ -247,4 +314,62 @@ public class Monster_Spawn : MonoBehaviour
             this.isBoss = isBoss;
         }
     }
+
+    // ===== 스토리모드 ====
+    // 스토리 모드 주입 API
+    public void EnableScriptedWaves(List<StoryStageAsset.WavePlan> waves, float waveDuration)
+    {
+        useScriptedWaves = true;
+        scriptedWaveDuration = waveDuration > 0 ? waveDuration : 15f;
+
+        // 변환: StoryStageAsset.WavePlan → ScriptedWave
+        _scriptedWaves = new List<ScriptedWave>();
+        foreach (var w in waves)
+        {
+            var sw = new ScriptedWave { spawns = new List<ScriptedSpawn>() };
+            foreach (var p in w.spawns)
+            {
+                sw.spawns.Add(new ScriptedSpawn
+                {
+                    prefab = p.prefab,
+                    count = Mathf.Max(0, p.count),
+                    hpMultiplier = Mathf.Max(0.01f, p.hpMultiplier)
+                });
+            }
+            _scriptedWaves.Add(sw);
+        }
+
+        currentWave = 1;
+        BeginWave(currentWave);
+    }
+    void SpawnOneFromScripted()
+    {
+        if (_currentWaveSpawns == null || _currentWaveSpawns.Count == 0) return;
+
+        // 간단 라운드 로빈: 첫 요소에서 하나 뺀 뒤, 0이면 제거; 아니면 뒤로 보냄
+        for (int i = 0; i < _currentWaveSpawns.Count; i++)
+        {
+            var s = _currentWaveSpawns[0];
+            _currentWaveSpawns.RemoveAt(0);
+
+            if (s.count > 0 && s.prefab != null)
+            {
+                Vector3 pos = new Vector3(Random.Range(spawnXRange.x, spawnXRange.y), spawnY, 0f);
+                GameObject m = Instantiate(s.prefab, pos, Quaternion.identity);
+
+                int hp = GetScaledHealthForWave(currentWave);
+                hp = Mathf.RoundToInt(hp * s.hpMultiplier);
+                ApplyHealth(m, hp);
+
+                var ctx = new MonsterSpawnContext(currentWave, hp, isBoss: false);
+                m.SendMessage("OnSpawned", ctx, SendMessageOptions.DontRequireReceiver);
+
+                // 남은 카운트 감소/재삽입
+                s.count -= 1;
+                if (s.count > 0) _currentWaveSpawns.Add(s);
+                break;
+            }
+        }
+    }
+
 }

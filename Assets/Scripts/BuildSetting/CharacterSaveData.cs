@@ -20,6 +20,8 @@ public class CharacterSaveData
     public int[] Player_haveSkills;
 
     public List<SkillSaveData> learnedSkills;
+
+    public string story_lastStageId;
 }
 
 [System.Serializable]

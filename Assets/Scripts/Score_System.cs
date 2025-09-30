@@ -10,10 +10,13 @@ public class Score_System : MonoBehaviour
     [System.Serializable]
     public class AwardedSkillInfo
     {
-        public Skill_Data skill;   // 참조
-        public int skillIndex;     // Character_HaveSkill 인덱스
-        public int tier;           // 0/1/2
-        public bool isNew;         // 이번에 isKnow=false -> true로 바뀌었는지
+        public enum AwardSource { Random, Guaranteed }
+
+        public Skill_Data skill;
+        public int skillIndex;
+        public int tier;
+        public bool isNew;
+        public AwardSource source;
     }
     public List<AwardedSkillInfo> LastAwarded = new List<AwardedSkillInfo>();
 
@@ -42,7 +45,7 @@ public class Score_System : MonoBehaviour
         var t1 = character.tier1Skills;
         var t2 = character.tier2Skills;
 
-        LastAwarded.Clear(); // 이번 결과 기록 초기화
+        //LastAwarded.Clear(); // 이번 결과 기록 초기화
 
         for (int i = 0; i < count; i++)
         {
@@ -76,7 +79,8 @@ public class Score_System : MonoBehaviour
                     skill = picked,
                     skillIndex = skillIndex,
                     tier = resolvedTier,
-                    isNew = !wasKnown
+                    isNew = !wasKnown,
+                    source = AwardedSkillInfo.AwardSource.Random
                 });
             }
         }
@@ -196,4 +200,49 @@ public class Score_System : MonoBehaviour
         System.Array.Copy(character.Character_HaveSkill, newArr, character.Character_HaveSkill.Length);
         character.Character_HaveSkill = newArr;
     }
+
+    // 스토리모드 확정 스킬 보상 유틸
+    public void AddGuaranteedSkillByIndex(int skillIndex)
+    {
+        if (character == null || skillIndex < 0) return;
+
+        // tier0/1/2 에서 해당 index를 찾는 규칙은 프로젝트 전역 규칙에 맞게 조정.
+        // 여기서는 우선 tier0 우선 → tier1 → tier2에서 index가 유효하면 찾는 방식
+        Skill_Data picked = null;
+        int resolvedTier = 0;
+
+        if (character.tier0Skills != null && skillIndex < character.tier0Skills.Length)
+        {
+            picked = character.tier0Skills[skillIndex];
+            resolvedTier = 0;
+        }
+        else if (character.tier1Skills != null && skillIndex < character.tier1Skills.Length)
+        {
+            picked = character.tier1Skills[skillIndex];
+            resolvedTier = 1;
+        }
+        else if (character.tier2Skills != null && skillIndex < character.tier2Skills.Length)
+        {
+            picked = character.tier2Skills[skillIndex];
+            resolvedTier = 2;
+        }
+
+        if (picked == null) { Debug.LogWarning($"[Score_System] 보장 스킬(index={skillIndex})을 찾지 못했습니다."); return; }
+
+        bool wasKnown = picked.isKnow;
+        if (!wasKnown) picked.isKnow = true;
+
+        EnsureHaveSkillCapacity(skillIndex);
+        character.Character_HaveSkill[skillIndex] += 1;
+
+        LastAwarded.Add(new AwardedSkillInfo
+        {
+            skill = picked,
+            skillIndex = skillIndex,
+            tier = resolvedTier,
+            isNew = !wasKnown,
+            source = AwardedSkillInfo.AwardSource.Guaranteed
+        });
+    }
+
 }

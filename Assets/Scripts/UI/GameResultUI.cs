@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -6,129 +6,169 @@ using System.Linq;
 
 public class GameResultUI : MonoBehaviour
 {
-    // UI ÄÄÆ÷³ÍÆ® (Inspector¿¡¼­ ÇÒ´ç)
-    public Text scoreText;     // Á¡¼ö¸¦ Ç¥½ÃÇÒ ÅØ½ºÆ®
-    public Text waveText;       // ¿şÀÌºê Ç¥½ÃÇÒ ÅØ½ºÆ®
-    public Text moneyText;      // µ· Ç¥½ÃÇÒ ÅØ½ºÆ®
-    public Text EXPText;        // °æÇèÄ¡ Ç¥½ÃÇÒ ÅØ½ºÆ®
+    // UI ì»´í¬ë„ŒíŠ¸ (Inspectorì—ì„œ í• ë‹¹)
+    public Text scoreText;     // ì ìˆ˜ë¥¼ í‘œì‹œí•  í…ìŠ¤íŠ¸
+    public Text waveText;       // ì›¨ì´ë¸Œ í‘œì‹œí•  í…ìŠ¤íŠ¸
+    public Text moneyText;      // ëˆ í‘œì‹œí•  í…ìŠ¤íŠ¸
+    public Text EXPText;        // ê²½í—˜ì¹˜ í‘œì‹œí•  í…ìŠ¤íŠ¸
 
     public SceneLoader sceneLoader;
     public Score_System scoreSystem;
     public Monster_Spawn monsterSpawn;
 
-    [Header("½ºÅ©·Ñ ±×¸®µå")]
+    [Header("ìŠ¤í¬ë¡¤ ê·¸ë¦¬ë“œ")]
     public ScrollRect scrollRect;               // Scroll View
     public RectTransform contentRect;           // ScrollRect.content
-    public GridLayoutGroup grid;                // Content¿¡ ºÙÀº GridLayoutGroup
-    public GameObject skillIconPrefab;          // SkillIconItem ÇÁ¸®ÆÕ
+    public GridLayoutGroup grid;                // Contentì— ë¶™ì€ GridLayoutGroup
+    public GameObject skillIconPrefab;          // SkillIconItem í”„ë¦¬íŒ¹
     [Range(1, 10)]
-    public int columns = 5;                     // °íÁ¤ 5¿­
+    public int columns = 5;                     // ê³ ì • 5ì—´
+
+    [Header("í™•ì • ë³´ìƒ(Guaranteed) ê·¸ë¦¬ë“œ")]
+    public RectTransform guaranteedContentRect;   // ë³„ë„ Content
+    public GridLayoutGroup guaranteedGrid;        // ë³„ë„ Grid
+    public GameObject guaranteedSkillIconPrefab;  // (ì—†ìœ¼ë©´ skillIconPrefab ì¬ì‚¬ìš©)
+    public Text guaranteedHeaderText;             // "Guaranteed Rewards" ê°™ì€ í—¤ë” í…ìŠ¤íŠ¸(ì„ íƒ)
+
+
+    [Header("ìŠ¤í† ë¦¬ ì „ìš© UI")]
+    public Button nextStageButton; 
 
     public void Awake()
     {
-        // Score_System/SceneLoader°¡ ºñ¾îÀÖÀ¸¸é ¿©±â¼­µµ ÇÑ ¹ø ¾ÈÀüÇÏ°Ô Àâ¾Æµµ µË´Ï´Ù.
+        // Score_System/SceneLoaderê°€ ë¹„ì–´ìˆìœ¼ë©´ ì—¬ê¸°ì„œë„ í•œ ë²ˆ ì•ˆì „í•˜ê²Œ ì¡ì•„ë„ ë©ë‹ˆë‹¤.
         if (scoreSystem == null) scoreSystem = FindObjectOfType<Score_System>(true);
         if (sceneLoader == null) sceneLoader = FindObjectOfType<SceneLoader>(true);
 
-        // ===== Monster_Spawn ÀÚµ¿ ÇÒ´ç =====
+        // ===== Monster_Spawn ìë™ í• ë‹¹ =====
         if (monsterSpawn == null)
         {
-            // ¾À ÀüÃ¼¿¡¼­ ÄÄÆ÷³ÍÆ® Å½»ö(ºñÈ°¼º Æ÷ÇÔ)
+            // ì”¬ ì „ì²´ì—ì„œ ì»´í¬ë„ŒíŠ¸ íƒìƒ‰(ë¹„í™œì„± í¬í•¨)
             monsterSpawn = FindObjectOfType<Monster_Spawn>(true);
         }
 
         if (monsterSpawn == null)
         {
-            // ÅÂ±×·Î Àç½Ãµµ: ½ºÆ÷³Ê ¿ÀºêÁ§Æ®¿¡ "MonsterSpawner" ÅÂ±×¸¦ ´Ş¾ÆµÎ¸é È®½Ç
+            // íƒœê·¸ë¡œ ì¬ì‹œë„: ìŠ¤í¬ë„ˆ ì˜¤ë¸Œì íŠ¸ì— "MonsterSpawner" íƒœê·¸ë¥¼ ë‹¬ì•„ë‘ë©´ í™•ì‹¤
             GameObject tagged = GameObject.FindWithTag("MonsterSpawner");
             if (tagged != null) monsterSpawn = tagged.GetComponent<Monster_Spawn>();
         }
 
         if (monsterSpawn == null)
         {
-            Debug.LogWarning("[GameResultUI] Monster_SpawnÀ» ¾À¿¡¼­ Ã£Áö ¸øÇß½À´Ï´Ù. Wave Ç¥½Ã´Â 0À¸·Î ´ëÃ¼µË´Ï´Ù.");
+            Debug.LogWarning("[GameResultUI] Monster_Spawnì„ ì”¬ì—ì„œ ì°¾ì§€ ëª»í–ˆìŠµë‹ˆë‹¤. Wave í‘œì‹œëŠ” 0ìœ¼ë¡œ ëŒ€ì²´ë©ë‹ˆë‹¤.");
+        }
+
+        if (nextStageButton != null)
+        {
+            nextStageButton.onClick.RemoveAllListeners();   //ì¸ìŠ¤í™í„°ì— ë‚¨ì€ ë¦¬ìŠ¤ë„ˆ ì œê±°
+            nextStageButton.onClick.AddListener(OnNextStageButtonClicked);
         }
     }
 
     /// <summary>
-    /// GameOver ½Ã È£ÃâÇÏ¿© °á°ú UI¸¦ Ç¥½ÃÇÕ´Ï´Ù.
+    /// GameOver ì‹œ í˜¸ì¶œí•˜ì—¬ ê²°ê³¼ UIë¥¼ í‘œì‹œí•©ë‹ˆë‹¤.
     /// </summary>
-    /// <param name="score">Score_System.csÀÇ score °ª</param>
+    /// <param name="score">Score_System.csì˜ score ê°’</param>
     public void ShowResult()
     {
         gameObject.SetActive(true);
         scoreSystem.ResultScore();
 
-        if (scoreText != null)
-            scoreText.text = "Score: " + scoreSystem.score.ToString();
-        if (waveText != null) waveText.text = "Wave: " + monsterSpawn.currentWave.ToString();
+        if (scoreText != null) scoreText.text = "Score: " + scoreSystem.score.ToString();
+        if (waveText != null) waveText.text = "Wave: " + (monsterSpawn ? monsterSpawn.currentWave.ToString() : "0");
         if (moneyText != null) moneyText.text = "Money: " + scoreSystem.score.ToString();
         if (EXPText != null) EXPText.text = "EXP: " + (scoreSystem.score / 100).ToString();
 
+        // ëœë¤ ë³´ìƒ ê·¸ë¦¬ë“œ
         BuildSkillGrid();
+
+        // í™•ì • ë³´ìƒ ê·¸ë¦¬ë“œ
+        BuildGuaranteedGrid();
+
+        // ë‹¤ìŒ ìŠ¤í…Œì´ì§€ ë²„íŠ¼ ì²˜ë¦¬: 'ë‹¤ìŒ' ì¡´ì¬í•  ë•Œë§Œ ì¼œê³ , ì—†ìœ¼ë©´ ì™„ì „ ë”
+        bool hasNext = false;
+        var sm = StoryModeManager.Instance;
+        if (sm != null && sm.isStoryRun)
+        {
+            var resolver = FindObjectOfType<StoryStageAssetResolver>(true);
+            if (resolver != null)
+            {
+                // ì—¬ê¸°ì„œ sm.lastCheckpointStageIdëŠ” ì´ë¯¸ 'ë‹¤ìŒ ìŠ¤í…Œì´ì§€'ë¡œ ê°±ì‹ ëœ ìƒíƒœ
+                var next = resolver.Resolve(sm.lastCheckpointStageId);
+                hasNext = (next != null);
+            }
+        }
+
+        if (nextStageButton != null)
+        {
+            nextStageButton.interactable = hasNext;
+            //nextStageButton.gameObject.SetActive(hasNext);  // ì™„ì „ ìˆ¨ê¹€ ì²˜ë¦¬ 
+        }
     }
 
+
     /// <summary>
-    /// Á¾·á ¹öÆ° Å¬¸¯ ½Ã ½ÇÇàµÇ´Â ¸Ş¼­µå
+    /// ì¢…ë£Œ ë²„íŠ¼ í´ë¦­ ì‹œ ì‹¤í–‰ë˜ëŠ” ë©”ì„œë“œ
     /// </summary>
     public void OnExitButtonClicked()
     {
         //scoreSystem.ResultScore();
 
-        // ÀúÀå
+        // ì €ì¥
         if (SaveSystem.Instance != null)
         {
             SaveSystem.Instance.SaveGameData();
         }
         else
         {
-            Debug.LogWarning("[GameResultUI] SaveSystem.Instance¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù.");
+            Debug.LogWarning("[GameResultUI] SaveSystem.Instanceë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.");
         }
 
-        // Á¡¼ö ¸®¼Â ¡æ ·Îºñ ¡æ ½Ã°£ Àç°³
+        // ì ìˆ˜ ë¦¬ì…‹ â†’ ë¡œë¹„ â†’ ì‹œê°„ ì¬ê°œ
         scoreSystem.score = 0;
         sceneLoader.LoadLobyScene();
         Time.timeScale = 1;
     }
 
-    // ====== ³»ºÎ: ½ºÅ©·Ñ ±×¸®µå ±¸¼º ======
+    // ====== ë‚´ë¶€: ìŠ¤í¬ë¡¤ ê·¸ë¦¬ë“œ êµ¬ì„± ======
 
     private void BuildSkillGrid()
     {
-        // ¾ÈÀü Ã¼Å©
         if (contentRect == null || grid == null || skillIconPrefab == null)
         {
-            Debug.LogWarning("[GameResultUI] Grid/Prefab ·¹ÆÛ·±½º°¡ ºñ¾îÀÖ½À´Ï´Ù.");
+            Debug.LogWarning("[GameResultUI] Grid/Prefab ë ˆí¼ëŸ°ìŠ¤ê°€ ë¹„ì–´ìˆìŠµë‹ˆë‹¤.");
             return;
         }
 
-        // ±âÁ¸ ¾ÆÀÌÅÛ Á¤¸®
+        // ê¸°ì¡´ ì•„ì´í…œ ì •ë¦¬
         for (int i = contentRect.childCount - 1; i >= 0; i--)
             Destroy(contentRect.GetChild(i).gameObject);
 
-        var awarded = scoreSystem.LastAwarded;
+        // ëœë¤ ë³´ìƒë§Œ í•„í„°
+        var awardedAll = scoreSystem.LastAwarded;
+        var awarded = (awardedAll == null)
+            ? null
+            : awardedAll
+                .Where(a => a.source == Score_System.AwardedSkillInfo.AwardSource.Random)
+                .ToList();
+
         if (awarded == null || awarded.Count == 0)
         {
             UpdateContentHeight(0);
             return;
         }
 
-        // 1) µ¿ÀÏ ½ºÅ³(Æ¼¾î+ÀÎµ¦½º) Áı°è + NEW ¿©ºÎ
-        var grouped = GroupAndAggregate(awarded);
-
-        // 2) Á¤·Ä: Æ¼¾î ASC ¡æ ÀÎµ¦½º ASC
-        var sorted = grouped
+        var grouped = GroupAndAggregate(awarded)
             .OrderBy(g => g.tier)
             .ThenBy(g => g.skillIndex)
             .ToList();
 
-        // 3) ¾ÆÀÌÅÛ »ı¼º(¸ğµÎ »ı¼º: 5 x n)
-        foreach (var g in sorted)
+        foreach (var g in grouped)
         {
             var go = Instantiate(skillIconPrefab, contentRect);
             var item = go.GetComponent<ResultSkillIcon>();
 
-            // ¾ÆÀÌÄÜ ÇÊµå¸í ÇÁ·ÎÁ§Æ®¿¡ ¸Â°Ô ¼öÁ¤
             Sprite icon = g.sample != null ? g.sample.skillIcon : null;
             bool showNew = g.anyNew;
             int count = g.count;
@@ -137,13 +177,12 @@ public class GameResultUI : MonoBehaviour
                 item.Setup(icon, count, showNew);
         }
 
-        // 4) ÄÁÅÙÃ÷ ³ôÀÌ °è»ê/Àû¿ë
-        UpdateContentHeight(sorted.Count);
+        UpdateContentHeight(grouped.Count);
 
-        // ¼öÁ÷ ½ºÅ©·Ñ ½ÃÀÛ À§Ä¡ ¸Ç À§·Î
         if (scrollRect != null)
             scrollRect.verticalNormalizedPosition = 1f;
     }
+
 
     private class Grouped
     {
@@ -179,7 +218,7 @@ public class GameResultUI : MonoBehaviour
     }
 
     /// <summary>
-    /// ¾ÆÀÌÅÛ °³¼ö·Î Çà ¼ö¸¦ °è»êÇØ Content ³ôÀÌ¸¦ °»½Å
+    /// ì•„ì´í…œ ê°œìˆ˜ë¡œ í–‰ ìˆ˜ë¥¼ ê³„ì‚°í•´ Content ë†’ì´ë¥¼ ê°±ì‹ 
     /// </summary>
     private void UpdateContentHeight(int itemCount)
     {
@@ -187,7 +226,7 @@ public class GameResultUI : MonoBehaviour
 
         int rows = Mathf.CeilToInt(itemCount / (float)columns);
 
-        // GridLayoutGroup ÆÄ¶ó¹ÌÅÍ
+        // GridLayoutGroup íŒŒë¼ë¯¸í„°
         Vector2 cell = grid.cellSize;
         Vector2 spacing = grid.spacing;
         RectOffset pad = grid.padding ?? new RectOffset(0, 0, 0, 0);
@@ -203,11 +242,106 @@ public class GameResultUI : MonoBehaviour
         }
         else
         {
-            totalHeight = pad.top + pad.bottom; // ¾ÆÀÌÅÛ ¾øÀ» ¶§ ÃÖ¼Ò
+            totalHeight = pad.top + pad.bottom; // ì•„ì´í…œ ì—†ì„ ë•Œ ìµœì†Œ
         }
 
-        // ÇöÀç Æø À¯Áö, ³ôÀÌ¸¸ Á¶Á¤
+        // í˜„ì¬ í­ ìœ ì§€, ë†’ì´ë§Œ ì¡°ì •
         var size = contentRect.sizeDelta;
         contentRect.sizeDelta = new Vector2(size.x, totalHeight);
     }
+    public void OnNextStageButtonClicked()
+    {
+        Time.timeScale = 1f;
+
+        var sm = StoryModeManager.Instance;
+        var resolver = FindObjectOfType<StoryStageAssetResolver>(true);
+        if (sm == null || resolver == null) return;
+
+        var next = resolver.Resolve(sm.lastCheckpointStageId);
+        if (next == null)
+        {
+            Debug.LogWarning("[GameResultUI] ë‹¤ìŒ ìŠ¤í…Œì´ì§€ SOë¥¼ ì°¾ì§€ ëª»í–ˆìŠµë‹ˆë‹¤.");
+            return;
+        }
+
+        gameObject.SetActive(false);
+        sm.QueueStartNextStage(next);   
+    }
+
+
+    private void BuildGuaranteedGrid()
+    {
+        if (guaranteedContentRect == null || (guaranteedGrid == null))
+        {
+            // ì„ íƒ ì„¹ì…˜ì´ ì—†ë‹¤ë©´ ìŠ¤í‚µ(í”„ë¡œì íŠ¸ì— ë”°ë¼ ëœë”ë§ ì•ˆ í•´ë„ OK)
+            return;
+        }
+
+        // ê¸°ì¡´ ì•„ì´í…œ ì •ë¦¬
+        for (int i = guaranteedContentRect.childCount - 1; i >= 0; i--)
+            Destroy(guaranteedContentRect.GetChild(i).gameObject);
+
+        var awarded = scoreSystem.LastAwarded;
+        if (awarded == null || awarded.Count == 0)
+        {
+            if (guaranteedHeaderText) guaranteedHeaderText.gameObject.SetActive(false);
+            UpdateContentHeightForGuaranteed(0);
+            return;
+        }
+
+        // í™•ì • ë³´ìƒë§Œ í•„í„°
+        var guaranteedOnly = awarded
+            .Where(a => a.source == Score_System.AwardedSkillInfo.AwardSource.Guaranteed)
+            .ToList();
+
+        if (guaranteedOnly.Count == 0)
+        {
+            if (guaranteedHeaderText) guaranteedHeaderText.gameObject.SetActive(false);
+            UpdateContentHeightForGuaranteed(0);
+            return;
+        }
+
+        // í—¤ë” ë…¸ì¶œ
+        if (guaranteedHeaderText) guaranteedHeaderText.gameObject.SetActive(true);
+
+        // ë™ì¼ ìŠ¤í‚¬(í‹°ì–´+ì¸ë±ìŠ¤) ì§‘ê³„ + NEW ì—¬ë¶€
+        var grouped = GroupAndAggregate(guaranteedOnly);
+
+        // ì •ë ¬
+        var sorted = grouped.OrderBy(g => g.tier).ThenBy(g => g.skillIndex).ToList();
+
+        // ì•„ì´í…œ ìƒì„±
+        var prefab = guaranteedSkillIconPrefab != null ? guaranteedSkillIconPrefab : skillIconPrefab;
+        foreach (var g in sorted)
+        {
+            var go = Instantiate(prefab, guaranteedContentRect);
+            var item = go.GetComponent<ResultSkillIcon>();
+
+            Sprite icon = g.sample != null ? g.sample.skillIcon : null;
+            bool showNew = g.anyNew;
+            int count = g.count;
+
+            if (item != null)
+                item.Setup(icon, count, showNew);
+        }
+
+        UpdateContentHeightForGuaranteed(sorted.Count);
+    }
+    private void UpdateContentHeightForGuaranteed(int itemCount)
+    {
+        if (guaranteedGrid == null || guaranteedContentRect == null || columns <= 0) return;
+
+        int rows = Mathf.CeilToInt(itemCount / (float)columns);
+        Vector2 cell = guaranteedGrid.cellSize;
+        Vector2 spacing = guaranteedGrid.spacing;
+        RectOffset pad = guaranteedGrid.padding ?? new RectOffset(0, 0, 0, 0);
+
+        float totalHeight = (rows > 0)
+            ? pad.top + rows * cell.y + (rows - 1) * spacing.y + pad.bottom
+            : pad.top + pad.bottom;
+
+        var size = guaranteedContentRect.sizeDelta;
+        guaranteedContentRect.sizeDelta = new Vector2(size.x, totalHeight);
+    }
+
 }

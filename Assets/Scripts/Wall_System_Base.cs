@@ -159,4 +159,19 @@ public class Wall_System_Base : MonoBehaviour
         foreach (GameObject c in GameObject.FindGameObjectsWithTag("AroundCenter"))
             Destroy(c);
     }
+
+    public void ResetForNextStage()
+    {
+        isGameOver = false;              // 다시 GameOver() 안 타도록
+        PlayTime = 0f;
+        damageTimer = 0f;                // private이므로 이 메서드 안에서만 접근
+        contactingMonsters.Clear();
+
+        maxHealth = character.WallHP;    // 캐릭터가 갱신된 HP를 쓰는 경우 반영
+        currentHealth = maxHealth;
+
+        CleanupAroundObjects();          // 잔여 투사체/센터 정리
+        UpdateUI();
+        Debug.Log("[Wall] Reset for next story stage");
+    }
 }

@@ -149,4 +149,23 @@ public class Reset_System : MonoBehaviour
         int c2 = character.tier2Skills != null ? character.tier2Skills.Length : 0;
         return c0 + c1 + c2;
     }
+
+    /// <summary>
+    /// 스토리 진행을 1-1로 초기화.
+    /// (캐릭터/스킬 초기화와 별개로 호출 가능)
+    /// </summary>
+    public void StoryProgressReset()
+    {
+        if (StoryModeManager.Instance != null)
+        {
+            StoryModeManager.Instance.lastCheckpointStageId = "1-1";
+            Debug.Log("[Reset] 스토리 진행을 1-1로 초기화했습니다.");
+        }
+        else
+        {
+            Debug.LogWarning("[Reset] StoryModeManager 인스턴스를 찾지 못했습니다. Loby에서 시작했는지 확인하세요.");
+        }
+
+        if (save) save.SaveGameData();
+    }
 }

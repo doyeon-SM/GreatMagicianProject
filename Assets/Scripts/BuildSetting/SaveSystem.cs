@@ -113,6 +113,10 @@ public class SaveSystem : MonoBehaviour
             data.Player_haveSkills = new int[totalSkillCount];
             System.Array.Copy(character.Character_HaveSkill, data.Player_haveSkills, totalSkillCount);
         }
+        // 스토리 진행 저장
+        data.story_lastStageId = StoryModeManager.Instance != null
+            ? StoryModeManager.Instance.lastCheckpointStageId
+            : "1-1";
 
         string json = JsonUtility.ToJson(data, true);
         File.WriteAllText(savePath, json);
@@ -179,6 +183,17 @@ public class SaveSystem : MonoBehaviour
         {
             // 세이브에 없으면(구버전) 현재 길이에 맞춰 0으로 초기화
             character.Character_HaveSkill = new int[expectedLen];
+        }
+        // 스토리 진행 복원 (필드가 없거나 빈 경우 기본값 "1-1")
+        string restoredStageId = string.IsNullOrEmpty(data.story_lastStageId) ? "1-1" : data.story_lastStageId;
+        if (StoryModeManager.Instance != null)
+        {
+            StoryModeManager.Instance.lastCheckpointStageId = restoredStageId;
+            Debug.Log($"[SaveSystem] 스토리 진행 복원: {restoredStageId}");
+        }
+        else
+        {
+            Debug.Log($"[SaveSystem] StoryModeManager 미존재. 진행도({restoredStageId})는 매니저 생성 후 반영 필요.");
         }
 
         Debug.Log("불러오기 완료");
