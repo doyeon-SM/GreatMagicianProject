@@ -22,6 +22,7 @@ public class CharacterSaveData
     public List<SkillSaveData> learnedSkills;
 
     public string story_lastStageId;
+    public QuestManager.QuestSOProgressSave questSO;  // 퀘스트 카운터 세이브
 }
 
 [System.Serializable]

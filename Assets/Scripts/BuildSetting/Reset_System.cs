@@ -68,7 +68,7 @@ public class Reset_System : MonoBehaviour
 
         character.Character_Level = 1;
         character.Character_EXP = 0;
-        character.Character_NextEXP = 10;
+        character.Character_NextEXP = 50;
         character.Character_Mana = 2.0f;
         character.WallHP = 30;
         character.Character_Gold = 0;
@@ -164,6 +164,24 @@ public class Reset_System : MonoBehaviour
         else
         {
             Debug.LogWarning("[Reset] StoryModeManager 인스턴스를 찾지 못했습니다. Loby에서 시작했는지 확인하세요.");
+        }
+
+        if (save) save.SaveGameData();
+    }
+
+    /// <summary>
+    /// 퀘스트 진행도 초기화
+    /// </summary>
+    public void QuestReset()
+    {
+        if (QuestManager.Instance != null)
+        {
+            QuestManager.Instance.ResetAllProgress();
+            Debug.Log("[Reset] 퀘스트 진행 카운트 전부 초기화");
+        }
+        else
+        {
+            Debug.LogWarning("[Reset] QuestManager_SO 인스턴스가 없습니다. 씬에 배치/DB 할당 확인");
         }
 
         if (save) save.SaveGameData();

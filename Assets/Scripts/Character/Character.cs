@@ -22,7 +22,7 @@ public class Character : MonoBehaviour
     public Skill_Combination_Data[] tier1SkillsCombination;
     public Skill_Combination_Data[] tier2SkillsCombination;
 
-    public int Character_NextEXP = 10;
+    public int Character_NextEXP = 50;
 
     // 해당 인덱스의 스킬 레벨을 올리고 데미지를 증가시키는 메서드
     public void LevelUpSkill(int tier, int index)

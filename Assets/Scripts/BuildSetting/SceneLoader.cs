@@ -52,4 +52,10 @@ public class SceneLoader : MonoBehaviour
         ReloadAllSkillData();
         SceneManager.LoadScene("StoryModeScene");
     }
+
+    public void LoadQuestScene()
+    {
+        ReloadAllSkillData();
+        SceneManager.LoadScene("QuestScene");
+    }
 }

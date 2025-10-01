@@ -428,6 +428,9 @@ public class Skill_Drag_System : MonoBehaviour
             {
                 rangeHandler.skillData = GetSkillDataForCurrentSkill();
                 rangeHandler.ApplySkillEffect(castPos);
+                // 퀘스트: 스킬 사용 1회 보고
+                if (QuestManager.Instance != null)
+                    QuestManager.Instance.ReportSkillUse();
             }
         }
         else

@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2fb932d03c7925445995d391d70c2e7e, type: 3}
+  m_Name: Kill_Ignis100
+  m_EditorClassIdentifier: 
+  questId: 68758840-4b07-43be-9631-2d9fb6a65a16
+  title: Kill Ignis 100
+  description: "\uD654\uC18D\uC131 \uBAAC\uC2A4\uD130 100\uD0AC"
+  kind: 1
+  targetCount: 100
+  repeatable: 1
+  reward:
+    exp: 100
+    gold: 1000
+    skillDust: 0
+  icon: {fileID: 0}

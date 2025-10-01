@@ -118,6 +118,10 @@ public class SaveSystem : MonoBehaviour
             ? StoryModeManager.Instance.lastCheckpointStageId
             : "1-1";
 
+        //퀘스트 저장
+        if (QuestManager.Instance != null)
+            data.questSO = QuestManager.Instance.ExportSave();
+
         string json = JsonUtility.ToJson(data, true);
         File.WriteAllText(savePath, json);
         Debug.Log("저장 완료: " + savePath);
@@ -195,6 +199,10 @@ public class SaveSystem : MonoBehaviour
         {
             Debug.Log($"[SaveSystem] StoryModeManager 미존재. 진행도({restoredStageId})는 매니저 생성 후 반영 필요.");
         }
+
+        //퀘스트 진행 복원
+        if (QuestManager.Instance != null)
+            QuestManager.Instance.ImportSave(data.questSO);
 
         Debug.Log("불러오기 완료");
     }

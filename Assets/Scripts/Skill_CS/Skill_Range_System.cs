@@ -16,7 +16,7 @@ public class Skill_Range_System : MonoBehaviour
     {
         
     }
-    public void StartRangeEffect() //Æø¹ßÈ¿°ú
+    public void StartRangeEffect()
     {
         if (skillData != null && skillData.skillType == Skill_Data.SkillType.Projectile)
         {
@@ -24,7 +24,7 @@ public class Skill_Range_System : MonoBehaviour
         }
         else if (skillData != null && skillData.skillType == Skill_Data.SkillType.Area)
         {
-            periodicDamageCoroutine = StartCoroutine(ApplyPeriodicDamage(skillData.AreaTime, 0.5f));
+            periodicDamageCoroutine = StartCoroutine(ApplyPeriodicDamage(skillData.AreaTime, 1.0f));
         }
         else
         {

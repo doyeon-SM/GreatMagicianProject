@@ -167,6 +167,10 @@ public class Monster_Base : MonoBehaviour
         scoreSystem.score += maxHealth;
         Debug.Log("몬스터가 죽었습니다! Score: " + scoreSystem.score);
 
+        // 퀘스트 몬스터 킬 카운팅
+        if (QuestManager.Instance != null)
+            QuestManager.Instance.ReportMonsterKill(monsterElement);
+
         // 아이템 드롭 확률 처리
         // advanced: 5% chance, normal: 20% chance (서로 배타적으로 처리)
         float roll = Random.value;  // 0~1 사이 난수
