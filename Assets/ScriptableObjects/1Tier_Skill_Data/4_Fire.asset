@@ -34,4 +34,4 @@ MonoBehaviour:
   Effect_Value: 0
   AreaTime: 0
   skillscript: "\uD3ED\uBC1C"
-  isKnow: 0
+  isKnow: 1
