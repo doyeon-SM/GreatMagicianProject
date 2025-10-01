@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System;
+using System.Collections.Generic;
 
 public class SkillUpgradeUI : MonoBehaviour
 {
@@ -26,6 +27,8 @@ public class SkillUpgradeUI : MonoBehaviour
     public Text skillEffectText;
     public Text skillAreaTimeText;
     public Text skillElementText;
+    public Button breakitemupButton;
+    public Button breakitemdownButton;
 
 
     private Character _character;
@@ -35,6 +38,7 @@ public class SkillUpgradeUI : MonoBehaviour
     private Func<int, int, Skill_Data> _getSkill; // Character의 최신 스킬 참조를 가져오기 위한 콜백
     private Action _onClosed;                    // 닫힘 콜백(도감 갱신/저장 등)
     private Action _onUpgraded;                  // 강화 성공 시 콜백(도감 갱신 등)
+    private int _breakCount = 0;    // 선택한 분해 개수
 
     // 외부에서 호출: 초기화
     public void Init(
@@ -60,7 +64,10 @@ public class SkillUpgradeUI : MonoBehaviour
         if (upgradeButton) upgradeButton.onClick.AddListener(HandleUpgrade);
         if (combineButton) combineButton.onClick.AddListener(HandleCombine);
         if (breakdownButton) breakdownButton.onClick.AddListener(HandleBreakdown);
+        if (breakitemupButton) breakitemupButton.onClick.AddListener(() => ChangeBreakCount(+1));
+        if (breakitemdownButton) breakitemdownButton.onClick.AddListener(() => ChangeBreakCount(-1));
 
+        _breakCount = 0; // 초기화
         RefreshUI();
     }
     private int GetMaxLevelByTier(int tier)
@@ -124,6 +131,7 @@ public class SkillUpgradeUI : MonoBehaviour
             needText.text += (skill.level >= maxLevel) ? "MAX" : $"{need}"; 
         }
         if (haveText) haveText.text = $"Have: {have}";
+        UpdateBreakdownUI(have);    //분해하기 버튼 text 업데이트
 
         if (skilldustText && _tier >= 1) skilldustText.text = $"Dust: {_character.Character_SkillDust}";
         else if (skilldustText) skilldustText.gameObject.SetActive(false);
@@ -133,6 +141,8 @@ public class SkillUpgradeUI : MonoBehaviour
 
         if (combineButton) combineButton.gameObject.SetActive(_tier >= 1);
         if (breakdownButton) breakdownButton.gameObject.SetActive(_tier >= 1);
+        if (breakitemupButton) breakitemupButton.gameObject.SetActive(_tier >= 1);
+        if (breakitemdownButton) breakitemdownButton.gameObject.SetActive(_tier >= 1);
 
         if (_tier >= 1 && requiredskillhaveText1 && requiredskillhaveText2)
         {
@@ -225,43 +235,58 @@ public class SkillUpgradeUI : MonoBehaviour
             return;
         }
 
-        // 2) 하위 파츠 확인 (기대: 2개. 없으면 가능한 만큼만 처리)
         var bases = targetSkill.requiredBaseSkills;
-        if (bases == null)
+        if (bases == null || bases.Count == 0)
         {
             Debug.LogWarning("[Combine] requiredBaseSkills 비어있음. 조합 스펙이 설정되지 않았습니다.");
             return;
         }
 
-        // 준비: 각 베이스 스킬의 위치/보유량/부족분에 대한 더스트 비용 계산
-        int totalDustNeeded = 0;
-
-        // 각 베이스의 글로벌 인덱스 및 티어/인덱스 캐시
-        var baseInfos = new System.Collections.Generic.List<(Skill_Data sd, int baseTier, int baseLocal, int baseGlobal, int have, bool willUseDust, int dustCost)>();
+        // 2) 요구 스킬을 "글로벌 인덱스" 단위로 묶어서 개수를 합산 (중복 처리 핵심)
+        //    key: globalIndex, value: (requiredCount, baseTier, baseLocal, sample Skill_Data)
+        var reqMap = new Dictionary<int, (int requiredCount, int baseTier, int baseLocal, Skill_Data sd)>();
 
         foreach (var baseSd in bases)
         {
-            if (baseSd == null) continue;
+            if (baseSd == null)
+            {
+                Debug.LogWarning("[Combine] requiredBaseSkills에 null 항목이 있습니다.");
+                return;
+            }
 
-            if (!FindSkillIndex(baseSd, out int baseTier, out int baseLocal))
+            if (!FindSkillIndex(baseSd, out int bTier, out int bLocal))
             {
                 Debug.LogWarning($"[Combine] 하위 스킬 인덱스 탐색 실패: {baseSd.name}");
                 return;
             }
-            int baseGlobal = GetGlobalIndex(_character, baseTier, baseLocal);
-            int haveBase = GetHave(baseGlobal);
 
-            bool needDust = haveBase <= 0;
-            int dustCost = 0;
-            if (needDust)
+            int g = GetGlobalIndex(_character, bTier, bLocal);
+            if (!reqMap.TryGetValue(g, out var cur))
             {
-                dustCost = GetDustCostForBaseTier(baseTier);
-                totalDustNeeded += dustCost;
+                reqMap[g] = (1, bTier, bLocal, baseSd);
             }
-            baseInfos.Add((baseSd, baseTier, baseLocal, baseGlobal, haveBase, needDust, dustCost));
+            else
+            {
+                reqMap[g] = (cur.requiredCount + 1, cur.baseTier, cur.baseLocal, cur.sd);
+            }
         }
 
-        // 3) 더스트 보유량 확인
+        // 3) 더스트 필요량 계산: (부족 개수 × 티어별 비용)을 모두 합산
+        int totalDustNeeded = 0;
+        foreach (var kv in reqMap)
+        {
+            int g = kv.Key;
+            var info = kv.Value;
+            int have = GetHave(g);
+            int shortage = Mathf.Max(0, info.requiredCount - have);
+            if (shortage > 0)
+            {
+                int dustPerOne = GetDustCostForBaseTier(info.baseTier);
+                totalDustNeeded += shortage * dustPerOne;
+            }
+        }
+
+        // 4) 더스트 보유량 확인
         int currentDust = _character.Character_SkillDust;
         if (currentDust < totalDustNeeded)
         {
@@ -269,22 +294,36 @@ public class SkillUpgradeUI : MonoBehaviour
             return;
         }
 
-        // 4) 실행: 파츠 차감 또는 더스트 소모 → 타겟 스킬 Have +1
-        foreach (var info in baseInfos)
+        // 5) 실제 차감 수행
+        //    - 전역 인덱스별로: 보유 수량에서 가능한 만큼 차감
+        //    - 남은 부족분은 더스트로 대체
+        foreach (var kv in reqMap)
         {
-            if (info.willUseDust)
+            int g = kv.Key;
+            var info = kv.Value;
+
+            int haveNow = GetHave(g);
+            int usePieces = Mathf.Min(haveNow, info.requiredCount);
+            int shortage = info.requiredCount - usePieces;
+
+            // 보유 스킬 조각 차감
+            if (usePieces > 0)
             {
-                _character.Character_SkillDust -= info.dustCost;
-                Debug.Log($"[Combine] 더스트 {info.dustCost} 소모 (baseTier={info.baseTier})");
+                AddHave(g, -usePieces);
+                Debug.Log($"[Combine] 하위 스킬(global={g}) {usePieces}개 차감 (요구 {info.requiredCount}, 보유 차감 후 {GetHave(g)})");
             }
-            else
+
+            // 부족분은 더스트로 대체
+            if (shortage > 0)
             {
-                AddHave(info.baseGlobal, -1);
-                Debug.Log($"[Combine] 하위 스킬 1개 차감 (global={info.baseGlobal})");
+                int dustPerOne = GetDustCostForBaseTier(info.baseTier);
+                int dustCost = shortage * dustPerOne;
+                _character.Character_SkillDust -= dustCost;
+                Debug.Log($"[Combine] 더스트 {dustCost} 소모 (부족 {shortage}개, tier={info.baseTier})");
             }
         }
 
-        // 타겟 스킬 보유 +1
+        // 6) 타겟 스킬 보유 +1
         AddHave(_globalIndex, +1);
         Debug.Log($"[Combine] 타겟 스킬(global={_globalIndex}) 보유 +1 완료.");
 
@@ -292,6 +331,7 @@ public class SkillUpgradeUI : MonoBehaviour
         RefreshUI();
         _onUpgraded?.Invoke(); // 상위 목록 갱신에 재사용
     }
+
     private void HandleBreakdown()
     {
         if (_character == null) return;
@@ -306,21 +346,68 @@ public class SkillUpgradeUI : MonoBehaviour
         if (have <= 0)
         {
             Debug.LogWarning("[Breakdown] 보유 수량 없음.");
+            UpdateBreakdownUI(have);
             return;
         }
 
-        // 환급량: 1티어=100, 2티어=500 (명시 스펙)
-        int refund = (_tier == 1) ? 100 :
-                     (_tier == 2) ? 500 : 500; // 3티어 이상 가정 시 500 유지
+        // 분해 개수 결정:
+        // - _breakCount > 0 이면 그 개수만큼 한 번에 분해
+        // - _breakCount == 0 이면 편의 모드: 1개만 분해 (기존 동작 유지)
+        int countToBreak = (_breakCount > 0) ? Mathf.Min(_breakCount, have) : 1;
 
-        AddHave(_globalIndex, -1);
-        _character.Character_SkillDust += refund;
+        // 환급량: 1티어=100, 2티어=500 (스펙)
+        int refundPer = (_tier == 1) ? 100 : 500;
 
-        Debug.Log($"[Breakdown] 스킬 분해: Have -1, Dust +{refund} (tier={_tier})");
+        AddHave(_globalIndex, -countToBreak);
+        _character.Character_SkillDust += refundPer * countToBreak;
 
+        Debug.Log($"[Breakdown] 스킬 분해: Have -{countToBreak}, Dust +{refundPer * countToBreak} (tier={_tier})");
+
+        // 분해 후 선택 개수 초기화 & UI 갱신
+        _breakCount = 0;
         TrySave();
         RefreshUI();
         _onUpgraded?.Invoke();
+    }
+
+
+    // 버튼 텍스트 얻기 (UGUI Text 기준)
+    private Text GetButtonLabel(Button btn)
+    {
+        return btn ? btn.GetComponentInChildren<Text>() : null;
+    }
+
+    // have(보유 수량)에 맞춰 분해 UI 상태 갱신
+    private void UpdateBreakdownUI(int have)
+    {
+        // 현재 선택 개수 보정
+        _breakCount = Mathf.Clamp(_breakCount, 0, Mathf.Max(0, have));
+
+        // breakdown 버튼 텍스트
+        var label = GetButtonLabel(breakdownButton);
+        if (label != null)
+        {
+            label.text = (_breakCount > 0) ? $"분해하기: {_breakCount}개" : "분해하기";
+        }
+
+        // 버튼 활성화 조건
+        if (breakdownButton) breakdownButton.interactable = (_tier >= 1) && (have > 0);
+        if (breakitemupButton) breakitemupButton.interactable = (_tier >= 1) && (have > _breakCount);
+        if (breakitemdownButton) breakitemdownButton.interactable = (_tier >= 1) && (_breakCount > 0);
+    }
+
+    // Up/Down 클릭 시 호출
+    private void ChangeBreakCount(int delta)
+    {
+        if (_character == null) return;
+
+        int have = GetHave(_globalIndex);
+        int prev = _breakCount;
+        _breakCount = Mathf.Clamp(_breakCount + delta, 0, Mathf.Max(0, have));
+
+        // 상태가 바뀌었을 때만 UI 갱신
+        if (_breakCount != prev)
+            UpdateBreakdownUI(have);
     }
 
     private void Close()

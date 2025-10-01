@@ -20,13 +20,20 @@ public class SkillArchiveUI : MonoBehaviour
     public GameObject skillIconPrefab;   // 스킬 아이콘 프리팹
     public Button previousButton;
     public Button nextButton;
+    public Sprite starSprite;
 
     [Header("Popup")]
     public Transform popupParent;              // 팝업을 붙일 부모(FullScreen Canvas 밑)
     public GameObject skillUpgradeUIPrefab;    // SkillUpgradeUI 프리팹
     private SkillUpgradeUI currentPopup;       // 중복 생성 방지/관리
 
+    [Header("Bulk Upgrade")]
+    public Button allUpgradeButton;   // AllUpgradeButton 연결
+    public GameObject bulkResultPopupPrefab;   // 모달 팝업 프리팹(배경+패널+스크롤+닫기)
+    public GameObject bulkResultItemPrefab;    // 스크롤 아이템 프리팹(아이콘+텍스트들)
+
     private string exclamationChildName = "bUpgrade";   //프리팹 업그레이드 가능 확인 이미지 이름
+    private GameObject currentBulkPopup = null;
 
     // 페이징 및 필터 관련 변수
     private int currentPage = 0;
@@ -49,6 +56,15 @@ public class SkillArchiveUI : MonoBehaviour
         public int localIndex; // 각 tier 리스트 안의 인덱스
         public SkillRef(Skill_Data d, int t, int li) { data = d; tier = t; localIndex = li; }
     }
+    private class UpgradeResult
+    {
+        public Skill_Data skill;
+        public int tier;
+        public int prevLevel;
+        public int newLevel;
+        public int spent;     // 소비한 스킬 조각(수)
+        public Sprite icon;
+    }
 
     void Start()
     {
@@ -61,6 +77,9 @@ public class SkillArchiveUI : MonoBehaviour
         allSkills.AddRange(tier0Skills);
         allSkills.AddRange(tier1Skills);
         allSkills.AddRange(tier2Skills);
+
+        if (allUpgradeButton != null)
+            allUpgradeButton.onClick.AddListener(OnClickAllUpgrade);
 
         // 기본 화면 갱신
         RefreshSkillGrid();
@@ -144,7 +163,18 @@ public class SkillArchiveUI : MonoBehaviour
                 // LearnedOnly/UpgradableOnly에서는 대부분 isKnow=true지만, 안전하게 처리
                 iconImage.sprite = (skillData.isKnow) ? skillData.skillIcon : UnknowSkillIcon;
             }
-
+            // skillIconPrefab 안에 "SUpgradePanel"이라는 이름의 자식을 가져온다.
+            var sUpgradePanel = icon.transform.Find("SUpgradePanel");
+            if (sUpgradePanel != null)
+            {
+                // 레벨 10당 별 1개
+                int starCount = Mathf.Clamp(skillData.level / 10, 0, 10);
+                PopulateStarGrid(sUpgradePanel, starCount);
+            }
+            else
+            {
+                Debug.LogWarning("[SkillArchiveUI] SUpgradePanel을 찾을 수 없습니다. 프리팹 구조를 확인하세요.");
+            }
             // 느낌표(bUpgrade) 토글
             Transform exMarkTr = icon.transform.Find(exclamationChildName);
             if (exMarkTr != null)
@@ -273,6 +303,53 @@ public class SkillArchiveUI : MonoBehaviour
 
         return have >= need;
     }
+    // 업그레이드에 따른 별 추가
+    // 업그레이드에 따른 별 추가
+    private void PopulateStarGrid(Transform panel, int starCount)
+    {
+        if (panel == null) return;
+
+        // 기존 자식 제거(중복 생성 방지)
+        for (int i = panel.childCount - 1; i >= 0; i--)
+            Destroy(panel.GetChild(i).gameObject);
+
+        // GridLayoutGroup 보장
+        var grid = panel.GetComponent<GridLayoutGroup>();
+        if (grid == null) grid = panel.gameObject.AddComponent<GridLayoutGroup>();
+        grid.cellSize = new Vector2(20f, 20f);
+
+        // 칸 간격 5px
+        grid.spacing = new Vector2(5f, 5f);
+
+        grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+        grid.constraintCount = 5;         // 5열 고정 → 5x2 형태
+
+        // 정렬 기준: 오른쪽 아래
+        grid.startCorner = GridLayoutGroup.Corner.LowerRight;
+        grid.startAxis = GridLayoutGroup.Axis.Horizontal;
+        grid.childAlignment = TextAnchor.LowerRight;
+
+        // 가장자리 간격 10px
+        grid.padding = new RectOffset(10, 10, 10, 10);
+
+        // 별 생성 (최대 10개)
+        starCount = Mathf.Clamp(starCount, 0, 10);
+        for (int i = 0; i < starCount; i++)
+        {
+            var starGO = new GameObject($"Star_{i}", typeof(RectTransform), typeof(Image));
+            starGO.transform.SetParent(panel, false);
+
+            var rt = (RectTransform)starGO.transform;
+            rt.sizeDelta = new Vector2(20f, 20f);
+
+            var img = starGO.GetComponent<Image>();
+            img.sprite = starSprite;
+            img.preserveAspect = true;   // 이미지 비율 유지
+            img.raycastTarget = false;   // 클릭 방해 X
+        }
+    }
+
+
 
     //필터 리스트
     private List<SkillRef> BuildFilteredList()
@@ -316,6 +393,199 @@ public class SkillArchiveUI : MonoBehaviour
         }
 
         return list;
+    }
+
+    // allupgrade 
+    private void OnClickAllUpgrade()
+    {
+        if (character == null || character.Character_HaveSkill == null) return;
+
+        var results = new List<UpgradeResult>();
+
+        // 0→1→2 티어 순으로 처리
+        UpgradeTierList(tier0Skills, 0, results);
+        UpgradeTierList(tier1Skills, 1, results);
+        UpgradeTierList(tier2Skills, 2, results);
+
+        // UI 갱신
+        RefreshSkillGrid();
+
+        // 팝업 띄우기
+        ShowBulkUpgradePopup(results);
+    }
+
+    private void UpgradeTierList(List<Skill_Data> list, int tier, List<UpgradeResult> results)
+    {
+        if (list == null || character == null || character.Character_HaveSkill == null) return;
+
+        for (int localIndex = 0; localIndex < list.Count; localIndex++)
+        {
+            var s = list[localIndex];
+            if (s == null || !s.isKnow) continue;
+
+            int maxLv = GetMaxLevelByTier(s.Tier);
+            if (s.level >= maxLv) continue;
+
+            int globalIndex = GetGlobalIndexFromTierLocal(tier, localIndex);
+            if (globalIndex < 0 || globalIndex >= character.Character_HaveSkill.Length) continue;
+
+            int startLevel = s.level;
+            int spent = 0;
+
+            // 안전 가드(무한루프 방지)
+            int guard = 0;
+            while (s.level < maxLv && guard++ < 1000)
+            {
+                int have = character.Character_HaveSkill[globalIndex];
+                int need = Mathf.Max(1, s.NeedLevelUP_Gold);   // 현재 레벨 기준 요구 조각 수
+
+                if (have < need) break;
+
+                // 소비량 집계는 호출 전에 현재 need를 누적
+                spent += need;
+
+                // 실제 레벨업(요구치/데미지/보정/조각 차감은 Character.LevelUpSkill 내부에서 처리)
+                character.LevelUpSkill(tier, localIndex);
+            }
+
+            if (s.level > startLevel)
+            {
+                results.Add(new UpgradeResult
+                {
+                    skill = s,
+                    tier = tier,
+                    prevLevel = startLevel,
+                    newLevel = s.level,
+                    spent = spent,
+                    icon = s.skillIcon
+                });
+            }
+        }
+    }
+
+
+    private void ShowBulkUpgradePopup(List<UpgradeResult> results)
+    {
+        // 기존 팝업이 있다면 제거
+        if (currentBulkPopup != null)
+        {
+            Destroy(currentBulkPopup);
+            currentBulkPopup = null;
+        }
+
+        if (bulkResultPopupPrefab == null)
+        {
+            Debug.LogError("[SkillArchiveUI] bulkResultPopupPrefab이 설정되지 않았습니다.");
+            return;
+        }
+        if (bulkResultItemPrefab == null)
+        {
+            Debug.LogError("[SkillArchiveUI] bulkResultItemPrefab이 설정되지 않았습니다.");
+            return;
+        }
+
+        // 부모 설정
+        Transform parent = popupParent != null ? popupParent : this.transform.root;
+
+        // 팝업 인스턴스
+        var popupGO = Instantiate(bulkResultPopupPrefab, parent);
+        currentBulkPopup = popupGO;
+
+        // 뒤 클릭 차단(배경 딤 이미지가 반드시 raycastTarget=true)
+        var backdropImg = popupGO.GetComponent<Image>();
+        if (backdropImg != null) backdropImg.raycastTarget = true;
+
+        // 필수 트랜스폼들 탐색
+        var panel = popupGO.transform.Find("Panel");
+        if (panel == null)
+        {
+            Debug.LogError("[SkillArchiveUI] Popup Prefab에 'Panel' 오브젝트가 없습니다.");
+            return;
+        }
+
+        // CloseButton
+        var closeBtnTr = panel.Find("CloseButton");
+        if (closeBtnTr == null)
+        {
+            Debug.LogError("[SkillArchiveUI] Popup Prefab에 'CloseButton'이 없습니다.");
+            return;
+        }
+        var closeBtn = closeBtnTr.GetComponent<Button>();
+        if (closeBtn == null)
+        {
+            Debug.LogError("[SkillArchiveUI] CloseButton에 Button 컴포넌트가 없습니다.");
+            return;
+        }
+
+        // Scroll 구조
+        var scroll = panel.Find("Scroll")?.GetComponent<ScrollRect>();
+        if (scroll == null)
+        {
+            Debug.LogError("[SkillArchiveUI] 'Panel/Scroll(ScrollRect)'을 찾을 수 없습니다.");
+            return;
+        }
+        var viewport = scroll.transform.Find("Viewport") as RectTransform;
+        var content = viewport?.Find("Content") as RectTransform;
+        if (viewport == null || content == null)
+        {
+            Debug.LogError("[SkillArchiveUI] Scroll 안에 'Viewport/Content' 구조가 정확하지 않습니다.");
+            return;
+        }
+
+        // 스크롤 초기화(기존 항목 제거)
+        for (int i = content.childCount - 1; i >= 0; i--)
+            Destroy(content.GetChild(i).gameObject);
+
+        // 결과 없을 때 메시지
+        if (results == null || results.Count == 0)
+        {
+            var emptyGO = new GameObject("EmptyText", typeof(RectTransform), typeof(Text));
+            emptyGO.transform.SetParent(content, false);
+            var t = emptyGO.GetComponent<Text>();
+            t.text = "강화 가능한 스킬이 없습니다.";
+            t.alignment = TextAnchor.MiddleCenter;
+            t.color = Color.white;
+            t.fontSize = 20;
+        }
+        else
+        {
+            // 0 → 1 → 2 티어 순으로 이미 정렬되어 results가 들어옴
+            foreach (var r in results)
+            {
+                CreateResultItem(content, r);
+            }
+        }
+
+        // 닫기
+        closeBtn.onClick.RemoveAllListeners();
+        closeBtn.onClick.AddListener(() =>
+        {
+            Destroy(popupGO);
+            currentBulkPopup = null;
+            // 도감 UI 다시 상호작용 가능
+            RefreshSkillGrid();
+        });
+    }
+    private void CreateResultItem(Transform content, UpgradeResult r)
+    {
+        var item = Instantiate(bulkResultItemPrefab, content);
+        // 필수 하위 찾기
+        var icon = item.transform.Find("SkillIconImage")?.GetComponent<Image>();
+        var nameText = item.transform.Find("SkillNameText")?.GetComponent<Text>();
+        var infoText = item.transform.Find("SkillInfoText")?.GetComponent<Text>();
+
+        if (icon == null || nameText == null || infoText == null)
+        {
+            Debug.LogError("[SkillArchiveUI] bulkResultItemPrefab 구조가 잘못되었습니다. (Icon/NameText/InfoText 필요)");
+            return;
+        }
+
+        // 데이터 바인딩
+        icon.sprite = (r.icon != null) ? r.icon : UnknowSkillIcon;
+        icon.preserveAspect = true;
+
+        nameText.text = $"{r.skill.skillName}  [Tier {r.tier}]";
+        infoText.text = $"Lv {r.prevLevel} → {r.newLevel}   (-{r.spent})";
     }
 
 }
