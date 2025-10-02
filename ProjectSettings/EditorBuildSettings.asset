@@ -26,4 +26,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/QuestScene.unity
     guid: b4100ba1fbf9aee4aacfba6f84c69669
+  - enabled: 1
+    path: Assets/Scenes/StoryMenuScene.unity
+    guid: bc23e3cb5ac6bf04bbee4d39bddaf31d
   m_configObjects: {}

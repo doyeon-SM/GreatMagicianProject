@@ -46,4 +46,7 @@ public class StoryStageAsset : ScriptableObject
 
     [Tooltip("확정 스킬 보상(전역 인덱스 기준). 필요 시 비워도 됨")]
     public List<int> guaranteedSkillIndices = new List<int>();
+
+    public string description;     // 스테이지 설명
+    public string rewardNote;      // 보상 텍스트
 }

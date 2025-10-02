@@ -47,10 +47,15 @@ public class SceneLoader : MonoBehaviour
         SceneManager.LoadScene("Shop");
     }
 
-    public void LoadStoryScene()
+    public void LoadStoryModeScene()
     {
         ReloadAllSkillData();
         SceneManager.LoadScene("StoryModeScene");
+    }
+    public void LoadStoryMenuScene()
+    {
+        ReloadAllSkillData();
+        SceneManager.LoadScene("StoryMenuScene");
     }
 
     public void LoadQuestScene()
