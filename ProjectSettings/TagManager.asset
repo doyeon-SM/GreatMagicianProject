@@ -10,6 +10,7 @@ TagManager:
   - AroundProjectile
   - Create
   - MonsterSpawner
+  - SkillArea
   layers:
   - Default
   - TransparentFX

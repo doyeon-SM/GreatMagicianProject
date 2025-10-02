@@ -158,4 +158,70 @@ public class UnderUI_System_Base : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 다음 스테이지 시작 전, UI 슬롯과 월드에 남아있는 스킬/생성체를 모두 초기화한다.
+    /// </summary>
+    public void ResetForNextStage()
+    {
+        ResetAllSlots();
+        CleanupSpawnedSkillsInWorld();
+        Debug.Log("[UnderUI] ResetForNextStage: slots cleared & world skills cleaned");
+    }
+
+    /// <summary>
+    /// 슬롯 초기화: 모든 슬롯을 비우고 스프라이트 제거
+    /// </summary>
+    public void ResetAllSlots()
+    {
+        if (slotDataList == null) return;
+
+        for (int i = 0; i < slotDataList.Count; i++)
+        {
+            var slot = slotDataList[i];
+            if (slot == null || slot.slotObject == null) continue;
+
+            slot.skillIndex = -1;
+
+            var sr = slot.slotObject.GetComponent<SpriteRenderer>();
+            if (sr != null) sr.sprite = null;
+        }
+    }
+
+    /// <summary>
+    /// 맵에 남아있는 스킬/생성체(태그: "skill", "create")를 제거
+    /// </summary>
+    public void CleanupSpawnedSkillsInWorld()
+    {
+        int removed = 0;
+
+        // 안전 태그 체크 유틸(미등록 태그 접근 시 UnityException 방지)
+        bool IsTagDefined(string t)
+        {
+            try { GameObject.FindGameObjectsWithTag(t); return true; }
+            catch (UnityException) { return false; }
+        }
+
+        if (IsTagDefined("SkillArea"))
+        {
+            var skills = GameObject.FindGameObjectsWithTag("SkillArea");
+            foreach (var go in skills) { if (go) { Destroy(go); removed++; } }
+        }
+        else
+        {
+            Debug.LogWarning("[UnderUI] Tag 'skill' not defined. (무시)");
+        }
+
+        if (IsTagDefined("Create"))
+        {
+            var creates = GameObject.FindGameObjectsWithTag("Create");
+            foreach (var go in creates) { if (go) { Destroy(go); removed++; } }
+        }
+        else
+        {
+            Debug.LogWarning("[UnderUI] Tag 'create' not defined. (무시)");
+        }
+
+        Debug.Log($"[UnderUI] Cleaned spawned skill objects: {removed}");
+    }
+
 }

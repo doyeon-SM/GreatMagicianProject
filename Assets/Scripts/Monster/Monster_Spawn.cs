@@ -65,6 +65,12 @@ public class Monster_Spawn : MonoBehaviour
 
     void Start()
     {
+        // 스토리 모드가 있을 땐, EnableScriptedWaves()가 시작을 관리하므로 자동 시작 방지
+        if (StoryModeManager.Instance != null)
+        {
+            Debug.Log("[Wave] StoryModeManager detected. Waiting for scripted start.");
+            return;
+        }
         BeginWave(currentWave);
     }
 

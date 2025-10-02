@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 4522209174839948347}
   m_Layer: 5
   m_Name: T2_Create_HP
-  m_TagString: Untagged
+  m_TagString: Create
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

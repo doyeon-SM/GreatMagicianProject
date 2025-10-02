@@ -25,6 +25,7 @@ public class StoryModeManager : MonoBehaviour
     private const string StorySceneName = "StoryModeScene";
     private bool _pendingNext;
     private StoryStageAsset _pendingStage;
+    private bool _isStartingStage = false;
 
     private void Awake()
     {
@@ -55,19 +56,31 @@ public class StoryModeManager : MonoBehaviour
     // ===== 외부에서 호출: 스토리 모드 시작 =====
     public void StartStoryStage(StoryStageAsset stage)
     {
+        // 중복/재진입 가드
+        if (_isStartingStage)
+        {
+            Debug.LogWarning("[StoryMode] StartStoryStage ignored: already starting.");
+            return;
+        }
+        _isStartingStage = true;
+
         TryAutoWire();
         if (!monsterSpawn || !scoreSystem || stage == null)
         {
+            _isStartingStage = false;
             Debug.LogError("[StoryMode] 시작 실패: 레퍼런스 또는 StageAsset 누락");
             return;
         }
 
-        // 스테이지 시작 전에 벽/마나 등 리셋
+        // === 리셋들 ===
         var wall = FindObjectOfType<Wall_System_Base>(true);
         if (wall) wall.ResetForNextStage();
 
         var mana = FindObjectOfType<Mana_Base>(true);
-        if (mana != null) Mana_Base.currentMana = 0f; // 필요 시 정책에 맞게 조절(풀/0)
+        if (mana != null) Mana_Base.currentMana = 0f;
+
+        var underUI = UnderUI_System_Base.Instance ?? FindObjectOfType<UnderUI_System_Base>(true);
+        if (underUI != null) underUI.ResetForNextStage();
 
         isStoryRun = true;
         currentStage = stage;
@@ -76,7 +89,35 @@ public class StoryModeManager : MonoBehaviour
 
         scoreSystem.score = 0;
         Debug.Log($"[StoryMode] Start {stage.stageId} (waves={stage.waveCount})");
+
+        // 시작 완료 후 플래그 해제
+        _isStartingStage = false;
     }
+
+    public void StartFromLastCheckpoint(StoryStageAssetResolver resolver)
+    {
+        // 대기 중(next 큐)이라면 부트스트랩 호출 무시
+        if (_pendingNext)
+        {
+            Debug.Log("[StoryMode] StartFromLastCheckpoint ignored: pending queued next stage.");
+            return;
+        }
+        // 이미 진행 중이면 무시
+        if (_isStartingStage || (isStoryRun && currentStage != null))
+        {
+            Debug.Log("[StoryMode] StartFromLastCheckpoint ignored: stage already running/starting.");
+            return;
+        }
+
+        var stage = resolver != null ? resolver.Resolve(lastCheckpointStageId) : null;
+        if (stage == null)
+        {
+            Debug.LogError($"[StoryMode] {lastCheckpointStageId} 스테이지를 찾을 수 없습니다.");
+            return;
+        }
+        StartStoryStage(stage);
+    }
+
 
 
     // ===== Monster_Spawn가 최종 웨이브 종료 후 호출 =====
@@ -196,19 +237,6 @@ public class StoryModeManager : MonoBehaviour
         // 프로젝트 SaveSystem에 "lastCheckpointStageId" 같은 필드 추가 권장
         // 여기서는 존재 가정 없이 로그만
         Debug.Log($"[StoryMode] Checkpoint saved: {lastCheckpointStageId}");
-    }
-
-    // ===== 외부 버튼에서: 마지막 도전지점부터 시작 =====
-    public void StartFromLastCheckpoint(StoryStageAssetResolver resolver)
-    {
-        // resolver: stageId → StageAsset을 찾아주는 간단 헬퍼(아래 주석 참조)
-        var stage = resolver != null ? resolver.Resolve(lastCheckpointStageId) : null;
-        if (stage == null)
-        {
-            Debug.LogError($"[StoryMode] {lastCheckpointStageId} 스테이지를 찾을 수 없습니다.");
-            return;
-        }
-        StartStoryStage(stage);
     }
 
     public void QueueStartNextStage(StoryStageAsset next)
