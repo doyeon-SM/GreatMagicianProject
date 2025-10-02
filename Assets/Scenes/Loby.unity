@@ -577,6 +577,18 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+      - m_Target: {fileID: 77215056}
+        m_TargetAssemblyTypeName: Reset_System, Assembly-CSharp
+        m_MethodName: ResetAllTutorials
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &269933938
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1166,6 +1178,7 @@ GameObject:
   m_Component:
   - component: {fileID: 505983495}
   - component: {fileID: 505983494}
+  - component: {fileID: 505983496}
   m_Layer: 0
   m_Name: QuestManager
   m_TagString: Untagged
@@ -1202,6 +1215,20 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &505983496
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 505983493}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f3b5bb6e49f8f3447b50678fb93adeb8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  database: {fileID: 11400000, guid: d51e8e4dd40a75543ac45152dc90c36d, type: 2}
+  popupPrefab: {fileID: 8314629282162481938, guid: f680d4212778be347966a96aaa821e6c, type: 3}
 --- !u!1 &524345239
 GameObject:
   m_ObjectHideFlags: 0

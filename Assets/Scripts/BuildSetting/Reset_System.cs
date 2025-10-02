@@ -186,4 +186,10 @@ public class Reset_System : MonoBehaviour
 
         if (save) save.SaveGameData();
     }
+
+    public void ResetAllTutorials()
+    {
+        CharacterTutorialBridge.ResetAll();
+        // 저장 데이터도 즉시 반영하고 싶다면 SaveGameData() 호출
+    }
 }

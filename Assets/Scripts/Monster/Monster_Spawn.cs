@@ -65,12 +65,14 @@ public class Monster_Spawn : MonoBehaviour
 
     void Start()
     {
-        // 스토리 모드가 있을 땐, EnableScriptedWaves()가 시작을 관리하므로 자동 시작 방지
-        if (StoryModeManager.Instance != null)
+        // 스토리 웨이브는 EnableScriptedWaves()가 시작을 호출하므로 여기서 대기
+        if (useScriptedWaves)
         {
-            Debug.Log("[Wave] StoryModeManager detected. Waiting for scripted start.");
+            Debug.Log("[Wave] useScriptedWaves=true. Waiting for EnableScriptedWaves().");
             return;
         }
+
+        // 일반 모드면 즉시 시작
         BeginWave(currentWave);
     }
 
@@ -119,6 +121,16 @@ public class Monster_Spawn : MonoBehaviour
         if (waveTimer >= waveDuration)
         {
             NextWave();
+        }
+    }
+    void OnEnable()
+    {
+        // 스토리 웨이브를 사용하지 않는 씬이라면, 일반 모드 재가동 보정
+        if (!useScriptedWaves && targetSpawnCountThisWave == 0 && spawnedThisWave == 0 && !isBossWave)
+        {
+            // 아직 BeginWave가 호출되지 않았다면 보정 시작
+            if (currentWave < 1) currentWave = 1;
+            BeginWave(currentWave);
         }
     }
 

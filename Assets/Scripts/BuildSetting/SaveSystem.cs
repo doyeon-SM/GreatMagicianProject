@@ -122,6 +122,13 @@ public class SaveSystem : MonoBehaviour
         if (QuestManager.Instance != null)
             data.questSO = QuestManager.Instance.ExportSave();
 
+        // 튜토리얼 키 저장
+        data.SeenTutorialKeys.Clear();
+        if (TutorialManager.Instance != null && TutorialManager.Instance.database != null)
+        {
+            data.SeenTutorialKeys = TutorialManager.Instance.database.GetClearedKeys();
+        }
+
         string json = JsonUtility.ToJson(data, true);
         File.WriteAllText(savePath, json);
         Debug.Log("저장 완료: " + savePath);
@@ -203,6 +210,11 @@ public class SaveSystem : MonoBehaviour
         //퀘스트 진행 복원
         if (QuestManager.Instance != null)
             QuestManager.Instance.ImportSave(data.questSO);
+        //튜토리얼 로드
+        if (TutorialManager.Instance != null && TutorialManager.Instance.database != null)
+        {
+            TutorialManager.Instance.database.ApplyClearedKeys(data.SeenTutorialKeys);
+        }
 
         Debug.Log("불러오기 완료");
     }

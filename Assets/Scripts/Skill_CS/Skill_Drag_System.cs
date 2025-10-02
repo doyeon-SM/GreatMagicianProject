@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
-using System.Linq; // LINQ 사용
+using UnityEngine.EventSystems;
 
 public class Skill_Drag_System : MonoBehaviour
 {
@@ -51,6 +51,9 @@ public class Skill_Drag_System : MonoBehaviour
     }
     void Update()
     {
+        if (TutorialManager.Instance != null && TutorialManager.Instance.IsShowing)
+            return;
+
         if (HasInput())
         {
             Vector3 screenPos = GetInputPosition();
@@ -129,6 +132,9 @@ public class Skill_Drag_System : MonoBehaviour
 
     private void OnMouseDown()
     {
+        if (TutorialManager.Instance != null && TutorialManager.Instance.IsShowing)
+            return;
+
         if (spriteRenderer.sprite.name != "Blank_Skill_Icon")
         {
             InitializeDrag();
@@ -137,6 +143,9 @@ public class Skill_Drag_System : MonoBehaviour
     }
     private void TryStartDrag(Vector3 pos)
     {
+        if (TutorialManager.Instance != null && TutorialManager.Instance.IsShowing)
+            return;
+
         if (spriteRenderer.sprite.name != "Blank_Skill_Icon")
         {
             if (Vector2.Distance(transform.position, pos) < 1f) // 근접한 터치일 경우만 시작
@@ -322,6 +331,9 @@ public class Skill_Drag_System : MonoBehaviour
 
     private void OnMouseUp()
     {
+        if (TutorialManager.Instance != null && TutorialManager.Instance.IsShowing)
+            return;
+
         if (isDragging && spriteRenderer.sprite.name != "Blank_Skill_Icon")
         {
             isDragging = false;
