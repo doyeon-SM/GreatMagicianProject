@@ -24,7 +24,7 @@ public class Skill_Range_System : MonoBehaviour
         }
         else if (skillData != null && skillData.skillType == Skill_Data.SkillType.Area)
         {
-            periodicDamageCoroutine = StartCoroutine(ApplyPeriodicDamage(skillData.AreaTime, 1.0f));
+            periodicDamageCoroutine = StartCoroutine(ApplyPeriodicDamage(skillData.AreaTime, 0.5f));
         }
         else
         {
@@ -249,7 +249,7 @@ public class Skill_Range_System : MonoBehaviour
                 CreateAroundSkill();
                 break;
 
-            case "StraightLine":   // ★ 추가: 직선형은 캐스트 위치로 다시 조준 후 타격
+            case "StraightLine":   // 직선형은 캐스트 위치로 다시 조준 후 타격
                 AimAndApplyStraightLine(mousePosition);
                 break;
 

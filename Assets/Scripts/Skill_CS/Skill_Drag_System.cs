@@ -540,7 +540,7 @@ public class Skill_Drag_System : MonoBehaviour
                         if (instantiatedRange == null)
                         {
                             instantiatedRange = Instantiate(skillData.rangePrefab, new Vector3(0, -8, 0), Quaternion.identity);
-                            instantiatedRange.transform.localScale = new Vector3(25f, 1f, 1f);  // 1x10 크기 설정
+                            //instantiatedRange.transform.localScale = new Vector3(25f, 1f, 1f);  // 1x10 크기 설정
                             ConfigureRangeObject(instantiatedRange);
                         }
 
