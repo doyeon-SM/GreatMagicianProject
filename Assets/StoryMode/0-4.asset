@@ -19,7 +19,7 @@ MonoBehaviour:
   - waveNumber: 1
     spawns:
     - prefab: {fileID: 1036661608251385216, guid: 5db9230f890dcae48901380e46a2f0f8, type: 3}
-      count: 10
+      count: 5
       hpMultiplier: 1
   - waveNumber: 2
     spawns:

@@ -218,12 +218,12 @@ public class Score_System : MonoBehaviour
         }
         else if (character.tier1Skills != null && skillIndex < character.tier1Skills.Length)
         {
-            picked = character.tier1Skills[skillIndex];
+            picked = character.tier1Skills[skillIndex-4];
             resolvedTier = 1;
         }
         else if (character.tier2Skills != null && skillIndex < character.tier2Skills.Length)
         {
-            picked = character.tier2Skills[skillIndex];
+            picked = character.tier2Skills[skillIndex-14];
             resolvedTier = 2;
         }
 

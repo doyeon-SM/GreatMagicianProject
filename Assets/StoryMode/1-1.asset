@@ -28,7 +28,7 @@ MonoBehaviour:
       hpMultiplier: 1
   - waveNumber: 2
     spawns:
-    - prefab: {fileID: 1036661608251385216, guid: 5db9230f890dcae48901380e46a2f0f8, type: 3}
+    - prefab: {fileID: 1036661608251385216, guid: 84d98d92943d4834ba0e050a6ec9c826, type: 3}
       count: 10
       hpMultiplier: 1
   stageScore: 1000
