@@ -93,11 +93,17 @@ public class GameResultUI : MonoBehaviour
         {
             StoryStageAsset next;
             hasNext = sm.TryPeekPendingNext(out next) && next != null;
+
+            // 다음 스테이지가 있다 = 이번 스테이지 클리어 확정 → 즉시 커밋/저장
+            if (hasNext)
+            {
+                sm.CommitStageClear();
+            }
         }
+
         if (nextStageButton != null)
         {
             nextStageButton.interactable = hasNext;
-            // 필요하면 nextStageButton.gameObject.SetActive(hasNext);
         }
     }
 
@@ -107,17 +113,13 @@ public class GameResultUI : MonoBehaviour
     /// </summary>
     public void OnExitButtonClicked()
     {
-        //scoreSystem.ResultScore();
-
-        // 저장
+        // 저장 (캐릭터/인벤 등)
         if (SaveSystem.Instance != null)
-        {
             SaveSystem.Instance.SaveGameData();
-        }
-        else
-        {
-            Debug.LogWarning("[GameResultUI] SaveSystem.Instance를 찾을 수 없습니다.");
-        }
+
+        // 스토리 진행도도 보장 저장
+        if (StoryModeManager.Instance != null)
+            StoryModeManager.Instance.PersistProgress();
 
         // 점수 리셋 → 로비 → 시간 재개
         scoreSystem.score = 0;

@@ -33,7 +33,7 @@ public class StoryModeManager : MonoBehaviour
 
     private void Awake()
     {
-        if (Instance == null) { Instance = this; DontDestroyOnLoad(gameObject); }
+        if (Instance == null) { Instance = this; DontDestroyOnLoad(gameObject); LoadProgress(); }
         else { Destroy(gameObject); return; }
     }
 
@@ -325,5 +325,46 @@ public class StoryModeManager : MonoBehaviour
         // 다음 스테이지 시작(씬 보장 로직 포함)
         QueueStartNextStage(next);
     }
+    public void CommitStageClear()
+    {
+        if (currentStage == null || string.IsNullOrEmpty(currentStage.stageId))
+            return;
 
+        // 현재가 더 뒤 스테이지면 갱신
+        if (CompareStageId(currentStage.stageId, lastCheckpointStageId) > 0)
+        {
+            lastCheckpointStageId = currentStage.stageId;
+            PersistProgress(); // 즉시 저장
+            Debug.Log($"[Story] Cleared {lastCheckpointStageId} (progress saved)");
+        }
+    }
+    public int CompareStageId(string a, string b)
+    {
+        (int am, int asub) = Parse(a);
+        (int bm, int bsub) = Parse(b);
+        if (am != bm) return am.CompareTo(bm);
+        return asub.CompareTo(bsub);
+
+        (int, int) Parse(string id)
+        {
+            if (string.IsNullOrEmpty(id)) return (0, 0);
+            var parts = id.Split('-');
+            if (parts.Length != 2) return (0, 0);
+            int.TryParse(parts[0], out int major);
+            int.TryParse(parts[1], out int minor);
+            return (major, minor);
+        }
+    }
+    // 진행도 저장/로드
+    public void PersistProgress()
+    {
+        PlayerPrefs.SetString("LastCheckpointStageId", lastCheckpointStageId);
+        PlayerPrefs.Save();
+    }
+
+    public void LoadProgress()
+    {
+        if (PlayerPrefs.HasKey("LastCheckpointStageId"))
+            lastCheckpointStageId = PlayerPrefs.GetString("LastCheckpointStageId", lastCheckpointStageId);
+    }
 }

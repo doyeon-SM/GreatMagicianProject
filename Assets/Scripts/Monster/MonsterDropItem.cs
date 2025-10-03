@@ -6,6 +6,23 @@ public class MonsterDropItem : MonoBehaviour
     public ItemType itemType;
     public Score_System scoreSystem;
 
+    [Header("Rendering")]
+    [Tooltip("아이템 전용 Sorting Layer 이름 (Project Settings > Tags and Layers에서 생성)")]
+    public string sortingLayerName = "Items";
+    [Tooltip("레이어 내 순서 (다른 월드 스프라이트보다 충분히 높게)")]
+    public int sortingOrder = 5000;
+
+    private void Awake()
+    {
+        // 자신 및 자식의 SpriteRenderer를 모두 올려서 월드 내 최상단에 배치
+        var renderers = GetComponentsInChildren<SpriteRenderer>(true);
+        foreach (var r in renderers)
+        {
+            r.sortingLayerName = sortingLayerName;
+            r.sortingOrder = sortingOrder;
+        }
+    }
+
     private void Update()
     {
         if (InputStarted())

@@ -199,7 +199,7 @@ public class UnderUI_System_Base : MonoBehaviour
     }
 
     /// <summary>
-    /// 맵에 남아있는 스킬/생성체(태그: "skill", "create")를 제거
+    /// 맵에 남아있는 스킬/생성체(태그: "skill", "create", "item")를 제거
     /// </summary>
     public void CleanupSpawnedSkillsInWorld()
     {
@@ -230,6 +230,16 @@ public class UnderUI_System_Base : MonoBehaviour
         else
         {
             Debug.LogWarning("[UnderUI] Tag 'create' not defined. (무시)");
+        }
+
+        if (IsTagDefined("Item"))
+        {
+            var items = GameObject.FindGameObjectsWithTag("Item");
+            foreach (var go in items) { if (go) { Destroy(go); removed++; } }
+        }
+        else
+        {
+            Debug.LogWarning("[UnderUI] Tag 'item' not defined. (무시)");
         }
 
         Debug.Log($"[UnderUI] Cleaned spawned skill objects: {removed}");

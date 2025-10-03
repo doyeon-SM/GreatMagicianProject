@@ -12,9 +12,9 @@ GameObject:
   - component: {fileID: 2347939150962026025}
   - component: {fileID: 9064800320476208998}
   - component: {fileID: 9039968140509557019}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: NomalDropItem
-  m_TagString: Untagged
+  m_TagString: Item
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -100,6 +100,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemType: 0
   scoreSystem: {fileID: 1729787502847079638, guid: 3281504f39627b845ba945c89bcc1641, type: 3}
+  sortingLayerName: Items
+  sortingOrder: 5000
 --- !u!58 &9039968140509557019
 CircleCollider2D:
   m_ObjectHideFlags: 0
