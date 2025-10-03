@@ -13,15 +13,18 @@ MonoBehaviour:
   m_Name: TutorialDatabase
   m_EditorClassIdentifier: 
   entries:
-  - key: Tutorial1
-    image: {fileID: 21300000, guid: 5d2634cb99d1ca2448fa480d2d7d7280, type: 3}
+  - key: FirstStart
+    image: {fileID: 21300000, guid: a6206eb996fddc24e942f9ae151ecc45, type: 3}
     clear: 0
+  - key: Tutorial1
+    image: {fileID: 21300000, guid: 5cebc97374931404fa42ff27d6c972b7, type: 3}
+    clear: 1
   - key: Tutorial2
-    image: {fileID: 21300000, guid: 5d2634cb99d1ca2448fa480d2d7d7280, type: 3}
+    image: {fileID: 21300000, guid: 3cbc952f859e12149ae3e59d4c8c43a3, type: 3}
     clear: 0
   - key: Tutorial3
-    image: {fileID: 21300000, guid: 5d2634cb99d1ca2448fa480d2d7d7280, type: 3}
+    image: {fileID: 21300000, guid: acbcf0e5d982ecb478f623a1945d2578, type: 3}
     clear: 0
   - key: Tutorial4
-    image: {fileID: 21300000, guid: 5d2634cb99d1ca2448fa480d2d7d7280, type: 3}
+    image: {fileID: 21300000, guid: 6280fe102d90020409141e22b7846aa0, type: 3}
     clear: 0

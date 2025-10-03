@@ -9,9 +9,15 @@ public class SaveSystem : MonoBehaviour
     public Character character; // 씬에 있는 캐릭터 참조
 
     private string savePath;
+    private bool _wasFirstRun = false;
+
     private void Start()
     {
         LoadGameData();  // 캐릭터와 스킬 배열이 초기화된 이후에 불러오기
+
+        // 첫 실행이면 튜토리얼 예약 트리거
+        if (_wasFirstRun)
+            StartCoroutine(CoTriggerFirstStartTutorialNextFrame());
     }
     private void Awake()
     {
@@ -136,14 +142,22 @@ public class SaveSystem : MonoBehaviour
 
     public void LoadGameData()
     {
-        if (!File.Exists(savePath))
+        bool hasSaveFile = File.Exists(savePath);
+
+        CharacterSaveData data = null;
+
+        if (hasSaveFile)
         {
-            Debug.LogWarning("세이브 파일이 없습니다.");
-            return;
+            string json = File.ReadAllText(savePath);
+            data = JsonUtility.FromJson<CharacterSaveData>(json);
+        }
+        else
+        {
+            Debug.LogWarning("세이브 파일이 없습니다. 기본값으로 시작합니다.");
+            _wasFirstRun = true;                 // 첫 실행 플래그 세움
+            data = new CharacterSaveData();      // 기본 데이터(빈 값) 생성
         }
 
-        string json = File.ReadAllText(savePath);
-        CharacterSaveData data = JsonUtility.FromJson<CharacterSaveData>(json);
 
         // 캐릭터 정보 복원
         character.Character_Level = data.Player_level;
@@ -210,13 +224,17 @@ public class SaveSystem : MonoBehaviour
         //퀘스트 진행 복원
         if (QuestManager.Instance != null)
             QuestManager.Instance.ImportSave(data.questSO);
-        //튜토리얼 로드
+        // 튜토리얼 키 적용
         if (TutorialManager.Instance != null && TutorialManager.Instance.database != null)
-        {
             TutorialManager.Instance.database.ApplyClearedKeys(data.SeenTutorialKeys);
-        }
+        else
+            StartCoroutine(CoApplyTutorialKeysWhenReady(data.SeenTutorialKeys));
 
         Debug.Log("불러오기 완료");
+        // 첫 실행이면 초기 파일을 즉시 저장해 두면 다음부터 hasSaveFile=true로 안전
+        if (_wasFirstRun)
+            SaveGameData();
+
     }
 
     // 헬퍼 함수: SkillSaveData → Skill_Data에 적용
@@ -238,5 +256,24 @@ public class SaveSystem : MonoBehaviour
     private void OnApplicationQuit()
     {
         SaveGameData(); // 게임이 꺼질 때 자동 저장
+    }
+    private IEnumerator CoApplyTutorialKeysWhenReady(System.Collections.Generic.List<string> keys)
+    {
+        // TutorialManager가 살아날 때까지 대기 (씬 전환 등 고려)
+        while (TutorialManager.Instance == null || TutorialManager.Instance.database == null)
+            yield return null;
+
+        TutorialManager.Instance.database.ApplyClearedKeys(keys);
+    }
+
+    // 첫 시작 안내문 
+    private IEnumerator CoTriggerFirstStartTutorialNextFrame()
+    {
+        // TutorialManager 준비 + 한 프레임 대기 후 호출 (UI/Canvas 준비 시간 확보)
+        while (TutorialManager.Instance == null || TutorialManager.Instance.database == null)
+            yield return null;
+        yield return null;
+
+        TutorialManager.Instance.TryTrigger("FirstStart");
     }
 }

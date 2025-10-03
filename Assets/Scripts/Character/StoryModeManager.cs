@@ -94,6 +94,9 @@ public class StoryModeManager : MonoBehaviour
         scoreSystem.score = 0;
         Debug.Log($"[StoryMode] Start {stage.stageId} (waves={stage.waveCount})");
 
+        // 튜토리얼 트리거
+        TryTriggerStageTutorial(stage);
+
         // 시작 완료 후 플래그 해제
         _isStartingStage = false;
     }
@@ -367,4 +370,28 @@ public class StoryModeManager : MonoBehaviour
         if (PlayerPrefs.HasKey("LastCheckpointStageId"))
             lastCheckpointStageId = PlayerPrefs.GetString("LastCheckpointStageId", lastCheckpointStageId);
     }
+
+    // 튜토리얼 트리거(스토리모드)
+    private void TryTriggerStageTutorial(StoryStageAsset stage)
+    {
+        if (stage == null || TutorialManager.Instance == null) return;
+
+        string key = MapStageIdToTutorialKey(stage.stageId);
+        if (string.IsNullOrEmpty(key)) return;
+
+        TutorialManager.Instance.TryTrigger(key);
+    }
+
+    private string MapStageIdToTutorialKey(string stageId)
+    {
+        switch (stageId)
+        {
+            case "0-1": return "Tutorial1";
+            case "0-2": return "Tutorial2";
+            case "0-3": return "Tutorial3";
+            case "0-4": return "Tutorial4";
+            default: return null;
+        }
+    }
+
 }
