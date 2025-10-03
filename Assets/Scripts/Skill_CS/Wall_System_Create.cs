@@ -15,6 +15,10 @@ public class Wall_System_Create : MonoBehaviour
     private float damageInterval = 1f; // 1초에 한 번 체력이 감소
     private float damageTimer = 0f;
 
+    // 자연 붕괴(2초마다 체력 1 감소)
+    private float decayInterval = 2f;
+    private float decayTimer = 0f;
+
     public Skill_Data skillData;
 
     // Start is called before the first frame update
@@ -59,6 +63,15 @@ public class Wall_System_Create : MonoBehaviour
                 }
             }            
         }
+
+        // 자연 붕괴(접촉 여부와 무관)
+        decayTimer += Time.deltaTime;
+        if (decayTimer >= decayInterval)
+        {
+            ReduceHealthFlat(1);   // 접촉 수와 무관하게 고정 1 감소
+            decayTimer = 0f;
+        }
+
         // 체력이 0 이하가 되면 게임 종료
         if (currentHealth <= 0)
         {
@@ -101,8 +114,17 @@ public class Wall_System_Create : MonoBehaviour
             healthText.text = currentHealth.ToString();
         }
     }
-    // 체력을 UI로 업데이트하는 함수
-    
+
+    // 접촉 수와 무관하게 고정량으로 체력 감소(자연붕괴)
+    private void ReduceHealthFlat(int amount)
+    {
+        currentHealth = Mathf.Max(0, currentHealth - amount);
+        if (healthTextInstance != null)
+        {
+            healthText.text = currentHealth.ToString();
+        }
+    }
+
     private void DestroyCreate()
     {
         Debug.Log("벽이 파괴되었습니다.");

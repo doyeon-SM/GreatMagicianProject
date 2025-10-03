@@ -41,7 +41,7 @@ MonoBehaviour:
     - prefab: {fileID: 1036661608251385216, guid: 5db9230f890dcae48901380e46a2f0f8, type: 3}
       count: 20
       hpMultiplier: 5
-  stageScore: 5000
+  stageScore: 10000
   bonusGold: 0
   bonusExp: 0
   guaranteedSkillIndices: 09000000

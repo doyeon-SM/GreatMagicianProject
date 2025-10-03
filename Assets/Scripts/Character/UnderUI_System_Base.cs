@@ -21,8 +21,6 @@ public class UnderUI_System_Base : MonoBehaviour
     private int totalSlots = 10;
     private int slotsPerRow = 5;
 
-    private bool _firstAddSkillTriggered = false;
-
     void Awake()
     {
         if (Instance == null)
@@ -97,14 +95,6 @@ public class UnderUI_System_Base : MonoBehaviour
     public void AddSkill()
     {
         Debug.Log("AddSkill() 호출됨");
-
-        if (!_firstAddSkillTriggered)
-        {
-            _firstAddSkillTriggered = true;
-
-            // 이미 clear된 경우 TutorialManager가 내부에서 무시
-            TutorialManager.Instance?.TryTrigger("FirstSkillCreated");
-        }
 
         for (int i = 0; i < slotDataList.Count; i++)
         {
