@@ -742,7 +742,7 @@ MonoBehaviour:
   character: {fileID: 3443930130645529466, guid: c892dc471f46e894bb4ad5fbf72dc345, type: 3}
   scoreSystem: {fileID: 1729787502847079638, guid: 3281504f39627b845ba945c89bcc1641, type: 3}
   monsterspawn: {fileID: 406770175}
-  gameResultUIPrefab: {fileID: 0}
+  gameResultUIPrefab: {fileID: 8428314767615906065, guid: 5b33281bd789ba04db1686d03cc53674, type: 3}
   maxHealth: 100
   currentHealth: 0
   healthText: {fileID: 1859914502}

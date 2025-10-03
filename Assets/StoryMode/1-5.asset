@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 26bc61d255e5caf4bbe1de4ce3ce7f67, type: 3}
-  m_Name: 1-2
+  m_Name: 1-5
   m_EditorClassIdentifier: 
-  stageId: 1-2
+  stageId: 1-5
   waveCount: 3
   waveDuration: 15
   scriptedWaves:
@@ -28,12 +28,12 @@ MonoBehaviour:
       hpMultiplier: 1
   - waveNumber: 2
     spawns:
-    - prefab: {fileID: 1036661608251385216, guid: 84d98d92943d4834ba0e050a6ec9c826, type: 3}
-      count: 10
-      hpMultiplier: 1
+    - prefab: {fileID: 1036661608251385216, guid: df2b943ea147bb44f8bb1d92b57892a2, type: 3}
+      count: 1
+      hpMultiplier: 20
   stageScore: 1000
-  bonusGold: 0
+  bonusGold: 1000
   bonusExp: 0
-  guaranteedSkillIndices: 05000000
-  description: "\uCC28\uC6D0\uC758 \uD2C8"
+  guaranteedSkillIndices: 08000000
+  description: "\uCCAB \uBCF4\uC2A4\uC804"
   rewardNote: 

@@ -1,0 +1,49 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 26bc61d255e5caf4bbe1de4ce3ce7f67, type: 3}
+  m_Name: 3-3
+  m_EditorClassIdentifier: 
+  stageId: 3-3
+  waveCount: 5
+  waveDuration: 10
+  scriptedWaves:
+  - waveNumber: 1
+    spawns:
+    - prefab: {fileID: 1036661608251385216, guid: ef211c5dc4a52c54397f9ef3c73e6c65, type: 3}
+      count: 30
+      hpMultiplier: 10
+  - waveNumber: 2
+    spawns:
+    - prefab: {fileID: 1036661608251385216, guid: ef211c5dc4a52c54397f9ef3c73e6c65, type: 3}
+      count: 30
+      hpMultiplier: 10
+  - waveNumber: 3
+    spawns:
+    - prefab: {fileID: 1036661608251385216, guid: ef211c5dc4a52c54397f9ef3c73e6c65, type: 3}
+      count: 30
+      hpMultiplier: 10
+  - waveNumber: 4
+    spawns:
+    - prefab: {fileID: 1036661608251385216, guid: ef211c5dc4a52c54397f9ef3c73e6c65, type: 3}
+      count: 30
+      hpMultiplier: 10
+  - waveNumber: 5
+    spawns:
+    - prefab: {fileID: 1036661608251385216, guid: ef211c5dc4a52c54397f9ef3c73e6c65, type: 3}
+      count: 30
+      hpMultiplier: 10
+  stageScore: 10000
+  bonusGold: 0
+  bonusExp: 0
+  guaranteedSkillIndices: 0b0000000b0000000b0000000b000000
+  description: "\uBC14\uB78C\uC774 \uBD80\uB294 \uC5B8\uB355"
+  rewardNote: 

@@ -91,19 +91,13 @@ public class GameResultUI : MonoBehaviour
         var sm = StoryModeManager.Instance;
         if (sm != null && sm.isStoryRun)
         {
-            var resolver = FindObjectOfType<StoryStageAssetResolver>(true);
-            if (resolver != null)
-            {
-                // 여기서 sm.lastCheckpointStageId는 이미 '다음 스테이지'로 갱신된 상태
-                var next = resolver.Resolve(sm.lastCheckpointStageId);
-                hasNext = (next != null);
-            }
+            StoryStageAsset next;
+            hasNext = sm.TryPeekPendingNext(out next) && next != null;
         }
-
         if (nextStageButton != null)
         {
             nextStageButton.interactable = hasNext;
-            //nextStageButton.gameObject.SetActive(hasNext);  // 완전 숨김 처리 
+            // 필요하면 nextStageButton.gameObject.SetActive(hasNext);
         }
     }
 
@@ -254,18 +248,11 @@ public class GameResultUI : MonoBehaviour
         Time.timeScale = 1f;
 
         var sm = StoryModeManager.Instance;
-        var resolver = FindObjectOfType<StoryStageAssetResolver>(true);
-        if (sm == null || resolver == null) return;
+        if (sm == null) return;
 
-        var next = resolver.Resolve(sm.lastCheckpointStageId);
-        if (next == null)
-        {
-            Debug.LogWarning("[GameResultUI] 다음 스테이지 SO를 찾지 못했습니다.");
-            return;
-        }
+        sm.ConfirmAndStartNextStage();
 
         gameObject.SetActive(false);
-        sm.QueueStartNextStage(next);   
     }
 
 

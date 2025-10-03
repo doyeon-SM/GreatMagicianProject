@@ -116,7 +116,7 @@ public class SaveSystem : MonoBehaviour
         // 스토리 진행 저장
         data.story_lastStageId = StoryModeManager.Instance != null
             ? StoryModeManager.Instance.lastCheckpointStageId
-            : "1-1";
+            : "0-1";
 
         //퀘스트 저장
         if (QuestManager.Instance != null)
@@ -195,8 +195,8 @@ public class SaveSystem : MonoBehaviour
             // 세이브에 없으면(구버전) 현재 길이에 맞춰 0으로 초기화
             character.Character_HaveSkill = new int[expectedLen];
         }
-        // 스토리 진행 복원 (필드가 없거나 빈 경우 기본값 "1-1")
-        string restoredStageId = string.IsNullOrEmpty(data.story_lastStageId) ? "1-1" : data.story_lastStageId;
+        // 스토리 진행 복원 (필드가 없거나 빈 경우 기본값 "0-1")
+        string restoredStageId = string.IsNullOrEmpty(data.story_lastStageId) ? "0-1" : data.story_lastStageId;
         if (StoryModeManager.Instance != null)
         {
             StoryModeManager.Instance.lastCheckpointStageId = restoredStageId;

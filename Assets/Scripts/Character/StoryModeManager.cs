@@ -12,12 +12,15 @@ public class StoryModeManager : MonoBehaviour
     public Score_System scoreSystem;
     public SceneLoader sceneLoader;
 
+    [Header("Stages")]
+    public StoryStageAssetResolver resolver;
+
     [Header("진행 상태")]
     public bool isStoryRun = false;
     public StoryStageAsset currentStage;
 
     // 간단 진행도(마지막 도전지점). 프로젝트 SaveSystem와 연동 권장
-    public string lastCheckpointStageId = "1-1"; // 초기 기본값
+    public string lastCheckpointStageId = "0-1"; // 초기 기본값
 
     [Header("Result UI")]
     public GameObject gameResultUIPrefab;
@@ -26,6 +29,7 @@ public class StoryModeManager : MonoBehaviour
     private bool _pendingNext;
     private StoryStageAsset _pendingStage;
     private bool _isStartingStage = false;
+    private string _pendingNextStageId = null;
 
     private void Awake()
     {
@@ -44,7 +48,7 @@ public class StoryModeManager : MonoBehaviour
         yield return null;
 
         if (string.IsNullOrEmpty(lastCheckpointStageId))
-            lastCheckpointStageId = "1-1";
+            lastCheckpointStageId = "0-1";
     }
     private void TryAutoWire()
     {
@@ -149,28 +153,23 @@ public class StoryModeManager : MonoBehaviour
         if (currentStage.bonusExp > 0)
             scoreSystem.character.CharacterLevelUP(currentStage.bonusExp);
 
-        // 결과 기록 초기화 후 보장 보상 먼저 누적
+        // 결과 기록 초기화 후 확정보상 먼저
         if (scoreSystem.LastAwarded == null) scoreSystem.LastAwarded = new List<Score_System.AwardedSkillInfo>();
         scoreSystem.LastAwarded.Clear();
 
         foreach (var idx in currentStage.guaranteedSkillIndices)
             scoreSystem.AddGuaranteedSkillByIndex(idx);
 
-        // 다음 도전 지점 갱신을 먼저 하고
-        lastCheckpointStageId = GetNextStageId(currentStage.stageId);
-        SaveCheckpoint();
+        // 다음 스테이지 "후보"만 계산해서 보관. 체크포인트는 아직 갱신하지 않음!
+        _pendingNextStageId = GetNextStageIdByOrder(currentStage.stageId);
 
-        ShowResultAndNext();  // ShowResult에서 ResultScore() 호출 → 랜덤 보상 '추가'
+        ShowResultAndNext();
     }
 
 
     private void ShowResultAndNext()
     {
-        // 먼저 다음 도전 지점으로 갱신 (버튼 노출 판단이 '다음' 기준으로 되도록)
-        lastCheckpointStageId = GetNextStageId(currentStage.stageId);
-        SaveCheckpoint();
-
-        // 결과창 찾기/생성
+        // 결과창 찾기/생성 (기존 그대로)
         var resultUI = FindObjectOfType<GameResultUI>(true);
         if (!resultUI)
         {
@@ -204,31 +203,40 @@ public class StoryModeManager : MonoBehaviour
             }
         }
 
-        // 주입
         if (!resultUI.scoreSystem) resultUI.scoreSystem = scoreSystem;
         if (!resultUI.sceneLoader) resultUI.sceneLoader = sceneLoader;
         if (!resultUI.monsterSpawn) resultUI.monsterSpawn = monsterSpawn;
 
-        // 결과창 표시 전에 일시정지
         Time.timeScale = 0f;
-
         resultUI.gameObject.SetActive(true);
         resultUI.ShowResult();
     }
 
 
 
-    // "1-1" → "1-2" 같은 증가. 실제 규칙은 프로젝트에 맞게 교체
-    private string GetNextStageId(string cur)
+
+    // Resolver 순서 기반 Next 계산
+    private string GetNextStageIdByOrder(string cur)
     {
-        // "A-B" 포맷 가정
+        if (resolver == null || resolver.stages == null || resolver.stages.Count == 0)
+            return GetNextStageId_FallbackNumeric(cur);
+
+        int idx = resolver.stages.FindIndex(s => s != null && s.stageId == cur);
+        if (idx < 0) return GetNextStageId_FallbackNumeric(cur);
+
+        if (idx + 1 < resolver.stages.Count)
+            return resolver.stages[idx + 1].stageId;
+
+        return cur; // 마지막이면 그대로
+    }
+
+    // 기존 숫자 증가식 폴백(예비용)
+    private string GetNextStageId_FallbackNumeric(string cur)
+    {
         var p = cur.Split('-');
         if (p.Length != 2) return cur;
-
         if (int.TryParse(p[0], out int a) && int.TryParse(p[1], out int b))
-        {
             return $"{a}-{b + 1}";
-        }
         return cur;
     }
 
@@ -241,6 +249,7 @@ public class StoryModeManager : MonoBehaviour
 
     public void QueueStartNextStage(StoryStageAsset next)
     {
+        _pendingNextStageId = null; // 메뉴에서 바로 시작할 땐 이전 보류값 무효화
         if (next == null) { Debug.LogWarning("[StoryMode] QueueStartNextStage: next=null"); return; }
         StartCoroutine(StartNextStageFlow(next));
     }
@@ -285,4 +294,36 @@ public class StoryModeManager : MonoBehaviour
         yield return null;
         StartStoryStage(stage);
     }
+    public bool TryPeekPendingNext(out StoryStageAsset next)
+    {
+        next = null;
+        if (string.IsNullOrEmpty(_pendingNextStageId) || resolver == null) return false;
+        next = resolver.Resolve(_pendingNextStageId);
+        return next != null;
+    }
+    public void ConfirmAndStartNextStage()
+    {
+        if (string.IsNullOrEmpty(_pendingNextStageId) || resolver == null)
+        {
+            Debug.LogWarning("[StoryMode] ConfirmAndStartNextStage: no pending next.");
+            return;
+        }
+
+        var next = resolver.Resolve(_pendingNextStageId);
+        if (next == null)
+        {
+            Debug.LogWarning($"[StoryMode] Pending next '{_pendingNextStageId}' not found.");
+            return;
+        }
+
+        // 여기서 '진짜'로 체크포인트 갱신 후 저장
+        lastCheckpointStageId = _pendingNextStageId;
+        SaveCheckpoint();
+
+        _pendingNextStageId = null; // 소모
+
+        // 다음 스테이지 시작(씬 보장 로직 포함)
+        QueueStartNextStage(next);
+    }
+
 }

@@ -8,7 +8,7 @@ public class StoryMenuController : MonoBehaviour
     [Header("Data")]
     public StoryStageAssetResolver resolver;   // stages 리스트 포함(모든 스테이지 등록)
     public StoryModeManager storyManager;      // 씬에 존재(없으면 런타임에 Find)
-    public string firstStageId = "1-1";
+    public string firstStageId = "0-1";
 
     [Header("Scroll UI")]
     public ScrollRect scrollRect;

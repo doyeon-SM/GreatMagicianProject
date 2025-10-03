@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: -4932612282564971601}
   - component: {fileID: 5914265774075559566}
   m_Layer: 6
-  m_Name: Monster_Boss
+  m_Name: Monster_Boss(T)
   m_TagString: Monster
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -170,3 +170,4 @@ MonoBehaviour:
   isBlind: 0
   normalSpherePrefab: {fileID: 7365884234219019472, guid: 8db9cb3e5c06c884a9372704eddfb62a, type: 3}
   advancedSpherePrefab: {fileID: 4306010834490960934, guid: 3e673a4045568324cbe14a73dbdd18f6, type: 3}
+  damageTextPrefab: {fileID: 1159308950168986743, guid: 08be37b1e4e23bb43a84b1a025007bf3, type: 3}

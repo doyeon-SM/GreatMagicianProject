@@ -2518,9 +2518,10 @@ MonoBehaviour:
   monsterSpawn: {fileID: 0}
   scoreSystem: {fileID: 1729787502847079638, guid: 3281504f39627b845ba945c89bcc1641, type: 3}
   sceneLoader: {fileID: 2323275790718373533, guid: e1ddb7b833db56049884fac2512d41da, type: 3}
+  resolver: {fileID: 1045821818393164139, guid: 1145a0b7197c97347885dfb2639dd592, type: 3}
   isStoryRun: 0
-  currentStage: {fileID: 11400000, guid: ac2e2fdab9a606e4facf0d735ee77d7d, type: 2}
-  lastCheckpointStageId: 1-1
+  currentStage: {fileID: 11400000, guid: d65c4654964f35d4298826efab6b8270, type: 2}
+  lastCheckpointStageId: 0-1
   gameResultUIPrefab: {fileID: 8428314767615906065, guid: 5b33281bd789ba04db1686d03cc53674, type: 3}
 --- !u!4 &2061626176
 Transform:

@@ -10,30 +10,40 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 26bc61d255e5caf4bbe1de4ce3ce7f67, type: 3}
-  m_Name: 1-1
+  m_Name: 2-1
   m_EditorClassIdentifier: 
-  stageId: 1-1
-  waveCount: 3
+  stageId: 2-1
+  waveCount: 5
   waveDuration: 15
   scriptedWaves:
-  - waveNumber: 0
-    spawns:
-    - prefab: {fileID: 1036661608251385216, guid: 5db9230f890dcae48901380e46a2f0f8, type: 3}
-      count: 10
-      hpMultiplier: 1
   - waveNumber: 1
     spawns:
     - prefab: {fileID: 1036661608251385216, guid: 5db9230f890dcae48901380e46a2f0f8, type: 3}
-      count: 10
-      hpMultiplier: 1
+      count: 20
+      hpMultiplier: 5
   - waveNumber: 2
     spawns:
     - prefab: {fileID: 1036661608251385216, guid: 5db9230f890dcae48901380e46a2f0f8, type: 3}
-      count: 10
-      hpMultiplier: 1
-  stageScore: 1000
+      count: 20
+      hpMultiplier: 5
+  - waveNumber: 3
+    spawns:
+    - prefab: {fileID: 1036661608251385216, guid: 5db9230f890dcae48901380e46a2f0f8, type: 3}
+      count: 20
+      hpMultiplier: 5
+  - waveNumber: 4
+    spawns:
+    - prefab: {fileID: 1036661608251385216, guid: 5db9230f890dcae48901380e46a2f0f8, type: 3}
+      count: 20
+      hpMultiplier: 5
+  - waveNumber: 5
+    spawns:
+    - prefab: {fileID: 1036661608251385216, guid: 5db9230f890dcae48901380e46a2f0f8, type: 3}
+      count: 20
+      hpMultiplier: 5
+  stageScore: 5000
   bonusGold: 0
   bonusExp: 0
-  guaranteedSkillIndices: 04000000
-  description: "\uC2A4\uD1A0\uB9AC\uC758 \uC2DC\uC791"
+  guaranteedSkillIndices: 09000000
+  description: "\uC804\uC9C4"
   rewardNote: 

@@ -5,7 +5,7 @@ using UnityEngine;
 public class StoryStageAsset : ScriptableObject
 {
     [Header("식별자 (예: 1-1, 2-4)")]
-    public string stageId = "1-1";
+    public string stageId = "0-1";
 
     [Header("웨이브 설정")]
     [Tooltip("스토리 웨이브 수 (scriptedWaves.Count와 일치 권장)")]

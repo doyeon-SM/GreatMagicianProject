@@ -151,15 +151,15 @@ public class Reset_System : MonoBehaviour
     }
 
     /// <summary>
-    /// 스토리 진행을 1-1로 초기화.
+    /// 스토리 진행을 0-1로 초기화.
     /// (캐릭터/스킬 초기화와 별개로 호출 가능)
     /// </summary>
     public void StoryProgressReset()
     {
         if (StoryModeManager.Instance != null)
         {
-            StoryModeManager.Instance.lastCheckpointStageId = "1-1";
-            Debug.Log("[Reset] 스토리 진행을 1-1로 초기화했습니다.");
+            StoryModeManager.Instance.lastCheckpointStageId = "0-1";
+            Debug.Log("[Reset] 스토리 진행을 0-1로 초기화했습니다.");
         }
         else
         {
