@@ -70,6 +70,7 @@ public class GameResultUI : MonoBehaviour
 
     public void ShowResult()
     {
+        _clearCommitted = false;
         gameObject.SetActive(true);
 
         // 보상 계산
@@ -117,6 +118,19 @@ public class GameResultUI : MonoBehaviour
     /// </summary>
     public void OnExitButtonClicked()
     {
+        // 스토리 진행 체크포인트
+        var sm = StoryModeManager.Instance;
+        if (sm != null && sm.isStoryRun)
+        {
+            StoryStageAsset peek;
+            if (sm.TryPeekPendingNext(out peek) && peek != null)
+            {
+                // 다음 스테이지가 존재하면 체크포인트를 다음으로 저장
+                sm.lastCheckpointStageId = peek.stageId;
+                sm.PersistProgress();
+            }
+        }
+
         // 보상/진행 저장
         if (SaveSystem.Instance != null)
             SaveSystem.Instance.SaveGameData();
@@ -128,6 +142,7 @@ public class GameResultUI : MonoBehaviour
         sceneLoader.LoadLobyScene();
         Time.timeScale = 1;
     }
+
 
     // ====== 내부: 스크롤 그리드 구성 ======
 

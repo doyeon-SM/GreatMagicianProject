@@ -86,6 +86,9 @@ public class StoryModeManager : MonoBehaviour
         var underUI = UnderUI_System_Base.Instance ?? FindObjectOfType<UnderUI_System_Base>(true);
         if (underUI != null) underUI.ResetForNextStage();
 
+        var sc = FindObjectOfType<Score_System>(true);
+        if (sc != null) sc.BeginStageRun();
+
         isStoryRun = true;
         currentStage = stage;
 

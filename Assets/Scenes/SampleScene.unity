@@ -470,7 +470,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 10
+  orthographic size: 12
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -565,7 +565,7 @@ BoxCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: -0.48, y: 8}
+  m_Offset: {x: -0.48, y: 9.1}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0, y: 0}
@@ -576,7 +576,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 0.01, y: 18}
+  m_Size: {x: 0.01, y: 20}
   m_EdgeRadius: 0
 --- !u!1 &752546734
 GameObject:
@@ -691,7 +691,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 2, y: -552}
+  m_AnchoredPosition: {x: 0, y: -473}
   m_SizeDelta: {x: 578.4476, y: 67.0089}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &767238280
@@ -887,7 +887,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: -6, z: 0}
-  m_LocalScale: {x: 12, y: 1, z: 1}
+  m_LocalScale: {x: 14, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 560305354}
@@ -1121,7 +1121,7 @@ BoxCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0.48, y: 8}
+  m_Offset: {x: 0.48, y: 9.48}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0, y: 0}
@@ -1132,7 +1132,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 0.01, y: 18}
+  m_Size: {x: 0.01, y: 20}
   m_EdgeRadius: 0
 --- !u!1 &1859914500
 GameObject:
@@ -1168,8 +1168,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0.000015259, y: -470}
-  m_SizeDelta: {x: 578.4476, y: 134.02}
+  m_AnchoredPosition: {x: 0, y: -400}
+  m_SizeDelta: {x: 578.45, y: 64.92}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1859914502
 MonoBehaviour:

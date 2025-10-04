@@ -26,16 +26,24 @@ public class Score_System : MonoBehaviour
     }
     public List<AwardedSkillInfo> LastAwarded = new List<AwardedSkillInfo>();
 
+    // 스테이지마다 결과 적재 플래그 리셋
+    public void BeginStageRun()
+    {
+        _resultApplied = false;
+        LastAwarded.Clear();
+    }
+    private void OnEnable()
+    {
+        _resultApplied = false;
+    }
+
     public void ResultScore()
     {
         if (_resultApplied) return;   // 두 번 이상 호출 방지
         _resultApplied = true;
-
-        LastAwarded.Clear();
-
         if (score > 0)
         {
-            character.Character_Gold = score;
+            character.Character_Gold += score;
             character.CharacterLevelUP(score / 100);
 
             AwardRandomSkills(score);
