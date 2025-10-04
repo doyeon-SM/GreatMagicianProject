@@ -381,7 +381,7 @@ Camera:
   m_GameObject: {fileID: 288587611}
   m_Enabled: 1
   serializedVersion: 2
-  m_ClearFlags: 1
+  m_ClearFlags: 2
   m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
@@ -1072,6 +1072,7 @@ GameObject:
   - component: {fileID: 884106730}
   - component: {fileID: 884106729}
   - component: {fileID: 884106728}
+  - component: {fileID: 884106731}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -1145,7 +1146,7 @@ MonoBehaviour:
   m_ScaleFactor: 1
   m_ReferenceResolution: {x: 1080, y: 1920}
   m_ScreenMatchMode: 0
-  m_MatchWidthOrHeight: 0.5
+  m_MatchWidthOrHeight: 0
   m_PhysicalUnit: 3
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
@@ -1160,20 +1161,33 @@ Canvas:
   m_GameObject: {fileID: 884106726}
   m_Enabled: 1
   serializedVersion: 3
-  m_RenderMode: 0
-  m_Camera: {fileID: 0}
-  m_PlaneDistance: 100
+  m_RenderMode: 1
+  m_Camera: {fileID: 288587613}
+  m_PlaneDistance: 5
   m_PixelPerfect: 0
   m_ReceivesEvents: 1
   m_OverrideSorting: 0
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
-  m_VertexColorAlwaysGammaSpace: 0
+  m_VertexColorAlwaysGammaSpace: 1
   m_AdditionalShaderChannelsFlag: 0
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0
+--- !u!114 &884106731
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 884106726}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 28520ab79ed8bf745862f856d8293901, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rc: {fileID: 1450826154901486433, guid: d6cb124ad8f17564ba8e5961b360ba2d, type: 3}
 --- !u!1 &908943510
 GameObject:
   m_ObjectHideFlags: 0

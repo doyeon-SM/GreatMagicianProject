@@ -30,9 +30,10 @@ public class GameResultUI : MonoBehaviour
     public GameObject guaranteedSkillIconPrefab;  // (없으면 skillIconPrefab 재사용)
     public Text guaranteedHeaderText;             // "Guaranteed Rewards" 같은 헤더 텍스트(선택)
 
-
     [Header("스토리 전용 UI")]
-    public Button nextStageButton; 
+    public Button nextStageButton;
+
+    private bool _clearCommitted = false;
 
     public void Awake()
     {
@@ -66,13 +67,12 @@ public class GameResultUI : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// GameOver 시 호출하여 결과 UI를 표시합니다.
-    /// </summary>
-    /// <param name="score">Score_System.cs의 score 값</param>
+
     public void ShowResult()
     {
         gameObject.SetActive(true);
+
+        // 보상 계산
         scoreSystem.ResultScore();
 
         if (scoreText != null) scoreText.text = "Score: " + scoreSystem.score.ToString();
@@ -80,31 +80,35 @@ public class GameResultUI : MonoBehaviour
         if (moneyText != null) moneyText.text = "Money: " + scoreSystem.score.ToString();
         if (EXPText != null) EXPText.text = "EXP: " + (scoreSystem.score / 100).ToString();
 
-        // 랜덤 보상 그리드
         BuildSkillGrid();
-
-        // 확정 보상 그리드
         BuildGuaranteedGrid();
 
-        // 다음 스테이지 버튼 처리: '다음' 존재할 때만 켜고, 없으면 완전 끔
+        // 스토리 진행: "커밋 먼저 → 다음 스테이지 미리보기 → 저장"
         bool hasNext = false;
         var sm = StoryModeManager.Instance;
         if (sm != null && sm.isStoryRun)
         {
+            if (!_clearCommitted)
+            {
+                sm.CommitStageClear();     
+                _clearCommitted = true;
+
+                // 커밋 직후 진행 저장 (중요!)
+                if (SaveSystem.Instance != null)
+                    SaveSystem.Instance.SaveGameData();
+                sm.PersistProgress();
+            }
+
             StoryStageAsset next;
             hasNext = sm.TryPeekPendingNext(out next) && next != null;
-
-            // 다음 스테이지가 있다 = 이번 스테이지 클리어 확정 → 즉시 커밋/저장
-            if (hasNext)
-            {
-                sm.CommitStageClear();
-            }
         }
 
         if (nextStageButton != null)
-        {
             nextStageButton.interactable = hasNext;
-        }
+
+        // 결과가 나온 시점에서 한 번 더 저장: 보상 반영 상태를 고정
+        if (SaveSystem.Instance != null)
+            SaveSystem.Instance.SaveGameData();
     }
 
 
@@ -113,11 +117,9 @@ public class GameResultUI : MonoBehaviour
     /// </summary>
     public void OnExitButtonClicked()
     {
-        // 저장 (캐릭터/인벤 등)
+        // 보상/진행 저장
         if (SaveSystem.Instance != null)
             SaveSystem.Instance.SaveGameData();
-
-        // 스토리 진행도도 보장 저장
         if (StoryModeManager.Instance != null)
             StoryModeManager.Instance.PersistProgress();
 
@@ -249,11 +251,16 @@ public class GameResultUI : MonoBehaviour
     {
         Time.timeScale = 1f;
 
+        // 보상/진행을 한 번 더 안전 저장
+        if (SaveSystem.Instance != null)
+            SaveSystem.Instance.SaveGameData();
+        if (StoryModeManager.Instance != null)
+            StoryModeManager.Instance.PersistProgress();
+
         var sm = StoryModeManager.Instance;
         if (sm == null) return;
 
         sm.ConfirmAndStartNextStage();
-
         gameObject.SetActive(false);
     }
 

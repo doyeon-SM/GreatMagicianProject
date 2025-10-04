@@ -12,7 +12,7 @@ PlayerSettings:
   targetDevice: 2
   useOnDemandResources: 0
   accelerometerFrequency: 60
-  companyName: AGSD_gaming
+  companyName: AGSD_game
   productName: magic_project_try
   defaultCursor: {fileID: 0}
   cursorHotspot: {x: 0, y: 0}
@@ -71,8 +71,8 @@ PlayerSettings:
   androidUseSwappy: 1
   androidBlitType: 0
   androidResizableWindow: 0
-  androidDefaultWindowWidth: 720
-  androidDefaultWindowHeight: 1280
+  androidDefaultWindowWidth: 1080
+  androidDefaultWindowHeight: 1920
   androidMinimumWindowWidth: 300
   androidMinimumWindowHeight: 400
   androidFullscreenMode: 3

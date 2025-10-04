@@ -1,12 +1,19 @@
-using System.Collections;
-using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Reset_System : MonoBehaviour
 {
     // Character 스크립트가 부착된 오브젝트를 할당 (0Tier 스킬 배열 포함)
     public Character character;
     public SaveSystem save;
+
+    [Header("UI")]
+    [Tooltip("확인용 팝업(ResetConfirmPopup) 프리팹 또는 씬 배치 오브젝트 참조")]
+    public ResetConfirmPopup resetConfirmPopup;
+
+    [Tooltip("재시작할 초기 씬 이름 (예: Loby). 비우면 BuildSettings의 0번 씬로 이동")]
+    public string bootSceneName = "Loby";
 
     // 각 스킬의 데미지를 저장할 배열 (0티어 전용 초기값)
     [Tooltip("0티어 스킬의 초기 데미지 값. tier0Skills 길이와 맞춰주세요.")]
@@ -191,5 +198,90 @@ public class Reset_System : MonoBehaviour
     {
         CharacterTutorialBridge.ResetAll();
         // 저장 데이터도 즉시 반영하고 싶다면 SaveGameData() 호출
+    }
+
+    /// <summary>
+    /// 로비의 "초기화" 버튼에 연결: 팝업을 띄운다.
+    /// </summary>
+    public void OnClickOpenResetPopup()
+    {
+        if (resetConfirmPopup == null)
+        {
+            Debug.LogError("[Reset] resetConfirmPopup이 할당되어 있지 않습니다.");
+            return;
+        }
+
+        resetConfirmPopup.Show(
+            onConfirm: DoFullResetAndRestart,  // 확인 -> 초기화 & 재시작
+            onCancel: () => Debug.Log("[Reset] 초기화가 취소되었습니다.")
+        );
+    }
+
+    /// <summary>
+    /// 실제 전체 초기화 + 저장파일 삭제 + 게임 재시작
+    /// </summary>
+    private void DoFullResetAndRestart()
+    {
+        // 1) 세이브 파일 삭제
+        DeleteSaveFile();
+
+        // 2) 게임 데이터 초기화(순서는 필요에 따라 조정 가능)
+        CharacterReset();
+        SkillReset();
+        SkillknowReset();
+        StoryProgressReset();
+        QuestReset();
+        ResetAllTutorials();
+
+        if (save) save.SaveGameData(); // 초기화된 상태로 즉시 저장(선택)
+
+        // 3) 게임 재시작 (모바일 포함 공통)
+        RestartGame();
+    }
+
+    /// <summary>
+    /// SaveSystem이 사용하는 save.json 파일 삭제
+    /// </summary>
+    private void DeleteSaveFile()
+    {
+        string path = Path.Combine(Application.persistentDataPath, "save.json");
+        try
+        {
+            if (File.Exists(path))
+            {
+                File.Delete(path);
+                Debug.Log($"[Reset] 저장 파일 삭제 완료: {path}");
+            }
+            else
+            {
+                Debug.Log($"[Reset] 저장 파일이 없습니다: {path}");
+            }
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"[Reset] 저장 파일 삭제 실패: {e.Message}");
+        }
+    }
+
+    /// <summary>
+    /// 초기 부트 씬으로 재시작. bootSceneName이 비어있으면 BuildSettings의 0번 씬으로.
+    /// </summary>
+    private void RestartGame()
+    {
+        // DontDestroyOnLoad 오브젝트로 인해 상태가 남는 경우가 있다면
+        // 여기서 싱글톤 해제/클리어 코드를 추가하세요(예: AudioManager.Instance?.Reset() 등).
+
+        if (!string.IsNullOrEmpty(bootSceneName))
+        {
+            SceneManager.LoadScene(bootSceneName, LoadSceneMode.Single);
+        }
+        else
+        {
+            SceneManager.LoadScene(0, LoadSceneMode.Single);
+        }
+
+        // 메모리 정리(선택)
+        Resources.UnloadUnusedAssets();
+        System.GC.Collect();
     }
 }

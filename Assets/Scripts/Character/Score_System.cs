@@ -6,6 +6,12 @@ public class Score_System : MonoBehaviour
 {
     public Character character;
     public int score = 0;
+
+    private bool _resultApplied = false;
+    private int T0Len => character?.tier0Skills?.Length ?? 0;
+    private int T1Len => character?.tier1Skills?.Length ?? 0;
+    private int T2Len => character?.tier2Skills?.Length ?? 0;
+
     // 결과창에서 사용할 "이번 결과에서 획득한 스킬" 기록
     [System.Serializable]
     public class AwardedSkillInfo
@@ -22,12 +28,18 @@ public class Score_System : MonoBehaviour
 
     public void ResultScore()
     {
-        if(score > 0)
+        if (_resultApplied) return;   // 두 번 이상 호출 방지
+        _resultApplied = true;
+
+        LastAwarded.Clear();
+
+        if (score > 0)
         {
             character.Character_Gold = score;
-            character.CharacterLevelUP(score/100);
+            character.CharacterLevelUP(score / 100);
 
             AwardRandomSkills(score);
+            // AwardGuaranteedSkills(); // 확정 보상 로직이 분리돼 있다면 여기서 함께
         }
     }
     /// <summary>
@@ -151,26 +163,29 @@ public class Score_System : MonoBehaviour
     private int ResolveSkillIndex(Skill_Data data)
     {
         if (data.skillIndex >= 0) return data.skillIndex;
-        //캐릭터가 들고있는 tier 배열에서 위치를 찾아 반환 (전역 인덱스가 아니라면 프로젝트 규칙에 맞게 매핑)
+
+        // 0티어에서 찾기
         int idx = IndexOfInArray(character.tier0Skills, data);
-        if (idx >= 0) return idx; // 예: 0티어는 0~N-1 범위 사용
+        if (idx >= 0) return ToGlobalIndex(0, idx);
 
+        // 1티어
         idx = IndexOfInArray(character.tier1Skills, data);
-        if (idx >= 0) return idx; // 전역 인덱스가 필요하면 오프셋 더하기 등으로 변경
+        if (idx >= 0) return ToGlobalIndex(1, idx);
 
+        // 2티어
         idx = IndexOfInArray(character.tier2Skills, data);
-        if (idx >= 0) return idx;
+        if (idx >= 0) return ToGlobalIndex(2, idx);
 
-        // 마지막 수단: 실패
-        Debug.LogWarning("[Score_System] 스킬 인덱스를 확인할 수 없습니다. Skill_Data에 SkillIndex(Id) 필드를 제공하는 것을 권장합니다.");
+        Debug.LogWarning("[Score_System] 전역 인덱스를 찾지 못했습니다. Skill_Data가 어떤 티어 배열에도 없습니다.");
         return -1;
     }
+
     private int ResolveTier(Skill_Data data, Skill_Data[] t0, Skill_Data[] t1, Skill_Data[] t2)
     {
         if (IndexOfInArray(t0, data) >= 0) return 0;
         if (IndexOfInArray(t1, data) >= 0) return 1;
         if (IndexOfInArray(t2, data) >= 0) return 2;
-        return 0; // 기본 0티어
+        return 0;
     }
 
     private int IndexOfInArray(Skill_Data[] arr, Skill_Data target)
@@ -202,47 +217,73 @@ public class Score_System : MonoBehaviour
     }
 
     // 스토리모드 확정 스킬 보상 유틸
-    public void AddGuaranteedSkillByIndex(int skillIndex)
+    public void AddGuaranteedSkillByIndex(int globalSkillIndex)
     {
-        if (character == null || skillIndex < 0) return;
+        if (character == null || globalSkillIndex < 0) return;
 
-        // tier0/1/2 에서 해당 index를 찾는 규칙은 프로젝트 전역 규칙에 맞게 조정.
-        // 여기서는 우선 tier0 우선 → tier1 → tier2에서 index가 유효하면 찾는 방식
+        if (!TryFromGlobalIndex(globalSkillIndex, out int tier, out int local))
+        {
+            Debug.LogWarning($"[Score_System] 전역 인덱스({globalSkillIndex})가 유효하지 않습니다. T0={T0Len}, T1={T1Len}, T2={T2Len}");
+            return;
+        }
+
         Skill_Data picked = null;
-        int resolvedTier = 0;
+        if (tier == 0) picked = character.tier0Skills[local];
+        else if (tier == 1) picked = character.tier1Skills[local];
+        else if (tier == 2) picked = character.tier2Skills[local];
 
-        if (character.tier0Skills != null && skillIndex < character.tier0Skills.Length)
+        if (picked == null)
         {
-            picked = character.tier0Skills[skillIndex];
-            resolvedTier = 0;
+            Debug.LogWarning($"[Score_System] 보장 스킬(global={globalSkillIndex}) 객체가 null 입니다.");
+            return;
         }
-        else if (character.tier1Skills != null && skillIndex < character.tier1Skills.Length)
-        {
-            picked = character.tier1Skills[skillIndex-4];
-            resolvedTier = 1;
-        }
-        else if (character.tier2Skills != null && skillIndex < character.tier2Skills.Length)
-        {
-            picked = character.tier2Skills[skillIndex-14];
-            resolvedTier = 2;
-        }
-
-        if (picked == null) { Debug.LogWarning($"[Score_System] 보장 스킬(index={skillIndex})을 찾지 못했습니다."); return; }
 
         bool wasKnown = picked.isKnow;
         if (!wasKnown) picked.isKnow = true;
 
-        EnsureHaveSkillCapacity(skillIndex);
-        character.Character_HaveSkill[skillIndex] += 1;
+        EnsureHaveSkillCapacity(globalSkillIndex);
+        character.Character_HaveSkill[globalSkillIndex] += 1;
 
         LastAwarded.Add(new AwardedSkillInfo
         {
             skill = picked,
-            skillIndex = skillIndex,
-            tier = resolvedTier,
+            skillIndex = globalSkillIndex,
+            tier = tier,
             isNew = !wasKnown,
             source = AwardedSkillInfo.AwardSource.Guaranteed
         });
     }
 
+
+    // (tier, localIndex) -> globalIndex
+    private int ToGlobalIndex(int tier, int localIndex)
+    {
+        if (tier == 0) return localIndex;
+        if (tier == 1) return T0Len + localIndex;
+        if (tier == 2) return T0Len + T1Len + localIndex;
+        return -1;
+    }
+
+    // globalIndex -> (tier, localIndex)
+    private bool TryFromGlobalIndex(int globalIndex, out int tier, out int localIndex)
+    {
+        tier = 0; localIndex = 0;
+        if (globalIndex < 0) return false;
+
+        if (globalIndex < T0Len)
+        {
+            tier = 0; localIndex = globalIndex; return true;
+        }
+        globalIndex -= T0Len;
+        if (globalIndex < T1Len)
+        {
+            tier = 1; localIndex = globalIndex; return true;
+        }
+        globalIndex -= T1Len;
+        if (globalIndex < T2Len)
+        {
+            tier = 2; localIndex = globalIndex; return true;
+        }
+        return false;
+    }
 }
