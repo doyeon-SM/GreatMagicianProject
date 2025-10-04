@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   skillName: Wind_Wall
   skillIndex: 66
-  damage: 0
+  damage: 37
   Tier: 2
   level: 1
   NeedLevelUP_Gold: 1
@@ -33,5 +33,5 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 7a339c104bb7d854db1aaf44f8cbdb29, type: 2}
   Effect_Value: 0
   AreaTime: 0
-  skillscript: 
+  skillscript: "\uC124\uCE58\uD615 \uBC29\uC5B4 \uAD6C\uC870\uBB3C, \uBC00\uCE58\uAE30"
   isKnow: 0

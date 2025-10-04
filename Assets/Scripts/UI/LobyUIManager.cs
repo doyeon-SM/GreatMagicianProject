@@ -36,8 +36,8 @@ public class LobyUIManager : MonoBehaviour
 
     public void Refresh()
     {
-        string lastId = GetLastCheckpointStageId();
-        bool enable = IsBeyond(lastId, thresholdStageId);
+        string maxId = GetMaxClearedStageId();    
+        bool enable = IsBeyond(maxId, thresholdStageId);
         ApplyButtonState(enable);
     }
 
@@ -55,16 +55,19 @@ public class LobyUIManager : MonoBehaviour
     }
 
     // StoryModeManager에서 마지막 체크포인트 스테이지 ID 가져오기
-    private string GetLastCheckpointStageId()
+    private string GetMaxClearedStageId()
     {
-        // 프로젝트 컨벤션: StoryModeManager.Instance.lastCheckpointStageId 사용
-        // (혹시 정적 프로퍼티로 쓰는 프로젝트라면 아래 주석 해제해서 대응)
-        // return StoryModeManager.LastCheckpointStageId;
+        var sm = StoryModeManager.Instance;
+        if (sm != null)
+        {
+            // 신규 필드가 비었거나 초기값이면 최근 체크포인트로 폴백
+            string maxId = sm.maxClearedStageId;
+            if (string.IsNullOrEmpty(maxId) || maxId == "0-0")
+                maxId = sm.lastCheckpointStageId;
 
-        if (StoryModeManager.Instance != null)
-            return StoryModeManager.Instance.lastCheckpointStageId;
-
-        // 실패 시 기본값
+            return string.IsNullOrEmpty(maxId) ? "0-1" : maxId;
+        }
+        // 매니저가 아직 없으면 안전 기본값
         return "0-1";
     }
 
@@ -78,7 +81,7 @@ public class LobyUIManager : MonoBehaviour
         (int bm, int bsub) = ParseStageId(b);
 
         if (am != bm) return am > bm;
-        return asub > bsub;
+        return asub >= bsub;
     }
 
     private (int major, int minor) ParseStageId(string id)

@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -8,122 +8,170 @@ public class Summon_System : MonoBehaviour
     public Skill_Data skillData;
     public int SummonMaxHP;
     public int SummonAttackDamage;
-    public int currentHealth; // ÇöÀç Ã¼·Â
-    public GameObject healthTextPrefab;  // Ã¼·ÂÀ» Ç¥½ÃÇÒ ÅØ½ºÆ® ÇÁ¸®ÆÕ
-    public GameObject SummonAttackPrefab;  // Åõ»çÃ¼ ÇÁ¸®ÆÕ
+    public int currentHealth;
 
-    // ÀÚµ¿ °ø°İ °ü·Ã Ãß°¡ ÇÊµå
-    public float SummonAttackRange = 5f;    // ¸ó½ºÅÍ Å½»ö ¹üÀ§
-    public float SummonAttackSpeed = 10f;   // Åõ»çÃ¼ ¼Óµµ
+    [Header("UI Prefab (ë‚´ë¶€ì— Canvas ì—†ëŠ” Text í”„ë¦¬íŒ¹)")]
+    public GameObject healthTextPrefab;
 
-    private GameObject healthTextInstance; // ÅØ½ºÆ® ÀÎ½ºÅÏ½º
+    [Header("Attack")]
+    public GameObject SummonAttackPrefab;  // íˆ¬ì‚¬ì²´ í”„ë¦¬íŒ¹
+    public float SummonAttackRange = 5f;   // íƒìƒ‰ ë°˜ê²½
+    public float SummonAttackSpeed = 10f;  // íˆ¬ì‚¬ì²´ ì†ë„
+
+    // UI ì¸ìŠ¤í„´ìŠ¤/ìºì‹œ
+    private GameObject healthTextInstance;
     private Text healthText;
+    private RectTransform healthRT;
+    private Camera cam;
+    private RectTransform canvasRT;
+    private Transform uiParent;
 
-    private float damageInterval = 1f; // 1ÃÊ¿¡ ÇÑ ¹ø Ã¼·ÂÀÌ °¨¼Ò
-    private float damageTimer = 0f;
+    // ì£¼ê¸° ì²˜ë¦¬
+    private float tickInterval = 1f; // 1ì´ˆë§ˆë‹¤ ì²´ë ¥ 1ê°ì†Œ + ê³µê²© 1íšŒ
+    private float tickTimer = 0f;
 
-    void Start()
+    private void Start()
     {
+        // ëŠ¥ë ¥ì¹˜ ì ìš©
         SummonMaxHP = skillData.ApplySummonHP();
         SummonAttackDamage = skillData.ApplySummonAD();
-        currentHealth = SummonMaxHP; // Ã³À½¿£ Ã¼·ÂÀÌ ÃÖ´ëÄ¡
+        currentHealth = SummonMaxHP;
+
+        // === ë©”ì¸ ì¹´ë©”ë¼/ìº”ë²„ìŠ¤ ìºì‹œ ===
+        cam = Camera.main;
+        if (cam == null)
+        {
+            Debug.LogError("[Summon] Main Camera not found.");
+            enabled = false; return;
+        }
+
+        var canvasGO = GameObject.Find("Canvas");
+        if (canvasGO == null)
+        {
+            Debug.LogError("[Summon] Canvas(ë©”ì¸) ë¥¼ ì°¾ì§€ ëª»í–ˆìŠµë‹ˆë‹¤. Canvas ì´ë¦„/ë°°ì¹˜ í™•ì¸!");
+            enabled = false; return;
+        }
+        uiParent = canvasGO.transform;
+        canvasRT = canvasGO.GetComponent<RectTransform>();
+
+        // === HP í…ìŠ¤íŠ¸ ìƒì„± (ë©”ì¸ Canvas í•˜ìœ„) ===
         if (healthTextPrefab != null)
         {
-            healthTextInstance = Instantiate(healthTextPrefab, transform.position, Quaternion.identity);
-            healthTextInstance.transform.SetParent(GameObject.Find("Canvas").transform, false);  // Äµ¹ö½º¿¡ ºÎÂø
+            healthTextInstance = Instantiate(healthTextPrefab, uiParent);
             healthText = healthTextInstance.GetComponent<Text>();
-            Vector3 screenPosition = Camera.main.WorldToScreenPoint(transform.position + new Vector3(0, 0f, 0));
-            healthTextInstance.transform.position = screenPosition;
-            if (healthTextInstance != null)
-            {
-                healthText.text = currentHealth.ToString();
-            }
+            healthRT = healthTextInstance.GetComponent<RectTransform>();
         }
+
+        RefreshHpText();
+        if (healthRT != null) UpdateUIPosition(healthRT, transform.position);
     }
 
-    void Update()
+    private void Update()
     {
-        damageTimer += Time.deltaTime;
-
-        if (damageTimer >= damageInterval)
+        // UI ìœ„ì¹˜ ê³„ì† ì¶”ì 
+        if (healthRT != null && canvasRT != null)
         {
-            currentHealth--;  // 1ÃÊ¸¶´Ù Ã¼·Â 1 °¨¼Ò
-            if (healthTextInstance != null)
-            {
-                healthText.text = currentHealth.ToString();
-            }
-            Attack();         // 1ÃÊ¸¶´Ù °ø°İ ½ÇÇà
-            damageTimer = 0f;
+            UpdateUIPosition(healthRT, transform.position);
         }
 
-        if(currentHealth <= 0)
+        // 1ì´ˆë§ˆë‹¤: ì²´ë ¥ 1 ê°ì†Œ + ê³µê²© 1íšŒ
+        tickTimer += Time.deltaTime;
+        if (tickTimer >= tickInterval)
+        {
+            currentHealth = Mathf.Max(0, currentHealth - 1);
+            RefreshHpText();
+
+            Attack();
+
+            tickTimer = 0f;
+        }
+
+        if (currentHealth <= 0)
         {
             DestroyCreate();
         }
     }
-    private void Attack()
+
+    // ì›”ë“œâ†’ìŠ¤í¬ë¦°â†’Canvas local ë¡œ ë³€í™˜í•˜ì—¬ anchoredPosition ì„¸íŒ…
+    private void UpdateUIPosition(RectTransform targetRT, Vector3 worldPos)
     {
-        // Summon À§Ä¡¿¡¼­ ÀÏÁ¤ ¹üÀ§ ³» ¸ó½ºÅÍ Å½»ö (ÅÂ±× "Monster" »ç¿ë)
-        Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, SummonAttackRange);
-        Monster_Base target = null;
-        float closestDistance = Mathf.Infinity;
-        foreach (Collider2D col in colliders)
+        Vector3 screenPos = cam.WorldToScreenPoint(worldPos);
+        if (RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRT, screenPos, cam, out var localPos))
         {
-            if (col.CompareTag("Monster"))
-            {
-                float dist = Vector2.Distance(transform.position, col.transform.position);
-                if (dist < closestDistance)
-                {
-                    closestDistance = dist;
-                    target = col.GetComponent<Monster_Base>();
-                }
-            }
-        }
-
-        if (target != null)
-        {
-            // Åõ»çÃ¼ »ı¼º ¹× target ¹æÇâÀ¸·Î ¹ß»ç
-            GameObject projectile = Instantiate(SummonAttackPrefab, transform.position, Quaternion.identity);
-
-            // SummonAttackDamage °ªÀ» Åõ»çÃ¼ÀÇ attackDamage·Î ÇÒ´ç
-            Summon_Projectile projectileScript = projectile.GetComponent<Summon_Projectile>();
-            if (projectileScript != null)
-            {
-                projectileScript.attackDamage = SummonAttackDamage;
-            }
-            else
-            {
-                Debug.LogError("SummonAttackPrefab¿¡ Summon_Projectile ÄÄÆ÷³ÍÆ®°¡ ¾ø½À´Ï´Ù.");
-            }
-
-            Rigidbody2D rb = projectile.GetComponent<Rigidbody2D>();
-            if (rb != null)
-            {
-                Vector2 direction = (target.transform.position - transform.position).normalized;
-                rb.velocity = direction * SummonAttackSpeed;
-            }
-            else
-            {
-                Debug.LogError("SummonAttackPrefab¿¡ Rigidbody2D ÄÄÆ÷³ÍÆ®°¡ ¾ø½À´Ï´Ù.");
-            }
+            targetRT.anchoredPosition = localPos;
         }
     }
+
+    private void RefreshHpText()
+    {
+        if (healthText != null)
+            healthText.text = currentHealth.ToString();
+    }
+
+    private void Attack()
+    {
+        // ë°˜ê²½ ë‚´ ê°€ì¥ ê°€ê¹Œìš´ Monster ì°¾ê¸°
+        Collider2D[] cols = Physics2D.OverlapCircleAll(transform.position, SummonAttackRange);
+        Monster_Base target = null;
+        float best = float.PositiveInfinity;
+
+        foreach (var c in cols)
+        {
+            if (!c.CompareTag("Monster")) continue;
+            float d = Vector2.Distance(transform.position, c.transform.position);
+            if (d < best)
+            {
+                best = d;
+                target = c.GetComponent<Monster_Base>();
+            }
+        }
+
+        if (target == null) return;
+        if (SummonAttackPrefab == null) { Debug.LogWarning("[Summon] SummonAttackPrefab is null."); return; }
+
+        // íˆ¬ì‚¬ì²´ ìƒì„± ë° ì„¤ì •
+        GameObject proj = Instantiate(SummonAttackPrefab, transform.position, Quaternion.identity);
+
+        var projLogic = proj.GetComponent<Summon_Projectile>();
+        if (projLogic != null) projLogic.attackDamage = SummonAttackDamage;
+        else Debug.LogError("[Summon] SummonAttackPrefabì— Summon_Projectile ì»´í¬ë„ŒíŠ¸ê°€ ì—†ìŠµë‹ˆë‹¤.");
+
+        var rb = proj.GetComponent<Rigidbody2D>();
+        if (rb != null)
+        {
+            Vector2 dir = ((Vector2)target.transform.position - (Vector2)transform.position).normalized;
+            rb.velocity = dir * SummonAttackSpeed;
+        }
+        else
+        {
+            Debug.LogError("[Summon] SummonAttackPrefabì— Rigidbody2D ì»´í¬ë„ŒíŠ¸ê°€ ì—†ìŠµë‹ˆë‹¤.");
+        }
+    }
+
     private void DestroyCreate()
     {
-        Debug.Log("¼ÒÈ¯¼ö°¡ ÆÄ±«µÇ¾ú½À´Ï´Ù.");
-        Destroy(gameObject);  // ¸ó½ºÅÍ °ÔÀÓ ¿ÀºêÁ§Æ® Á¦°Å
-        if (healthText != null)
-        {
-            Destroy(healthText);  // Ã¼·Â ÅØ½ºÆ®µµ Á¦°Å
-        }
+        Debug.Log("[Summon] ì†Œí™˜ìˆ˜ê°€ íŒŒê´´ë˜ì—ˆìŠµë‹ˆë‹¤.");
+        if (healthTextInstance) Destroy(healthTextInstance); 
+        Destroy(gameObject);
     }
 
     public void Heal_Summon(int amount)
     {
         currentHealth = Mathf.Min(currentHealth + amount, SummonMaxHP);
-        if (healthTextInstance != null)
-        {
-            healthText.text = currentHealth.ToString();
-        }
+        RefreshHpText();
     }
+
+    private void OnDisable()
+    {
+        if (healthTextInstance) Destroy(healthTextInstance);
+    }
+
+#if UNITY_EDITOR
+    private void OnDrawGizmosSelected()
+    {
+        // ì—ë””í„°ì—ì„œ ê³µê²© ë²”ìœ„ ì‹œê°í™”
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position, SummonAttackRange);
+    }
+#endif
 }

@@ -14,12 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   stageId: 0-1
   waveCount: 1
-  waveDuration: 5
+  waveDuration: 10
   scriptedWaves:
   - waveNumber: 0
     spawns:
     - prefab: {fileID: 1036661608251385216, guid: 5db9230f890dcae48901380e46a2f0f8, type: 3}
-      count: 1
+      count: 5
       hpMultiplier: 1
   stageScore: 1000
   bonusGold: 0

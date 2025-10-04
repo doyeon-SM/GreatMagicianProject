@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   skillName: Ice_Spear
   skillIndex: 28
-  damage: 0
+  damage: 52
   Tier: 2
   level: 1
   NeedLevelUP_Gold: 1
@@ -33,5 +33,5 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 24478f9746478f946922e14f702a0761, type: 2}
   Effect_Value: 0
   AreaTime: 0
-  skillscript: 
+  skillscript: "\uBC94\uC704\uD615 \uACF5\uACA9, \uB3D9\uC0C1"
   isKnow: 0

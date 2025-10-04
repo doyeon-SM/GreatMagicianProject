@@ -13,7 +13,7 @@ public class StoryMenuController : MonoBehaviour
     [Header("Scroll UI")]
     public ScrollRect scrollRect;
     public RectTransform content;
-    public GameObject itemButtonPrefab;        // [story 1-1] 텍스트 버튼 프리팹
+    public GameObject itemButtonPrefab;        // [story 0-1] 텍스트 버튼 프리팹
 
     [Header("Popup")]
     public StoryPopupUI popupPrefab;           // 팝업 프리팹
@@ -36,13 +36,28 @@ public class StoryMenuController : MonoBehaviour
 
     private int StageOrder(string id)
     {
-        // "A-B" → (A * 1000 + B) 같은 정렬 키
         if (string.IsNullOrEmpty(id)) return 0;
         var p = id.Split('-');
         int a = 0, b = 0;
         if (p.Length >= 1) int.TryParse(p[0], out a);
         if (p.Length >= 2) int.TryParse(p[1], out b);
+        // 정렬 안정성을 위해 충분히 큰 배수 사용
         return a * 1000 + b;
+    }
+
+    private string GetMaxClearedStageId()
+    {
+        // StoryModeManager에 최대 클리어가 있으면 그걸 쓰고, 없으면 lastCheckpoint → firstStageId 순으로 폴백
+        var sm = storyManager ?? StoryModeManager.Instance ?? FindObjectOfType<StoryModeManager>(true);
+        if (sm != null)
+        {
+            var maxId = sm.maxClearedStageId;
+            if (string.IsNullOrEmpty(maxId) || maxId == "0-0")
+                maxId = sm.lastCheckpointStageId;
+
+            if (!string.IsNullOrEmpty(maxId)) return maxId;
+        }
+        return firstStageId;
     }
 
     private void BuildList()
@@ -53,23 +68,25 @@ public class StoryMenuController : MonoBehaviour
             return;
         }
 
-        string lastCheckpoint = storyManager ? storyManager.lastCheckpointStageId : firstStageId;
-        if (string.IsNullOrEmpty(lastCheckpoint)) lastCheckpoint = firstStageId;
+        // 최대 클리어 기준으로 보여줄 범위를 결정
+        string maxCleared = GetMaxClearedStageId();
+        int limit = StageOrder(maxCleared);
 
-        // 1) 모든 스테이지 중에서 lastCheckpoint 이하만 선택(= 클리어한 마지막 다음 스테이지까지)
-        int limit = StageOrder(lastCheckpoint);
+        
+        var nextId = storyManager?.GetNextStageIdByOrder(maxCleared);
+        if (!string.IsNullOrEmpty(nextId)) limit = Mathf.Max(limit, StageOrder(nextId));
 
         var candidates = resolver.stages
             .Where(s => s != null)
-            .Where(s => StageOrder(s.stageId) <= limit)
-            .OrderByDescending(s => StageOrder(s.stageId))  // 가장 마지막 story부터 위→아래 정렬
+            .Where(s => StageOrder(s.stageId) <= limit)        // 최대 클리어 이하만 표시
+            .OrderByDescending(s => StageOrder(s.stageId))     // 최근 스테이지가 위에 오도록
             .ToList();
 
-        // 2) 기존 자식 정리
+        // 기존 자식 정리
         for (int i = content.childCount - 1; i >= 0; i--)
             Destroy(content.GetChild(i).gameObject);
 
-        // 3) 아이템 생성
+        // 아이템 생성
         foreach (var stage in candidates)
         {
             var go = Instantiate(itemButtonPrefab, content);
@@ -93,7 +110,6 @@ public class StoryMenuController : MonoBehaviour
     private void OnPopupStartClicked(StoryStageAsset stage)
     {
         // 팝업에서 "시작" 눌렀을 때: StoryModeScene 로드 후 해당 stage 시작
-        // Scene 전환은 SceneLoader 사용 또는 직접 LoadScene 호출
         var sceneLoader = FindObjectOfType<SceneLoader>(true);
         if (sceneLoader != null) sceneLoader.LoadStoryModeScene();
         else UnityEngine.SceneManagement.SceneManager.LoadScene("StoryModeScene");
@@ -106,6 +122,6 @@ public class StoryMenuController : MonoBehaviour
 
     private void OnPopupCancelClicked()
     {
-        // 아무것도 안 해도 됨 (팝업이 닫힘)
+        // 팝업 닫기만
     }
 }

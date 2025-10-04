@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   skillName: Flower
   skillIndex: 41
-  damage: 0
+  damage: 42
   Tier: 2
   level: 1
   NeedLevelUP_Gold: 1
@@ -33,5 +33,5 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 913e169a24362454687a8e4f2b961867, type: 2}
   Effect_Value: 0
   AreaTime: 0
-  skillscript: 
+  skillscript: "\uC18C\uD658\uC218"
   isKnow: 0

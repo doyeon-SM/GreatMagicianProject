@@ -1,160 +1,199 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class Wall_System_Create : MonoBehaviour
 {
-    public int maxHealth = 10; // º®ÀÇ ÃÖ´ë Ã¼·Â
-    public int currentHealth; // ÇöÀç Ã¼·Â
-    public GameObject healthTextPrefab;  // Ã¼·ÂÀ» Ç¥½ÃÇÒ ÅØ½ºÆ® ÇÁ¸®ÆÕ
-    private GameObject healthTextInstance; // ÅØ½ºÆ® ÀÎ½ºÅÏ½º
-    private Text healthText;
+    public int maxHealth = 10;
+    public int currentHealth;
 
-    private int monstersInContact => contactingMonsters.Count;  // ÇöÀç º®¿¡ Ãæµ¹ ÁßÀÎ ¸ó½ºÅÍÀÇ °³¼ö
-    private float damageInterval = 1f; // 1ÃÊ¿¡ ÇÑ ¹ø Ã¼·ÂÀÌ °¨¼Ò
+    [Header("UI Prefab (ë‚´ë¶€ì— Canvas ì—†ëŠ” Text í”„ë¦¬íŒ¹)")]
+    public GameObject healthTextPrefab;
+
+    private GameObject healthTextInstance;
+    private Text healthText;
+    private RectTransform healthRT;
+
+    // Canvas/Camera ìºì‹œ
+    private Camera cam;
+    private RectTransform canvasRT;
+    private Transform uiParent;
+
+    private int monstersInContact => contactingMonsters.Count;
+    private float damageInterval = 1f;
     private float damageTimer = 0f;
 
-    // ÀÚ¿¬ ºØ±«(2ÃÊ¸¶´Ù Ã¼·Â 1 °¨¼Ò)
+    // ìì—° ë¶•ê´´(2ì´ˆë§ˆë‹¤ 1)
     private float decayInterval = 2f;
     private float decayTimer = 0f;
 
     public Skill_Data skillData;
 
-    // Start is called before the first frame update
-    void Start()
+    // ì¶©ëŒ ì¤‘ ëª¬ìŠ¤í„°
+    private HashSet<Monster_Base> contactingMonsters = new HashSet<Monster_Base>();
+
+    private void Start()
     {
+        // ìŠ¤íƒ¯ ì ìš©
         maxHealth = skillData.ApplyCreate();
-        currentHealth = maxHealth; // Ã³À½¿£ Ã¼·ÂÀÌ ÃÖ´ëÄ¡
+        currentHealth = maxHealth;
+
+        // === ì¹´ë©”ë¼/ìº”ë²„ìŠ¤ ìºì‹œ ===
+        cam = Camera.main;
+        if (cam == null)
+        {
+            Debug.LogError("[WallCreate] Main Camera not found.");
+            enabled = false; return;
+        }
+
+        var canvasGO = GameObject.Find("Canvas");
+        if (canvasGO == null)
+        {
+            Debug.LogError("[WallCreate] Canvas(ë©”ì¸) ë¥¼ ì°¾ì§€ ëª»í–ˆìŠµë‹ˆë‹¤. Canvas ì´ë¦„/ë°°ì¹˜ í™•ì¸!");
+            enabled = false; return;
+        }
+        uiParent = canvasGO.transform;
+        canvasRT = canvasGO.GetComponent<RectTransform>();
+
+        // === HP í…ìŠ¤íŠ¸ ìƒì„±(ë©”ì¸ Canvas í•˜ìœ„) ===
         if (healthTextPrefab != null)
         {
-            healthTextInstance = Instantiate(healthTextPrefab, transform.position, Quaternion.identity);
-            healthTextInstance.transform.SetParent(GameObject.Find("Canvas").transform, false);  // Äµ¹ö½º¿¡ ºÎÂø
+            healthTextInstance = Instantiate(healthTextPrefab, uiParent);
             healthText = healthTextInstance.GetComponent<Text>();
-            Vector3 screenPosition = Camera.main.WorldToScreenPoint(transform.position + new Vector3(0, 0f, 0));
-            healthTextInstance.transform.position = screenPosition;
+            healthRT = healthTextInstance.GetComponent<RectTransform>();
         }
-        TakeDamage(0);
+
+        // ì²« í‘œì‹œ
+        RefreshHpText();
+        if (healthRT != null) UpdateUIPosition(healthRT, transform.position);
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Update()
     {
+        // ì ‘ì´‰ ì¤‘ì´ë©´ ì£¼ê¸°ì  í”¼í•´
         if (monstersInContact > 0)
         {
             damageTimer += Time.deltaTime;
-            //Blind È¿°ú¿¡ µû¸¥ µ¥¹ÌÁö Ã³¸®
-            contactingMonsters.RemoveWhere(monster => monster == null || monster.isBlind);
+
+            // Blind ëª¬ìŠ¤í„° ì œê±°(ë¬´íš¨ ì²˜ë¦¬)
+            contactingMonsters.RemoveWhere(m => m == null || m.isBlind);
 
             if (damageTimer >= damageInterval)
             {
-                TakeDamage(1);  // 1ÃÊ¸¶´Ù Ã¼·Â 1 °¨¼Ò
+                TakeDamage(1);
                 damageTimer = 0f;
-                //È¿°ú¿¡ µû¸¥ ¹İ»çµ¥¹ÌÁö
+
+                // ë°˜ì‚¬ ë°ë¯¸ì§€
                 if (skillData.skillEffect == Skill_Data.SkillEffect.Burn ||
                     skillData.skillEffect == Skill_Data.SkillEffect.Paralysis)
                 {
                     ReflectDamage("Ignis");
                 }
                 else if (skillData.skillEffect == Skill_Data.SkillEffect.Knockback ||
-                    skillData.skillEffect == Skill_Data.SkillEffect.Freezing)
+                         skillData.skillEffect == Skill_Data.SkillEffect.Freezing)
                 {
                     ReflectDamage("Aqua");
                 }
-            }            
+            }
         }
 
-        // ÀÚ¿¬ ºØ±«(Á¢ÃË ¿©ºÎ¿Í ¹«°ü)
+        // ìì—° ë¶•ê´´(ì ‘ì´‰ ë¬´ê´€)
         decayTimer += Time.deltaTime;
         if (decayTimer >= decayInterval)
         {
-            ReduceHealthFlat(1);   // Á¢ÃË ¼ö¿Í ¹«°üÇÏ°Ô °íÁ¤ 1 °¨¼Ò
+            ReduceHealthFlat(1);
             decayTimer = 0f;
         }
 
-        // Ã¼·ÂÀÌ 0 ÀÌÇÏ°¡ µÇ¸é °ÔÀÓ Á¾·á
+        // UI ìœ„ì¹˜ ì¶”ì 
+        if (healthRT != null && canvasRT != null)
+        {
+            UpdateUIPosition(healthRT, transform.position);
+        }
+
         if (currentHealth <= 0)
         {
             DestroyCreate();
         }
     }
 
-    // ÀûÀÌ Ãæµ¹ÇßÀ» ¶§ È£Ãâ
-    private HashSet<Monster_Base> contactingMonsters = new HashSet<Monster_Base>();
+    // ì›”ë“œâ†’ìŠ¤í¬ë¦°â†’Canvas local ë¡œ ë³€í™˜í•˜ì—¬ anchoredPosition ì„¸íŒ…
+    private void UpdateUIPosition(RectTransform targetRT, Vector3 worldPos)
+    {
+        Vector3 screenPos = cam.WorldToScreenPoint(worldPos);
+        if (RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRT, screenPos, cam, out var localPos))
+        {
+            targetRT.anchoredPosition = localPos;
+        }
+    }
+
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.CompareTag("Monster"))
         {
-            Monster_Base monster = collision.gameObject.GetComponent<Monster_Base>();
+            var monster = collision.gameObject.GetComponent<Monster_Base>();
             if (monster != null && !monster.isBlind)
-            {
                 contactingMonsters.Add(monster);
-            }
         }
     }
 
-    // ÀûÀÌ º®¿¡¼­ ¶³¾îÁú ¶§ È£Ãâ
     private void OnCollisionExit2D(Collision2D collision)
     {
         if (collision.gameObject.CompareTag("Monster"))
         {
-            Monster_Base monster = collision.gameObject.GetComponent<Monster_Base>();
-            if (monster != null && contactingMonsters.Contains(monster))
-            {
-                contactingMonsters.Remove(monster); // ¹«Á¶°Ç Á¦°Å (»óÅÂ°¡ ¹Ù²î¾ú´õ¶óµµ)
-            }
-        }
-    }
-    // Ã¼·ÂÀ» °¨¼Ò½ÃÅ°´Â ÇÔ¼ö
-    public void TakeDamage(int damage)
-    {
-        currentHealth = currentHealth - (damage * monstersInContact);
-        if (healthTextInstance != null)
-        {
-            healthText.text = currentHealth.ToString();
+            var monster = collision.gameObject.GetComponent<Monster_Base>();
+            if (monster != null)
+                contactingMonsters.Remove(monster);
         }
     }
 
-    // Á¢ÃË ¼ö¿Í ¹«°üÇÏ°Ô °íÁ¤·®À¸·Î Ã¼·Â °¨¼Ò(ÀÚ¿¬ºØ±«)
+    // ì ‘ì´‰ ìˆ˜ ë¹„ë¡€ í”¼í•´
+    public void TakeDamage(int damage)
+    {
+        currentHealth -= (damage * Mathf.Max(1, monstersInContact));
+        RefreshHpText();
+    }
+
+    // ê³ ì •ëŸ‰ ê°ì†Œ(ìì—° ë¶•ê´´ ë“±)
     private void ReduceHealthFlat(int amount)
     {
         currentHealth = Mathf.Max(0, currentHealth - amount);
-        if (healthTextInstance != null)
-        {
+        RefreshHpText();
+    }
+
+    private void RefreshHpText()
+    {
+        if (healthText != null)
             healthText.text = currentHealth.ToString();
-        }
     }
 
     private void DestroyCreate()
     {
-        Debug.Log("º®ÀÌ ÆÄ±«µÇ¾ú½À´Ï´Ù.");
-        Destroy(gameObject);  // ¸ó½ºÅÍ °ÔÀÓ ¿ÀºêÁ§Æ® Á¦°Å
-        if (healthText != null)
-        {
-            Destroy(healthText);  // Ã¼·Â ÅØ½ºÆ®µµ Á¦°Å
-        }
+        Debug.Log("[WallCreate] ë²½ì´ íŒŒê´´ë˜ì—ˆìŠµë‹ˆë‹¤.");
+        if (healthTextInstance) Destroy(healthTextInstance);   
+        Destroy(gameObject);
     }
 
-    //º® ¹İ»çÇÔ¼ö
+    // ë²½ ë°˜ì‚¬
     private void ReflectDamage(string element)
     {
-        foreach (Monster_Base monster in contactingMonsters)
+        foreach (var monster in contactingMonsters)
         {
-            if (monster != null)
-            {
-                monster.ApplyElement(element);
-                monster.TakeDamage(skillData.damage); //¹İ»ç µ¥¹ÌÁö
-            }
-            else Debug.Log("¹İ»ç´ë»óÀÌ ¾ø½À´Ï´Ù.");
+            if (monster == null) continue;
+            monster.ApplyElement(element);
+            monster.TakeDamage(skillData.damage);
         }
     }
 
     public void Heal_Create(int amount)
     {
         currentHealth = Mathf.Min(currentHealth + amount, maxHealth);
-        if (healthTextInstance != null)
-        {
-            healthText.text = currentHealth.ToString();
-        }
+        RefreshHpText();
+    }
+
+    private void OnDisable()
+    {
+        if (healthTextInstance) Destroy(healthTextInstance);
     }
 }

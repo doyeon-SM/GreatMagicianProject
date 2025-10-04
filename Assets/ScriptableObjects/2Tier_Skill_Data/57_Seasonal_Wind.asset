@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   skillName: Seasonal_Wind
   skillIndex: 57
-  damage: 0
+  damage: 38
   Tier: 2
   level: 1
   NeedLevelUP_Gold: 1
@@ -33,5 +33,5 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 7a339c104bb7d854db1aaf44f8cbdb29, type: 2}
   Effect_Value: 8
   AreaTime: 0
-  skillscript: 
+  skillscript: "\uBC94\uC704\uD615 \uACF5\uACA9, \uBC00\uCE58\uAE30"
   isKnow: 0

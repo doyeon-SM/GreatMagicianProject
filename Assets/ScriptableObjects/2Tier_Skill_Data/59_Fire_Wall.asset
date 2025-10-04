@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   skillName: Fire_Wall
   skillIndex: 59
-  damage: 0
+  damage: 44
   Tier: 2
   level: 1
   NeedLevelUP_Gold: 1
@@ -33,5 +33,5 @@ MonoBehaviour:
   - {fileID: 11400000, guid: f79541974eaa9d0499d2ca29b2a40dcd, type: 2}
   Effect_Value: 0
   AreaTime: 0
-  skillscript: 
-  isKnow: 0
+  skillscript: "\uC124\uCE58\uD615 \uBC29\uC5B4 \uAD6C\uC870\uBB3C, \uD654\uC0C1"
+  isKnow: 1

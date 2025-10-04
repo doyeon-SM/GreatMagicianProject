@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -7,7 +7,7 @@ public class StoryModeManager : MonoBehaviour
 {
     public static StoryModeManager Instance { get; private set; }
 
-    [Header("·¹ÆÛ·±½º")]
+    [Header("ë ˆí¼ëŸ°ìŠ¤")]
     public Monster_Spawn monsterSpawn;
     public Score_System scoreSystem;
     public SceneLoader sceneLoader;
@@ -15,12 +15,13 @@ public class StoryModeManager : MonoBehaviour
     [Header("Stages")]
     public StoryStageAssetResolver resolver;
 
-    [Header("ÁøÇà »óÅÂ")]
+    [Header("ì§„í–‰ ìƒíƒœ")]
     public bool isStoryRun = false;
     public StoryStageAsset currentStage;
 
-    // °£´Ü ÁøÇàµµ(¸¶Áö¸· µµÀüÁöÁ¡). ÇÁ·ÎÁ§Æ® SaveSystem¿Í ¿¬µ¿ ±ÇÀå
-    public string lastCheckpointStageId = "0-1"; // ÃÊ±â ±âº»°ª
+    // ê°„ë‹¨ ì§„í–‰ë„(ë§ˆì§€ë§‰ ë„ì „ì§€ì ). í”„ë¡œì íŠ¸ SaveSystemì™€ ì—°ë™ ê¶Œì¥
+    public string lastCheckpointStageId = "0-1"; // ì´ˆê¸° ê¸°ë³¸ê°’
+    public string maxClearedStageId = "0-0";    // ìµœëŒ€ ìŠ¤í…Œì´ì§€
 
     [Header("Result UI")]
     public GameObject gameResultUIPrefab;
@@ -44,7 +45,7 @@ public class StoryModeManager : MonoBehaviour
     }
     private IEnumerator EnsureLoadedStageId()
     {
-        // SaveSystem.Start()ÀÇ LoadGameData°¡ ¸ÕÀú ½ÇÇàµÇµµ·Ï ÇÑ ÇÁ·¹ÀÓ ´ë±â
+        // SaveSystem.Start()ì˜ LoadGameDataê°€ ë¨¼ì € ì‹¤í–‰ë˜ë„ë¡ í•œ í”„ë ˆì„ ëŒ€ê¸°
         yield return null;
 
         if (string.IsNullOrEmpty(lastCheckpointStageId))
@@ -57,10 +58,10 @@ public class StoryModeManager : MonoBehaviour
         if (!sceneLoader) sceneLoader = FindObjectOfType<SceneLoader>(true);
     }
 
-    // ===== ¿ÜºÎ¿¡¼­ È£Ãâ: ½ºÅä¸® ¸ğµå ½ÃÀÛ =====
+    // ===== ì™¸ë¶€ì—ì„œ í˜¸ì¶œ: ìŠ¤í† ë¦¬ ëª¨ë“œ ì‹œì‘ =====
     public void StartStoryStage(StoryStageAsset stage)
     {
-        // Áßº¹/ÀçÁøÀÔ °¡µå
+        // ì¤‘ë³µ/ì¬ì§„ì… ê°€ë“œ
         if (_isStartingStage)
         {
             Debug.LogWarning("[StoryMode] StartStoryStage ignored: already starting.");
@@ -72,11 +73,11 @@ public class StoryModeManager : MonoBehaviour
         if (!monsterSpawn || !scoreSystem || stage == null)
         {
             _isStartingStage = false;
-            Debug.LogError("[StoryMode] ½ÃÀÛ ½ÇÆĞ: ·¹ÆÛ·±½º ¶Ç´Â StageAsset ´©¶ô");
+            Debug.LogError("[StoryMode] ì‹œì‘ ì‹¤íŒ¨: ë ˆí¼ëŸ°ìŠ¤ ë˜ëŠ” StageAsset ëˆ„ë½");
             return;
         }
 
-        // === ¸®¼Âµé ===
+        // === ë¦¬ì…‹ë“¤ ===
         var wall = FindObjectOfType<Wall_System_Base>(true);
         if (wall) wall.ResetForNextStage();
 
@@ -92,7 +93,7 @@ public class StoryModeManager : MonoBehaviour
         }
         else
         {
-            // È¤½Ã¶óµµ ´©¶ô½Ã ÇÑ ¹ø ´õ ½Ãµµ
+            // í˜¹ì‹œë¼ë„ ëˆ„ë½ì‹œ í•œ ë²ˆ ë” ì‹œë„
             scoreSystem = FindObjectOfType<Score_System>(true);
             if (scoreSystem != null) scoreSystem.BeginStageRun();
             else Debug.LogError("[StoryMode] Score_System instance not found for BeginStageRun.");
@@ -106,22 +107,22 @@ public class StoryModeManager : MonoBehaviour
         scoreSystem.score = 0;
         Debug.Log($"[StoryMode] Start {stage.stageId} (waves={stage.waveCount})");
 
-        // Æ©Åä¸®¾ó Æ®¸®°Å
+        // íŠœí† ë¦¬ì–¼ íŠ¸ë¦¬ê±°
         TryTriggerStageTutorial(stage);
 
-        // ½ÃÀÛ ¿Ï·á ÈÄ ÇÃ·¡±× ÇØÁ¦
+        // ì‹œì‘ ì™„ë£Œ í›„ í”Œë˜ê·¸ í•´ì œ
         _isStartingStage = false;
     }
 
     public void StartFromLastCheckpoint(StoryStageAssetResolver resolver)
     {
-        // ´ë±â Áß(next Å¥)ÀÌ¶ó¸é ºÎÆ®½ºÆ®·¦ È£Ãâ ¹«½Ã
+        // ëŒ€ê¸° ì¤‘(next í)ì´ë¼ë©´ ë¶€íŠ¸ìŠ¤íŠ¸ë© í˜¸ì¶œ ë¬´ì‹œ
         if (_pendingNext)
         {
             Debug.Log("[StoryMode] StartFromLastCheckpoint ignored: pending queued next stage.");
             return;
         }
-        // ÀÌ¹Ì ÁøÇà ÁßÀÌ¸é ¹«½Ã
+        // ì´ë¯¸ ì§„í–‰ ì¤‘ì´ë©´ ë¬´ì‹œ
         if (_isStartingStage || (isStoryRun && currentStage != null))
         {
             Debug.Log("[StoryMode] StartFromLastCheckpoint ignored: stage already running/starting.");
@@ -131,7 +132,7 @@ public class StoryModeManager : MonoBehaviour
         var stage = resolver != null ? resolver.Resolve(lastCheckpointStageId) : null;
         if (stage == null)
         {
-            Debug.LogError($"[StoryMode] {lastCheckpointStageId} ½ºÅ×ÀÌÁö¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù.");
+            Debug.LogError($"[StoryMode] {lastCheckpointStageId} ìŠ¤í…Œì´ì§€ë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.");
             return;
         }
         StartStoryStage(stage);
@@ -139,18 +140,18 @@ public class StoryModeManager : MonoBehaviour
 
 
 
-    // ===== Monster_Spawn°¡ ÃÖÁ¾ ¿şÀÌºê Á¾·á ÈÄ È£Ãâ =====
+    // ===== Monster_Spawnê°€ ìµœì¢… ì›¨ì´ë¸Œ ì¢…ë£Œ í›„ í˜¸ì¶œ =====
     public void OnAllScriptedWavesFinished()
     {
         if (!isStoryRun || currentStage == null) return;
 
-        // ÀÜ¸÷ ¼ÒÅÁ °¨½Ã ¡æ ¸ğµÎ »ç¶óÁö¸é Å¬¸®¾î Ã³¸®
+        // ì”ëª¹ ì†Œíƒ• ê°ì‹œ â†’ ëª¨ë‘ ì‚¬ë¼ì§€ë©´ í´ë¦¬ì–´ ì²˜ë¦¬
         StartCoroutine(WaitAndClearRoutine());
     }
 
     private IEnumerator WaitAndClearRoutine()
     {
-        // ÀÜ¸÷ Á¤¸® ´ë±â
+        // ì”ëª¹ ì •ë¦¬ ëŒ€ê¸°
         while (GameObject.FindGameObjectsWithTag("Monster").Length > 0)
             yield return new WaitForSeconds(0.25f);
 
@@ -170,14 +171,14 @@ public class StoryModeManager : MonoBehaviour
 
         scoreSystem.PatchScoreFromStageIfNeeded(currentStage.stageScore);
 
-        // °á°ú ±â·Ï ÃÊ±âÈ­ ÈÄ È®Á¤º¸»ó ¸ÕÀú
+        // ê²°ê³¼ ê¸°ë¡ ì´ˆê¸°í™” í›„ í™•ì •ë³´ìƒ ë¨¼ì €
         if (scoreSystem.LastAwarded == null) scoreSystem.LastAwarded = new List<Score_System.AwardedSkillInfo>();
         scoreSystem.LastAwarded.Clear();
 
         foreach (var idx in currentStage.guaranteedSkillIndices)
             scoreSystem.AddGuaranteedSkillByIndex(idx);
 
-        // ´ÙÀ½ ½ºÅ×ÀÌÁö "ÈÄº¸"¸¸ °è»êÇØ¼­ º¸°ü. Ã¼Å©Æ÷ÀÎÆ®´Â ¾ÆÁ÷ °»½ÅÇÏÁö ¾ÊÀ½!
+        // ë‹¤ìŒ ìŠ¤í…Œì´ì§€ "í›„ë³´"ë§Œ ê³„ì‚°í•´ì„œ ë³´ê´€. ì²´í¬í¬ì¸íŠ¸ëŠ” ì•„ì§ ê°±ì‹ í•˜ì§€ ì•ŠìŒ!
         _pendingNextStageId = GetNextStageIdByOrder(currentStage.stageId);
 
         ShowResultAndNext();
@@ -186,7 +187,7 @@ public class StoryModeManager : MonoBehaviour
 
     private void ShowResultAndNext()
     {
-        // °á°úÃ¢ Ã£±â/»ı¼º (±âÁ¸ ±×´ë·Î)
+        // ê²°ê³¼ì°½ ì°¾ê¸°/ìƒì„± (ê¸°ì¡´ ê·¸ëŒ€ë¡œ)
         var resultUI = FindObjectOfType<GameResultUI>(true);
         if (!resultUI)
         {
@@ -197,7 +198,7 @@ public class StoryModeManager : MonoBehaviour
 
             if (prefab == null)
             {
-                Debug.LogWarning("[StoryMode] GameResultUI ÇÁ¸®ÆÕÀ» Ã£À» ¼ö ¾ø½À´Ï´Ù. ·Îºñ·Î º¹±ÍÇÕ´Ï´Ù.");
+                Debug.LogWarning("[StoryMode] GameResultUI í”„ë¦¬íŒ¹ì„ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤. ë¡œë¹„ë¡œ ë³µê·€í•©ë‹ˆë‹¤.");
                 if (sceneLoader) sceneLoader.LoadLobyScene();
                 return;
             }
@@ -205,7 +206,7 @@ public class StoryModeManager : MonoBehaviour
             var canvasGO = GameObject.Find("Canvas");
             if (canvasGO == null)
             {
-                Debug.LogWarning("[StoryMode] Canvas¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù. ·Îºñ·Î º¹±ÍÇÕ´Ï´Ù.");
+                Debug.LogWarning("[StoryMode] Canvasë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤. ë¡œë¹„ë¡œ ë³µê·€í•©ë‹ˆë‹¤.");
                 if (sceneLoader) sceneLoader.LoadLobyScene();
                 return;
             }
@@ -214,7 +215,7 @@ public class StoryModeManager : MonoBehaviour
             resultUI = uiInstance.GetComponent<GameResultUI>();
             if (!resultUI)
             {
-                Debug.LogError("[StoryMode] »ı¼ºµÈ ÇÁ¸®ÆÕ¿¡ GameResultUI ÄÄÆ÷³ÍÆ®°¡ ¾ø½À´Ï´Ù.");
+                Debug.LogError("[StoryMode] ìƒì„±ëœ í”„ë¦¬íŒ¹ì— GameResultUI ì»´í¬ë„ŒíŠ¸ê°€ ì—†ìŠµë‹ˆë‹¤.");
                 if (sceneLoader) sceneLoader.LoadLobyScene();
                 return;
             }
@@ -232,8 +233,8 @@ public class StoryModeManager : MonoBehaviour
 
 
 
-    // Resolver ¼ø¼­ ±â¹İ Next °è»ê
-    private string GetNextStageIdByOrder(string cur)
+    // Resolver ìˆœì„œ ê¸°ë°˜ Next ê³„ì‚°
+    public string GetNextStageIdByOrder(string cur)
     {
         if (resolver == null || resolver.stages == null || resolver.stages.Count == 0)
             return GetNextStageId_FallbackNumeric(cur);
@@ -244,10 +245,13 @@ public class StoryModeManager : MonoBehaviour
         if (idx + 1 < resolver.stages.Count)
             return resolver.stages[idx + 1].stageId;
 
-        return cur; // ¸¶Áö¸·ÀÌ¸é ±×´ë·Î
+       
+        return null;
     }
 
-    // ±âÁ¸ ¼ıÀÚ Áõ°¡½Ä Æú¹é(¿¹ºñ¿ë)
+   
+
+    // ê¸°ì¡´ ìˆ«ì ì¦ê°€ì‹ í´ë°±(ì˜ˆë¹„ìš©)
     private string GetNextStageId_FallbackNumeric(string cur)
     {
         var p = cur.Split('-');
@@ -259,21 +263,21 @@ public class StoryModeManager : MonoBehaviour
 
     private void SaveCheckpoint()
     {
-        // ÇÁ·ÎÁ§Æ® SaveSystem¿¡ "lastCheckpointStageId" °°Àº ÇÊµå Ãß°¡ ±ÇÀå
-        // ¿©±â¼­´Â Á¸Àç °¡Á¤ ¾øÀÌ ·Î±×¸¸
+        // í”„ë¡œì íŠ¸ SaveSystemì— "lastCheckpointStageId" ê°™ì€ í•„ë“œ ì¶”ê°€ ê¶Œì¥
+        // ì—¬ê¸°ì„œëŠ” ì¡´ì¬ ê°€ì • ì—†ì´ ë¡œê·¸ë§Œ
         Debug.Log($"[StoryMode] Checkpoint saved: {lastCheckpointStageId}");
     }
 
     public void QueueStartNextStage(StoryStageAsset next)
     {
-        _pendingNextStageId = null; // ¸Ş´º¿¡¼­ ¹Ù·Î ½ÃÀÛÇÒ ¶© ÀÌÀü º¸·ù°ª ¹«È¿È­
+        _pendingNextStageId = null; // ë©”ë‰´ì—ì„œ ë°”ë¡œ ì‹œì‘í•  ë• ì´ì „ ë³´ë¥˜ê°’ ë¬´íš¨í™”
         if (next == null) { Debug.LogWarning("[StoryMode] QueueStartNextStage: next=null"); return; }
         StartCoroutine(StartNextStageFlow(next));
     }
 
     private IEnumerator StartNextStageFlow(StoryStageAsset next)
     {
-        // °á°úÃ¢¿¡¼­ TimeScaleÀ» 1·Î Ç®¾ú´Ù°í °¡Á¤. ÇÑ ÇÁ·¹ÀÓ ¾çº¸
+        // ê²°ê³¼ì°½ì—ì„œ TimeScaleì„ 1ë¡œ í’€ì—ˆë‹¤ê³  ê°€ì •. í•œ í”„ë ˆì„ ì–‘ë³´
         yield return null;
 
         var cur = SceneManager.GetActiveScene().name;
@@ -284,10 +288,10 @@ public class StoryModeManager : MonoBehaviour
 
             SceneManager.sceneLoaded += OnSceneLoaded_RunPendingNext;
             SceneManager.LoadScene(StorySceneName);
-            yield break; // ¾À ¹Ù²î¸é ¿©±â¼­ Á¾·á, ·Îµå Äİ¹é¿¡¼­ ÀÌ¾î¼­ ½ÃÀÛ
+            yield break; // ì”¬ ë°”ë€Œë©´ ì—¬ê¸°ì„œ ì¢…ë£Œ, ë¡œë“œ ì½œë°±ì—ì„œ ì´ì–´ì„œ ì‹œì‘
         }
 
-        // ÀÌ¹Ì StoryModeSceneÀÌ¸é ¹Ù·Î ½ÃÀÛ
+        // ì´ë¯¸ StoryModeSceneì´ë©´ ë°”ë¡œ ì‹œì‘
         StartStoryStage(next);
     }
 
@@ -302,7 +306,7 @@ public class StoryModeManager : MonoBehaviour
         _pendingNext = false;
         _pendingStage = null;
 
-        // ¾À ·Îµå ¿Ï·á ÇÁ·¹ÀÓ ÇÑ ¹ø ¾çº¸ (¸ğµç ¿ÀºêÁ§Æ® Awake/Start º¸Àå)
+        // ì”¬ ë¡œë“œ ì™„ë£Œ í”„ë ˆì„ í•œ ë²ˆ ì–‘ë³´ (ëª¨ë“  ì˜¤ë¸Œì íŠ¸ Awake/Start ë³´ì¥)
         StartCoroutine(_StartAfterOneFrame(stage));
     }
 
@@ -333,13 +337,13 @@ public class StoryModeManager : MonoBehaviour
             return;
         }
 
-        // ¿©±â¼­ 'ÁøÂ¥'·Î Ã¼Å©Æ÷ÀÎÆ® °»½Å ÈÄ ÀúÀå
+        // ì—¬ê¸°ì„œ 'ì§„ì§œ'ë¡œ ì²´í¬í¬ì¸íŠ¸ ê°±ì‹  í›„ ì €ì¥
         lastCheckpointStageId = _pendingNextStageId;
         SaveCheckpoint();
 
-        _pendingNextStageId = null; // ¼Ò¸ğ
+        _pendingNextStageId = null; // ì†Œëª¨
 
-        // ´ÙÀ½ ½ºÅ×ÀÌÁö ½ÃÀÛ(¾À º¸Àå ·ÎÁ÷ Æ÷ÇÔ)
+        // ë‹¤ìŒ ìŠ¤í…Œì´ì§€ ì‹œì‘(ì”¬ ë³´ì¥ ë¡œì§ í¬í•¨)
         QueueStartNextStage(next);
     }
     public void CommitStageClear()
@@ -347,11 +351,16 @@ public class StoryModeManager : MonoBehaviour
         if (currentStage == null || string.IsNullOrEmpty(currentStage.stageId))
             return;
 
-        // ÇöÀç°¡ ´õ µÚ ½ºÅ×ÀÌÁö¸é °»½Å
+        // ìµœëŒ€ í´ë¦¬ì–´ ìŠ¤í…Œì´ì§€ ê°±ì‹ 
+        if (CompareStageId(currentStage.stageId, maxClearedStageId) > 0)
+        {
+            maxClearedStageId = currentStage.stageId;
+        }
+
         if (CompareStageId(currentStage.stageId, lastCheckpointStageId) > 0)
         {
             lastCheckpointStageId = currentStage.stageId;
-            PersistProgress(); // Áï½Ã ÀúÀå
+            PersistProgress(); // ì¦‰ì‹œ ì €ì¥
             Debug.Log($"[Story] Cleared {lastCheckpointStageId} (progress saved)");
         }
     }
@@ -372,10 +381,19 @@ public class StoryModeManager : MonoBehaviour
             return (major, minor);
         }
     }
-    // ÁøÇàµµ ÀúÀå/·Îµå
+    public void ClearRunState()
+    {
+        _pendingNext = false;
+        _pendingStage = null;
+        _pendingNextStageId = null;
+        isStoryRun = false;
+        currentStage = null;
+    }
+    // ì§„í–‰ë„ ì €ì¥/ë¡œë“œ
     public void PersistProgress()
     {
         PlayerPrefs.SetString("LastCheckpointStageId", lastCheckpointStageId);
+        PlayerPrefs.SetString("MaxClearedStageId", maxClearedStageId);  
         PlayerPrefs.Save();
     }
 
@@ -383,9 +401,16 @@ public class StoryModeManager : MonoBehaviour
     {
         if (PlayerPrefs.HasKey("LastCheckpointStageId"))
             lastCheckpointStageId = PlayerPrefs.GetString("LastCheckpointStageId", lastCheckpointStageId);
+
+        if (PlayerPrefs.HasKey("MaxClearedStageId"))
+            maxClearedStageId = PlayerPrefs.GetString("MaxClearedStageId", maxClearedStageId);
+        else
+            // ì—†ëŠ” ê²½ìš° ìµœê·¼ê°’ìœ¼ë¡œ ì´ˆê¸° ë³´ì • (ë˜ëŠ” "0-0" ìœ ì§€ â€” í”„ë¡œì íŠ¸ ì •ì±…ì— ë§ê²Œ)
+            maxClearedStageId = CompareStageId(lastCheckpointStageId, maxClearedStageId) > 0
+                ? lastCheckpointStageId : maxClearedStageId;
     }
 
-    // Æ©Åä¸®¾ó Æ®¸®°Å(½ºÅä¸®¸ğµå)
+    // íŠœí† ë¦¬ì–¼ íŠ¸ë¦¬ê±°(ìŠ¤í† ë¦¬ëª¨ë“œ)
     private void TryTriggerStageTutorial(StoryStageAsset stage)
     {
         if (stage == null || TutorialManager.Instance == null) return;

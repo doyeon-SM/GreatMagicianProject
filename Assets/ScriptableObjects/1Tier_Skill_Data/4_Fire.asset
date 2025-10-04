@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   skillName: Fire
   skillIndex: 4
-  damage: 20
+  damage: 28
   Tier: 1
   level: 1
   NeedLevelUP_Gold: 1
@@ -33,5 +33,5 @@ MonoBehaviour:
   - {fileID: 11400000, guid: a3018a307d23370448eb0e615b1b53a5, type: 2}
   Effect_Value: 0
   AreaTime: 0
-  skillscript: "\uD3ED\uBC1C"
+  skillscript: "\uD3ED\uBC1C\uD615 \uD22C\uC0AC\uCCB4"
   isKnow: 1

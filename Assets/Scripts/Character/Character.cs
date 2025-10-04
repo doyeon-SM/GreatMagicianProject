@@ -170,23 +170,20 @@ public class Character : MonoBehaviour
     }
 
     public void CharacterLevelUP(int score)
-    {        
-        for(int score_tmp = score; score_tmp > 0;)
+    {
+        // 1) 경험치 누적
+        Character_EXP += score;
+        Debug.Log($"경험치를 획득했습니다 {Character_EXP}/{Character_NextEXP}");
+
+        // 2) 레벨업 루프
+        while (Character_EXP >= Character_NextEXP)
         {
-            if(score_tmp >= Character_NextEXP)
-            {
-                Character_Level++;
-                Character_Stat += 2;
-                score_tmp -= Character_NextEXP;
-                Character_NextEXP = Mathf.RoundToInt(Character_NextEXP * 1.1f);
-                Debug.Log("레벨업했습니다" + Character_Level + "||" + Character_EXP + "/" + Character_NextEXP);
-            }
-            else
-            {
-                Character_EXP += score_tmp;
-                score_tmp = 0;
-                Debug.Log("경험치를 획득했습니다" + Character_EXP + "/" + Character_NextEXP);
-            }
+            Character_EXP -= Character_NextEXP;  // 필요 경험치 차감
+            Character_Level++;
+            Character_Stat += 2;
+            Character_NextEXP = Mathf.RoundToInt(Character_NextEXP * 1.1f);
+
+            Debug.Log($"레벨업했습니다! Lv.{Character_Level} || EXP {Character_EXP}/{Character_NextEXP}");
         }
     }
 

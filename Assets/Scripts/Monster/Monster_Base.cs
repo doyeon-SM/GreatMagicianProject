@@ -12,8 +12,8 @@ public class Monster_Base : MonoBehaviour
     public MonsterElement monsterElement;
 
     [Header("UI Prefabs (Canvas 없는 Item 프리팹)")]
-    public GameObject healthTextPrefab;   // Text만 있는 프리팹(내부 Canvas 없음)
-    public GameObject damageTextPrefab;   // Text만 있는 프리팹(내부 Canvas 없음)
+    public GameObject healthTextPrefab;   
+    public GameObject damageTextPrefab;  
 
     [Header("Refs")]
     public Score_System scoreSystem;

@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   skillName: Iron
   skillIndex: 23
-  damage: 0
+  damage: 44
   Tier: 2
   level: 1
   NeedLevelUP_Gold: 1
@@ -33,5 +33,5 @@ MonoBehaviour:
   - {fileID: 11400000, guid: e371c33aa863b1a498019613ea6a4def, type: 2}
   Effect_Value: 0
   AreaTime: 0
-  skillscript: 
+  skillscript: "\uC9C1\uC120\uACF5\uACA9"
   isKnow: 0

@@ -14,10 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   skillName: Terra
   skillIndex: 3
-  damage: 5
+  damage: 8
   Tier: 0
-  level: 1
-  NeedLevelUP_Gold: 1
+  level: 4
+  NeedLevelUP_Gold: 7
   skillIcon: {fileID: 21300000, guid: 36279f9ab70ae3343ab09b14c4e3e2ee, type: 3}
   rangePrefab: {fileID: 845473151264501715, guid: d42f56de64815684895ceaeb7ad80c31, type: 3}
   useableRangePrefab: {fileID: 590556380511742590, guid: df2aa2e2add7b8446896c8f9f2289b2f, type: 3}
@@ -31,5 +31,5 @@ MonoBehaviour:
   requiredBaseSkills: []
   Effect_Value: 0
   AreaTime: 0
-  skillscript: "\uB545\uC18D\uC131, \uD2B9\uC218\uC2A4\uD0AC \uD2B9\uD654"
+  skillscript: "\uB098\uBB34\uC18D\uC131, \uD2B9\uC218\uACF5\uACA9 \uD2B9\uD654"
   isKnow: 1

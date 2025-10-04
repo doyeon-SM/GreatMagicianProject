@@ -118,29 +118,34 @@ public class GameResultUI : MonoBehaviour
     /// </summary>
     public void OnExitButtonClicked()
     {
-        // 스토리 진행 체크포인트
         var sm = StoryModeManager.Instance;
         if (sm != null && sm.isStoryRun)
         {
+            // 다음 스테이지가 있으면 체크포인트 갱신 (마지막이면 TryPeek 실패)
             StoryStageAsset peek;
             if (sm.TryPeekPendingNext(out peek) && peek != null)
             {
-                // 다음 스테이지가 존재하면 체크포인트를 다음으로 저장
                 sm.lastCheckpointStageId = peek.stageId;
                 sm.PersistProgress();
             }
+
+            // 스토리 런 상태 완전 정리
+            sm.ClearRunState();
         }
+        if (scoreSystem != null)
+        {
+            scoreSystem.BeginStageRun(); 
+        }
+        if (SaveSystem.Instance != null) SaveSystem.Instance.SaveGameData();
+        if (StoryModeManager.Instance != null) StoryModeManager.Instance.PersistProgress();
 
-        // 보상/진행 저장
-        if (SaveSystem.Instance != null)
-            SaveSystem.Instance.SaveGameData();
-        if (StoryModeManager.Instance != null)
-            StoryModeManager.Instance.PersistProgress();
+        // 혹시라도 UI가 남아있지 않게 비활성화
+        gameObject.SetActive(false);
 
-        // 점수 리셋 → 로비 → 시간 재개
+        // 점수 리셋 + 로비 이동
         scoreSystem.score = 0;
         sceneLoader.LoadLobyScene();
-        Time.timeScale = 1;
+        Time.timeScale = 1f;
     }
 
 

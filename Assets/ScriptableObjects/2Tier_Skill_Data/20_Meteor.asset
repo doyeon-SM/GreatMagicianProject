@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   skillName: Meteor
   skillIndex: 20
-  damage: 0
+  damage: 50
   Tier: 2
   level: 1
   NeedLevelUP_Gold: 1
@@ -33,5 +33,5 @@ MonoBehaviour:
   - {fileID: 11400000, guid: f79541974eaa9d0499d2ca29b2a40dcd, type: 2}
   Effect_Value: 0
   AreaTime: 0
-  skillscript: 
+  skillscript: "\uBC94\uC704\uD615 \uACF5\uACA9"
   isKnow: 0
