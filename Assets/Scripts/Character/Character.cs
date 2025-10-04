@@ -183,7 +183,7 @@ public class Character : MonoBehaviour
             }
             else
             {
-                Character_EXP = score_tmp;
+                Character_EXP += score_tmp;
                 score_tmp = 0;
                 Debug.Log("경험치를 획득했습니다" + Character_EXP + "/" + Character_NextEXP);
             }

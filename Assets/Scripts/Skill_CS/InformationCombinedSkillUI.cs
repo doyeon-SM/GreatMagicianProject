@@ -17,16 +17,23 @@ public class InformationCombinedSkillUI : MonoBehaviour,
     [Header("Canvas Sorting (optional)")]
     public int sortingOrder = 6000; // 다른 UI보다 위에 오도록
 
+    [Header("Parent Canvas (optional)")]
+    [Tooltip("지정하면 해당 Canvas 아래로 붙습니다. 비워두면 씬의 첫 Canvas를 자동 검색합니다.")]
+    public Canvas parentCanvas;
+
     private Image _blocker;
     private float _prevTimeScale = 1f;
     private bool _canClose = false;
+    private Canvas _localCanvas;  
+    private Camera _worldCam;
 
     private void Awake()
     {
         if (ConfirmButton != null) ConfirmButton.interactable = false;
         if (ConfirmButton != null) ConfirmButton.onClick.AddListener(OnClickConfirm);
 
-        EnsureTopCanvas();
+        AttachToParentCanvas();  
+        EnsureTopCanvasOnCamera();
         EnsureRaycastBlocker();
     }
 
@@ -111,17 +118,66 @@ public class InformationCombinedSkillUI : MonoBehaviour,
 
         Destroy(gameObject);
     }
-    private void EnsureTopCanvas()
+    /// <summary>
+    /// 부모 Canvas를 찾아 이 오브젝트를 그 아래로 붙인다.
+    /// </summary>
+    private void AttachToParentCanvas()
     {
-        var canvas = GetComponentInParent<Canvas>();
-        if (canvas == null) canvas = gameObject.AddComponent<Canvas>();
+        // 1) 인스펙터로 지정된 parentCanvas 우선
+        if (parentCanvas == null)
+        {
+            // 2) 현재 트랜스폼 상위에서 Canvas 찾기
+            parentCanvas = GetComponentInParent<Canvas>();
+        }
+        if (parentCanvas == null)
+        {
+            // 3) 씬 전체에서 제일 먼저 보이는 Canvas(가급적 ScreenSpaceCamera) 탐색
+            var all = FindObjectsOfType<Canvas>(true);
+            Canvas ssc = null;
+            foreach (var c in all)
+            {
+                if (c.renderMode == RenderMode.ScreenSpaceCamera) { ssc = c; break; }
+            }
+            parentCanvas = ssc != null ? ssc : (all.Length > 0 ? all[0] : null);
+        }
 
-        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-        canvas.overrideSorting = true;
-        canvas.sortingOrder = sortingOrder;
+        if (parentCanvas == null)
+        {
+            Debug.LogError("[InformationCombinedSkillUI] 부모 Canvas를 찾지 못했습니다. 씬에 Canvas가 필요합니다.");
+            return;
+        }
 
-        if (GetComponentInParent<GraphicRaycaster>() == null)
-            gameObject.AddComponent<GraphicRaycaster>();
+        // 부모로 붙이기
+        var prt = parentCanvas.transform;
+        if (transform.parent != prt)
+            transform.SetParent(prt, false);
+
+        // 부모 카메라 캐시
+        _worldCam = parentCanvas.worldCamera != null ? parentCanvas.worldCamera : Camera.main;
+    }
+
+    /// <summary>
+    /// 최상단에 보이도록 이 객체에 ‘로컬 Canvas’를 설정(부모 Canvas 기준).
+    /// Overlay를 새로 만들지 않고, ScreenSpace-Camera 모드 유지.
+    /// </summary>
+    private void EnsureTopCanvasOnCamera()
+    {
+        if (parentCanvas == null) return;
+
+        // 프리팹에 Canvas가 붙어 있다면 그것을 재설정, 없으면 추가
+        _localCanvas = GetComponent<Canvas>();
+        if (_localCanvas == null) _localCanvas = gameObject.AddComponent<Canvas>();
+
+        _localCanvas.renderMode = RenderMode.ScreenSpaceCamera;
+        _localCanvas.worldCamera = _worldCam != null ? _worldCam : Camera.main;
+        _localCanvas.planeDistance = Mathf.Max(1f, parentCanvas.planeDistance + 0.01f); // 살짝 앞쪽
+        _localCanvas.overrideSorting = true;
+        _localCanvas.sortingLayerID = parentCanvas.sortingLayerID; // 부모와 동일 레이어 사용
+        _localCanvas.sortingOrder = sortingOrder;                  // 원하는 최상단 순서
+
+        // Raycaster 보장
+        var ray = GetComponent<GraphicRaycaster>();
+        if (ray == null) ray = gameObject.AddComponent<GraphicRaycaster>();
     }
 
     private void EnsureRaycastBlocker()
@@ -138,14 +194,10 @@ public class InformationCombinedSkillUI : MonoBehaviour,
         rt.anchorMax = Vector2.one;
         rt.offsetMin = Vector2.zero;
         rt.offsetMax = Vector2.zero;
-        rt.SetAsFirstSibling(); //가장 아래 자식으로 두어 창 뒤 전체를 덮게
+        rt.SetAsFirstSibling(); // 가장 아래에 두어 뒤 UI 전체 덮기
 
         _blocker = go.GetComponent<Image>();
-        _blocker.color = new Color(0f, 0f, 0f, 0.0f);   // 완전 투명(딤 원하면 0.4f 정도)
-        _blocker.raycastTarget = true;                  // 뒤 UI 입력 차단
-
-        // 딤 클릭으로 닫고 싶지 않다면, 아무 핸들러도 추가하지 않으면 됩니다.
-        // 만약 딤 클릭으로 닫고 싶다면:
-        // go.AddComponent<CloseOnClick>().Init(this); // 아래 보조 클래스를 사용
+        _blocker.color = new Color(0f, 0f, 0f, 0.0f); // 투명(딤 원하면 0.4f 정도)
+        _blocker.raycastTarget = true;                // 뒤 UI 입력 차단
     }
 }

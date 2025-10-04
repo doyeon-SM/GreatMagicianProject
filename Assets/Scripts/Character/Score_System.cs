@@ -7,7 +7,9 @@ public class Score_System : MonoBehaviour
     public Character character;
     public int score = 0;
 
-    private bool _resultApplied = false;
+    private bool _appliedThisStage = false;
+    private string _appliedStageId = null;
+
     private int T0Len => character?.tier0Skills?.Length ?? 0;
     private int T1Len => character?.tier1Skills?.Length ?? 0;
     private int T2Len => character?.tier2Skills?.Length ?? 0;
@@ -29,25 +31,65 @@ public class Score_System : MonoBehaviour
     // 스테이지마다 결과 적재 플래그 리셋
     public void BeginStageRun()
     {
-        _resultApplied = false;
+        _appliedStageId = null;
+        _appliedThisStage = false;
         LastAwarded.Clear();
     }
     private void OnEnable()
     {
-        _resultApplied = false;
+        _appliedThisStage = false;
     }
 
     public void ResultScore()
     {
-        if (_resultApplied) return;   // 두 번 이상 호출 방지
-        _resultApplied = true;
-        if (score > 0)
-        {
-            character.Character_Gold += score;
-            character.CharacterLevelUP(score / 100);
+        var sm = StoryModeManager.Instance;
 
-            AwardRandomSkills(score);
-            // AwardGuaranteedSkills(); // 확정 보상 로직이 분리돼 있다면 여기서 함께
+        // 스테이지 변경 감지: 스테이지가 바뀌었는데 플래그가 살아있으면 안전 리셋
+        string curStageId = (sm != null && sm.currentStage != null) ? sm.currentStage.stageId : null;
+        if (_appliedThisStage && !string.IsNullOrEmpty(curStageId) && _appliedStageId != curStageId)
+        {
+            Debug.Log($"[Score_System] Stage changed ({_appliedStageId} -> {curStageId}), auto reset.");
+            _appliedThisStage = false;
+            LastAwarded.Clear();
+        }
+
+        // 기존 보정 로직
+        if (score <= 0 && sm != null && sm.isStoryRun && sm.currentStage != null)
+        {
+            score = sm.currentStage.stageScore;
+            Debug.Log($"[Score_System] Patched score inside ResultScore: {score}");
+        }
+
+        if (score <= 0)
+        {
+            Debug.Log("[Score_System] Score <= 0, skip apply (not marking as applied)");
+            return;
+        }
+
+        if (_appliedThisStage)
+        {
+            Debug.Log("[Score_System] Already applied this stage, skip");
+            return;
+        }
+
+        // 지급
+        Debug.Log($"[Score_System] Apply rewards once. score={score}");
+        character.Character_Gold += score;
+        character.CharacterLevelUP(score / 100);
+        AwardRandomSkills(score);
+
+        // 이번에 지급한 스테이지 기록
+        _appliedThisStage = true;
+        _appliedStageId = curStageId;
+    }
+
+
+    public void PatchScoreFromStageIfNeeded(int stageScore)
+    {
+        if (score <= 0 && stageScore > 0)
+        {
+            score = stageScore;
+            Debug.Log($"[Score_System] Patched score from stage: {score}");
         }
     }
     /// <summary>
@@ -170,8 +212,6 @@ public class Score_System : MonoBehaviour
     /// </summary>
     private int ResolveSkillIndex(Skill_Data data)
     {
-        if (data.skillIndex >= 0) return data.skillIndex;
-
         // 0티어에서 찾기
         int idx = IndexOfInArray(character.tier0Skills, data);
         if (idx >= 0) return ToGlobalIndex(0, idx);
@@ -183,6 +223,9 @@ public class Score_System : MonoBehaviour
         // 2티어
         idx = IndexOfInArray(character.tier2Skills, data);
         if (idx >= 0) return ToGlobalIndex(2, idx);
+
+        // 마지막 수단으로 필드 사용(전역 인덱스가 맞다는 전제 하에)
+        if (data.skillIndex >= 0) return data.skillIndex;
 
         Debug.LogWarning("[Score_System] 전역 인덱스를 찾지 못했습니다. Skill_Data가 어떤 티어 배열에도 없습니다.");
         return -1;

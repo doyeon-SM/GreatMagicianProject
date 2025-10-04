@@ -179,8 +179,8 @@ public class GameResultUI : MonoBehaviour
 
         foreach (var g in grouped)
         {
-            var go = Instantiate(skillIconPrefab, contentRect);
-            var item = go.GetComponent<ResultSkillIcon>();
+            var go = InstantiateUnder(skillIconPrefab, contentRect);
+            var item = go ? go.GetComponent<ResultSkillIcon>() : null;
 
             Sprite icon = g.sample != null ? g.sample.skillIcon : null;
             bool showNew = g.anyNew;
@@ -325,8 +325,8 @@ public class GameResultUI : MonoBehaviour
         var prefab = guaranteedSkillIconPrefab != null ? guaranteedSkillIconPrefab : skillIconPrefab;
         foreach (var g in sorted)
         {
-            var go = Instantiate(prefab, guaranteedContentRect);
-            var item = go.GetComponent<ResultSkillIcon>();
+            var go = InstantiateUnder(prefab, guaranteedContentRect);
+            var item = go ? go.GetComponent<ResultSkillIcon>() : null;
 
             Sprite icon = g.sample != null ? g.sample.skillIcon : null;
             bool showNew = g.anyNew;
@@ -354,5 +354,77 @@ public class GameResultUI : MonoBehaviour
         var size = guaranteedContentRect.sizeDelta;
         guaranteedContentRect.sizeDelta = new Vector2(size.x, totalHeight);
     }
+   
 
+    private GameObject InstantiateUnder(GameObject prefab, RectTransform parent)
+    {
+        if (prefab == null || parent == null)
+        {
+            Debug.LogWarning("[GameResultUI] InstantiateUnder: prefab 혹은 parent가 null");
+            return null;
+        }
+
+        // 1) 우선 임시로 인스턴스 생성(부모는 parent로 바로)
+        GameObject inst = Instantiate(prefab, parent);
+        var instRT = inst.GetComponent<RectTransform>();
+
+        // 2) 만약 프리팹 루트가 Canvas를 갖고 있다면, 내부 실제 UI를 parent로 승격
+        //    (Canvas/Scaler/Raycaster는 제거, 자식(첫 RectTransform)을 올려 붙인다)
+        var innerCanvas = inst.GetComponentInChildren<Canvas>(true);
+        if (innerCanvas != null && innerCanvas.gameObject == inst) // 루트가 Canvas인 경우
+        {
+            // 내부에서 "실제 UI 루트" 후보 찾기 (Canvas 바로 아래 첫 RectTransform)
+            RectTransform realRoot = null;
+            for (int i = 0; i < instRT.childCount; i++)
+            {
+                var childRT = instRT.GetChild(i) as RectTransform;
+                if (childRT != null)
+                {
+                    realRoot = childRT;
+                    break;
+                }
+            }
+
+            if (realRoot != null)
+            {
+                // realRoot를 parent 밑으로 이동
+                realRoot.SetParent(parent, false);
+
+                // 불필요 컴포넌트 제거
+                var scaler = inst.GetComponent<CanvasScaler>();
+                var ray = inst.GetComponent<GraphicRaycaster>();
+                if (ray) Destroy(ray);
+                if (scaler) Destroy(scaler);
+                Destroy(innerCanvas);
+
+                // 빈 껍데기 제거
+                Destroy(inst);
+                inst = realRoot.gameObject;
+                instRT = realRoot;
+            }
+            else
+            {
+                // 자식이 없다면 그냥 Canvas만 제거
+                var scaler = inst.GetComponent<CanvasScaler>();
+                var ray = inst.GetComponent<GraphicRaycaster>();
+                if (ray) Destroy(ray);
+                if (scaler) Destroy(scaler);
+                Destroy(innerCanvas);
+            }
+        }
+
+        // 3) RectTransform 정리(스케일/회전/오프셋)
+        if (instRT != null)
+        {
+            instRT.anchorMin = instRT.anchorMin; // (앵커는 프리팹 설계대로 유지)
+            instRT.anchorMax = instRT.anchorMax;
+            instRT.pivot = instRT.pivot;
+
+            instRT.anchoredPosition3D = Vector3.zero;
+            instRT.localScale = Vector3.one;
+            instRT.localRotation = Quaternion.identity;
+        }
+
+        return inst;
+    }
 }

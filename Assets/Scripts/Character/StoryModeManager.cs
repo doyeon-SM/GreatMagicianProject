@@ -86,8 +86,17 @@ public class StoryModeManager : MonoBehaviour
         var underUI = UnderUI_System_Base.Instance ?? FindObjectOfType<UnderUI_System_Base>(true);
         if (underUI != null) underUI.ResetForNextStage();
 
-        var sc = FindObjectOfType<Score_System>(true);
-        if (sc != null) sc.BeginStageRun();
+        if (scoreSystem != null)
+        {
+            scoreSystem.BeginStageRun();
+        }
+        else
+        {
+            // 혹시라도 누락시 한 번 더 시도
+            scoreSystem = FindObjectOfType<Score_System>(true);
+            if (scoreSystem != null) scoreSystem.BeginStageRun();
+            else Debug.LogError("[StoryMode] Score_System instance not found for BeginStageRun.");
+        }
 
         isStoryRun = true;
         currentStage = stage;
@@ -158,6 +167,8 @@ public class StoryModeManager : MonoBehaviour
             scoreSystem.character.Character_Gold += currentStage.bonusGold;
         if (currentStage.bonusExp > 0)
             scoreSystem.character.CharacterLevelUP(currentStage.bonusExp);
+
+        scoreSystem.PatchScoreFromStageIfNeeded(currentStage.stageScore);
 
         // 결과 기록 초기화 후 확정보상 먼저
         if (scoreSystem.LastAwarded == null) scoreSystem.LastAwarded = new List<Score_System.AwardedSkillInfo>();
