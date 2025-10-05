@@ -165,7 +165,8 @@ public class Reset_System : MonoBehaviour
     {
         if (StoryModeManager.Instance != null)
         {
-            StoryModeManager.Instance.lastCheckpointStageId = "0-1";
+            StoryModeManager.Instance.lastCheckpointStageId = "0-0";
+            StoryModeManager.Instance.maxClearedStageId = "0-0";
             Debug.Log("[Reset] 스토리 진행을 0-1로 초기화했습니다.");
         }
         else
