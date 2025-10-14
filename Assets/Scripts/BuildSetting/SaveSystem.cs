@@ -123,6 +123,9 @@ public class SaveSystem : MonoBehaviour
         data.story_lastStageId = StoryModeManager.Instance != null
             ? StoryModeManager.Instance.lastCheckpointStageId
             : "0-1";
+        data.story_maxStageId = StoryModeManager.Instance != null
+            ? StoryModeManager.Instance.maxClearedStageId
+            : "0-0";
 
         //퀘스트 저장
         if (QuestManager.Instance != null)
@@ -211,9 +214,11 @@ public class SaveSystem : MonoBehaviour
         }
         // 스토리 진행 복원 (필드가 없거나 빈 경우 기본값 "0-1")
         string restoredStageId = string.IsNullOrEmpty(data.story_lastStageId) ? "0-1" : data.story_lastStageId;
+        string restoredmaxStageId = string.IsNullOrEmpty(data.story_maxStageId) ? "0-0" : data.story_maxStageId;
         if (StoryModeManager.Instance != null)
         {
             StoryModeManager.Instance.lastCheckpointStageId = restoredStageId;
+            StoryModeManager.Instance.maxClearedStageId = restoredmaxStageId;
             Debug.Log($"[SaveSystem] 스토리 진행 복원: {restoredStageId}");
         }
         else
