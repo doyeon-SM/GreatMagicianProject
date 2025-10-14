@@ -52,9 +52,9 @@ public class Score_System : MonoBehaviour
             _appliedThisStage = false;
             LastAwarded.Clear();
         }
-
+        var wall = FindObjectOfType<Wall_System_Base>();
         // 기존 보정 로직
-        if (score <= 0 && sm != null && sm.isStoryRun && sm.currentStage != null)
+        if (score <= 0 && sm != null && sm.isStoryRun && sm.currentStage != null && wall.isGameOver)
         {
             score = sm.currentStage.stageScore;
             Debug.Log($"[Score_System] Patched score inside ResultScore: {score}");

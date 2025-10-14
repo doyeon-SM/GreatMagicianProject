@@ -22,7 +22,7 @@ public class Wall_System_Base : MonoBehaviour
     private float damageInterval = 1f; // 1초에 한 번 체력이 감소
     private float damageTimer = 0f;
     private GameResultUI gameresultui;
-    private bool isGameOver = false;
+    public bool isGameOver = false;
 
     // Inspector에서 UnderUI prefab을 할당하세요.
     public GameObject underUIPrefab;

@@ -5,15 +5,15 @@ using UnityEngine.UI;
 public class PausePopupUI : MonoBehaviour
 {
     [Header("Wire in Prefab")]
-    [SerializeField] private GameObject popupRoot;   // 전체 팝업 루트(비주얼 루트)
-    [SerializeField] private Button resumeButton;     // 이어하기 버튼
-    [SerializeField] private Image dimBackground;     // 전체화면 딤(이미지) - Raycast Target = true
+    [SerializeField] protected GameObject popupRoot;   // 전체 팝업 루트(비주얼 루트)
+    [SerializeField] protected Button resumeButton;     // 이어하기 버튼
+    [SerializeField] protected Image dimBackground;     // 전체화면 딤(이미지) - Raycast Target = true
 
-    private CanvasGroup _cg;
-    private bool _isOpen = false;
-    private float _prevTimeScale = 1f;
+    protected CanvasGroup _cg;
+    protected bool _isOpen = false;
+    protected float _prevTimeScale = 1f;
 
-    private void Awake()
+    protected virtual void Awake()
     {
         _cg = GetComponent<CanvasGroup>();
         // 초기 비가시화
@@ -29,7 +29,7 @@ public class PausePopupUI : MonoBehaviour
         }
     }
 
-    public void Open()
+    public virtual void Open()
     {
         if (_isOpen) return;
         _isOpen = true;
@@ -52,7 +52,7 @@ public class PausePopupUI : MonoBehaviour
         HideImmediate();
     }
 
-    private void Show()
+    protected void Show()
     {
         if (popupRoot) popupRoot.SetActive(true);
         _cg.alpha = 1f;
@@ -60,7 +60,7 @@ public class PausePopupUI : MonoBehaviour
         _cg.blocksRaycasts = true; // 팝업 영역 내 Raycast 허용
     }
 
-    private void HideImmediate()
+    protected void HideImmediate()
     {
         if (popupRoot) popupRoot.SetActive(false);
         _cg.alpha = 0f;
