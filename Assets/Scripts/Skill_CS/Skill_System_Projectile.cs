@@ -45,12 +45,12 @@ public class Skill_System_Projectile : MonoBehaviour
                     break;
                 // 다른 스킬에 대한 처리 추가 가능
                 default:
-                    hasCollided = true;
+                    //hasCollided = true;
                     if (monster != null)
                     {
                         skillData.ApplyDamage(monster);  // 데미지 적용
                     }
-                    Destroy(gameObject);  // Ignis 투사체는 충돌 후 사라짐
+                    //Destroy(gameObject);  // Ignis 투사체는 충돌 후 사라짐
                     break;
             }
         }

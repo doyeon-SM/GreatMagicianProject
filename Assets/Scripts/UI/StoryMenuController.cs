@@ -47,16 +47,14 @@ public class StoryMenuController : MonoBehaviour
 
     private string GetMaxClearedStageId()
     {
-        // StoryModeManager에 최대 클리어가 있으면 그걸 쓰고, 없으면 lastCheckpoint → firstStageId 순으로 폴백
         var sm = storyManager ?? StoryModeManager.Instance ?? FindObjectOfType<StoryModeManager>(true);
         if (sm != null)
         {
             var maxId = sm.maxClearedStageId;
-            if (string.IsNullOrEmpty(maxId) || maxId == "0-0")
-                maxId = sm.lastCheckpointStageId;
-
-            if (!string.IsNullOrEmpty(maxId)) return maxId;
+            if (!string.IsNullOrEmpty(maxId) && maxId != "0-0")
+                return maxId;
         }
+        // 아직 아무 것도 클리어하지 않았다면 최초 스테이지만 허용
         return firstStageId;
     }
 
@@ -72,7 +70,6 @@ public class StoryMenuController : MonoBehaviour
         string maxCleared = GetMaxClearedStageId();
         int limit = StageOrder(maxCleared);
 
-        
         var nextId = storyManager?.GetNextStageIdByOrder(maxCleared);
         if (!string.IsNullOrEmpty(nextId)) limit = Mathf.Max(limit, StageOrder(nextId));
 

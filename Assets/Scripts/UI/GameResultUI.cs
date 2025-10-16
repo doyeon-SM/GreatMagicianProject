@@ -87,9 +87,11 @@ public class GameResultUI : MonoBehaviour
         // 스토리 진행: "커밋 먼저 → 다음 스테이지 미리보기 → 저장"
         bool hasNext = false;
         var sm = StoryModeManager.Instance;
+        bool wasCleared = (sm != null && sm.isStoryRun && sm.IsStageCleared());
+
         if (sm != null && sm.isStoryRun)
         {
-            if (!_clearCommitted)
+            if (!_clearCommitted && wasCleared)
             {
                 sm.CommitStageClear();     
                 _clearCommitted = true;
@@ -119,11 +121,13 @@ public class GameResultUI : MonoBehaviour
     public void OnExitButtonClicked()
     {
         var sm = StoryModeManager.Instance;
+        bool wasCleared = (sm != null && sm.isStoryRun && sm.IsStageCleared());
+
         if (sm != null && sm.isStoryRun)
         {
             // 다음 스테이지가 있으면 체크포인트 갱신 (마지막이면 TryPeek 실패)
             StoryStageAsset peek;
-            if (sm.TryPeekPendingNext(out peek) && peek != null)
+            if (wasCleared && sm.TryPeekPendingNext(out peek) && peek != null)
             {
                 sm.lastCheckpointStageId = peek.stageId;
                 sm.PersistProgress();

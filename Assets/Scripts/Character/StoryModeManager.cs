@@ -32,6 +32,12 @@ public class StoryModeManager : MonoBehaviour
     private bool _isStartingStage = false;
     private string _pendingNextStageId = null;
 
+    public enum RunOutcome { None, Cleared, Failed, Aborted }
+
+    public RunOutcome LastOutcome { get; private set; } = RunOutcome.None;
+
+    public bool IsStageCleared() => LastOutcome == RunOutcome.Cleared;
+
     private void Awake()
     {
         if (Instance == null) { Instance = this; DontDestroyOnLoad(gameObject); LoadProgress(); }
@@ -158,10 +164,27 @@ public class StoryModeManager : MonoBehaviour
         HandleStageClear();
     }
 
+    public void BeginStageRun()
+    {
+        LastOutcome = RunOutcome.None;
+    }
+    public void MarkCleared()
+    {
+        LastOutcome = RunOutcome.Cleared;
+    }
+    public void MarkFailed()
+    {
+        LastOutcome = RunOutcome.Failed;
+    }
+    public void MarkAborted()
+    {
+        LastOutcome = RunOutcome.Aborted;
+    }
+
     private void HandleStageClear()
     {
         if (!scoreSystem || currentStage == null) return;
-
+        MarkCleared();
         scoreSystem.score = currentStage.stageScore;
 
         if (currentStage.bonusGold > 0)

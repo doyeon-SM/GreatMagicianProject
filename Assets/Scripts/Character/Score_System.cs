@@ -34,6 +34,14 @@ public class Score_System : MonoBehaviour
         _appliedStageId = null;
         _appliedThisStage = false;
         LastAwarded.Clear();
+
+        // 스토리모드 Outcome 초기화
+        var sm = StoryModeManager.Instance;
+        if (sm != null)
+        {
+            sm.BeginStageRun();   // 스테이지 시작 시 Outcome을 None으로 리셋
+            //Debug.Log("[Score_System] StoryModeManager.BeginStageRun() called → Outcome reset");
+        }
     }
     private void OnEnable()
     {

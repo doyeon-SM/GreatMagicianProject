@@ -1044,7 +1044,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   resolver: {fileID: 1045821818393164139, guid: 1145a0b7197c97347885dfb2639dd592, type: 3}
   storyManager: {fileID: 0}
-  firstStageId: 1-1
+  firstStageId: 0-0
   scrollRect: {fileID: 60270082}
   content: {fileID: 1227870887}
   itemButtonPrefab: {fileID: 2712512932710348939, guid: baf3ccf91509e354bb606fde1c79bd75, type: 3}

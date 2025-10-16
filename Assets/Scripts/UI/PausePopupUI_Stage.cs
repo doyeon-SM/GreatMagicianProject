@@ -32,10 +32,10 @@ public class PausePopupUI_Stage : PausePopupUI
 
     private void OnClickGiveUp()
     {
-        // 1) 퍼즈 UI 종료(이어하기와 동일: timeScale 복구 + 닫기)
+        // 퍼즈 UI 종료(이어하기와 동일: timeScale 복구 + 닫기)
         base.OnClickResume();
 
-        // 2) HP -1로 설정 → Wall_System_Base의 GameOver() 로직 실행
+        // HP -1로 설정 → Wall_System_Base의 GameOver() 로직 실행
         var wall = wallSystem != null ? wallSystem : FindObjectOfType<Wall_System_Base>();
         if (wall != null)
         {
@@ -45,6 +45,10 @@ public class PausePopupUI_Stage : PausePopupUI
         {
             Debug.LogWarning("[PausePopupUI_Stage] Wall_System_Base를 찾지 못했습니다. 'wallSystem' 참조를 인스펙터에 연결하세요.");
         }
+
+        var sm = StoryModeManager.Instance;
+        if (sm != null && sm.isStoryRun)
+            sm.MarkAborted();
     }
 
     private void RefreshTexts()
