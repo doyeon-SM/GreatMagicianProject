@@ -18,7 +18,7 @@ public class Skill_Range_System : MonoBehaviour
     }
     public void StartRangeEffect()
     {
-        if (skillData != null && skillData.skillType == Skill_Data.SkillType.Projectile)
+        if (skillData != null && skillData.skillEffect == Skill_Data.SkillEffect.Explosion)
         {
             periodicDamageCoroutine = StartCoroutine(ApplyPeriodicDamage(0.2f, 0.1f));
         }
@@ -224,8 +224,23 @@ public class Skill_Range_System : MonoBehaviour
         switch (skillData.skillType.ToString())
         {
             case "Projectile":
+                if (skillData.skillEffect == Skill_Data.SkillEffect.Explosion)
+                {
+                    LaunchProjectile(mousePosition);
+                    break;                    
+                }
+                else if(skillData.skillEffect == Skill_Data.SkillEffect.Rolling)
+                {
+                    AimAndApplyProjectile_Rolling(mousePosition);
+                    break;
+                }
+                else
+                {
+                    AimAndApplyProjectile(mousePosition);
+                    break;
+                }
             case "Chain":
-                LaunchProjectile(mousePosition);
+                AimAndApplyProjectile(mousePosition);
                 break;
 
             case "Area":
@@ -241,7 +256,7 @@ public class Skill_Range_System : MonoBehaviour
                 for (int i = 0; i < 5; i++)
                 {
                     Vector3 randomOffset = new Vector3(Random.Range(-1f, 1f), 0f, 0f);
-                    LaunchProjectile(mousePosition + randomOffset);
+                    AimAndApplyProjectile(mousePosition + randomOffset);
                 }
                 break;
 
@@ -263,7 +278,7 @@ public class Skill_Range_System : MonoBehaviour
     {
         if (skillData != null && skillData.attackPrefab != null)
         {
-            Vector3 spawnPosition = new Vector3(0, -8, 0); // Ignis 또는 Fire의 경우
+            Vector3 spawnPosition = new Vector3(0, -8, 0); 
 
             if (skillData.skillEffect.ToString() == "Rolling")
             {
@@ -422,5 +437,32 @@ public class Skill_Range_System : MonoBehaviour
 
         // 현재 콜라이더에 겹쳐진 대상들에게 적용
         ApplyDamageToMonsters();
+    }
+
+    private void AimAndApplyProjectile(Vector3 castPos)
+    {
+        Vector3 bottomCenter = new Vector3(0f, -8f, 0f);
+        transform.position = bottomCenter;
+
+        Vector3 dir = castPos - bottomCenter;
+        if (dir.sqrMagnitude < 0.0001f) dir = Vector3.right;
+
+        float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+        transform.rotation = Quaternion.Euler(0f, 0f, angle);
+
+        LaunchProjectile(castPos);
+    }
+
+    private void AimAndApplyProjectile_Rolling(Vector3 castPos)
+    {
+        Vector3 bottomCenter = new Vector3(castPos.x, -8f, 0f);
+        transform.position = bottomCenter;
+
+        Vector3 dir = castPos - bottomCenter;
+        if (dir.sqrMagnitude < 0.0001f) dir = Vector3.right;
+
+        transform.rotation = Quaternion.Euler(0f, 0f, 90f);
+
+        LaunchProjectile(castPos);
     }
 }

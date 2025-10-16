@@ -534,32 +534,50 @@ public class Skill_Drag_System : MonoBehaviour
 
                 if (skillData.rangePrefab != null)
                 {
-                    if(skillData.skillType == Skill_Data.SkillType.StraightLine)
+                    if(skillData.skillType == Skill_Data.SkillType.StraightLine || 
+                       (skillData.skillType == Skill_Data.SkillType.Projectile && skillData.skillEffect != Skill_Data.SkillEffect.Explosion) ||
+                       skillData.skillType == Skill_Data.SkillType.Chain ||
+                       skillData.skillType == Skill_Data.SkillType.Scattered)
                     {
                         // 직사각형 범위 생성
                         if (instantiatedRange == null)
                         {
-                            instantiatedRange = Instantiate(skillData.rangePrefab, new Vector3(0, -8, 0), Quaternion.identity);
+                            if(skillData.skillEffect == Skill_Data.SkillEffect.Rolling)
+                                instantiatedRange = Instantiate(skillData.rangePrefab, new Vector3(mousePosition.x, -8, 0), Quaternion.identity);
+                            else
+                                instantiatedRange = Instantiate(skillData.rangePrefab, new Vector3(0, -8, 0), Quaternion.identity);
                             //instantiatedRange.transform.localScale = new Vector3(25f, 1f, 1f);  // 1x10 크기 설정
                             ConfigureRangeObject(instantiatedRange);
                         }
 
-                        // 직사각형의 아랫변 중앙 고정
-                        Vector3 bottomCenter = new Vector3(0, -8, 0);
+                        if (skillData.skillEffect == Skill_Data.SkillEffect.Rolling)
+                        {
+                            Vector3 bottomCenter = new Vector3(mousePosition.x, -8, 0);
+                            Vector3 direction = (mousePosition - bottomCenter).normalized;
+                            float distance = 5f;
+                            Vector3 correctedMousePosition = bottomCenter + direction * distance;
+                            instantiatedRange.transform.rotation = Quaternion.Euler(0, 0, 90);
+                            instantiatedRange.transform.position = bottomCenter;
+                        }
+                        else
+                        {
+                            // 직사각형의 아랫변 중앙 고정
+                            Vector3 bottomCenter = new Vector3(0, -8, 0);
 
-                        // 직사각형 중앙선의 방향 계산 (부채꼴 회전)
-                        Vector3 direction = (mousePosition - bottomCenter).normalized;
-                        float distance = 5f; // 직사각형 높이의 절반 (중앙선 길이의 절반)
+                            // 직사각형 중앙선의 방향 계산 (부채꼴 회전)
+                            Vector3 direction = (mousePosition - bottomCenter).normalized;
+                            float distance = 5f; // 직사각형 높이의 절반 (중앙선 길이의 절반)
 
-                        // 중앙선을 따라 마우스가 위치할 좌표를 계산
-                        Vector3 correctedMousePosition = bottomCenter + direction * distance;
+                            // 중앙선을 따라 마우스가 위치할 좌표를 계산
+                            Vector3 correctedMousePosition = bottomCenter + direction * distance;
 
-                        // 직사각형 회전 (아랫변 고정)
-                        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
-                        instantiatedRange.transform.rotation = Quaternion.Euler(0, 0, angle);
+                            // 직사각형 회전 (아랫변 고정)
+                            float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+                            instantiatedRange.transform.rotation = Quaternion.Euler(0, 0, angle);
 
-                        // 직사각형의 아랫변 중앙을 고정한 상태에서 마우스를 중앙선 위에 고정
-                        instantiatedRange.transform.position = bottomCenter;
+                            // 직사각형의 아랫변 중앙을 고정한 상태에서 마우스를 중앙선 위에 고정
+                            instantiatedRange.transform.position = bottomCenter;
+                        }
                     }
                     else if (skillData.skillType == Skill_Data.SkillType.Around)
                     {
@@ -594,24 +612,40 @@ public class Skill_Drag_System : MonoBehaviour
         else if (instantiatedRange != null)
         {
             // 직사각형 범위가 이미 생성된 경우, 마우스 위치에 따라 회전 및 이동 조정
-            if (skillData != null && skillData.skillType == Skill_Data.SkillType.StraightLine)
+            if (skillData != null && 
+                (skillData.skillType == Skill_Data.SkillType.StraightLine || 
+                (skillData.skillType == Skill_Data.SkillType.Projectile && skillData.skillEffect != Skill_Data.SkillEffect.Explosion) ||
+                skillData.skillType == Skill_Data.SkillType.Chain ||
+                skillData.skillType == Skill_Data.SkillType.Scattered))
             {
-                // 아랫변 중앙 고정: (0, -8, 0)
-                Vector3 bottomCenter = new Vector3(0, -8, 0);
+                if (skillData.skillEffect == Skill_Data.SkillEffect.Rolling)
+                {
+                    Vector3 bottomCenter = new Vector3(mousePosition.x, -8, 0);
+                    Vector3 direction = (mousePosition - bottomCenter).normalized;
+                    float distance = 5f;
+                    Vector3 correctedMousePosition = bottomCenter + direction * distance;
+                    instantiatedRange.transform.rotation = Quaternion.Euler(0, 0, 90);
+                    instantiatedRange.transform.position = bottomCenter;
+                }
+                else
+                {
+                    // 아랫변 중앙 고정: (0, -8, 0)
+                    Vector3 bottomCenter = new Vector3(0, -8, 0);
 
-                // 마우스를 직사각형의 중앙선 위에 위치시키기 위해 방향을 계산
-                Vector3 direction = (mousePosition - bottomCenter).normalized;
-                float distance = 5f; // 직사각형 높이의 절반 (중앙선 길이의 절반)
+                    // 마우스를 직사각형의 중앙선 위에 위치시키기 위해 방향을 계산
+                    Vector3 direction = (mousePosition - bottomCenter).normalized;
+                    float distance = 5f; // 직사각형 높이의 절반 (중앙선 길이의 절반)
 
-                // 중앙선을 따라 마우스가 위치할 좌표를 계산
-                Vector3 correctedMousePosition = bottomCenter + direction * distance;
+                    // 중앙선을 따라 마우스가 위치할 좌표를 계산
+                    Vector3 correctedMousePosition = bottomCenter + direction * distance;
 
-                // 직사각형 회전 (아랫변 고정)
-                float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
-                instantiatedRange.transform.rotation = Quaternion.Euler(0, 0, angle);
+                    // 직사각형 회전 (아랫변 고정)
+                    float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+                    instantiatedRange.transform.rotation = Quaternion.Euler(0, 0, angle);
 
-                // 직사각형의 아랫변 중앙을 고정한 상태에서 마우스를 중앙선 위에 고정
-                instantiatedRange.transform.position = bottomCenter;
+                    // 직사각형의 아랫변 중앙을 고정한 상태에서 마우스를 중앙선 위에 고정
+                    instantiatedRange.transform.position = bottomCenter;
+                }
             }
             else if(skillData != null && skillData.skillType != Skill_Data.SkillType.Around)
             {
