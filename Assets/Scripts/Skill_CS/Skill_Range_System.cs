@@ -300,7 +300,7 @@ public class Skill_Range_System : MonoBehaviour
                 Skill_System_Projectile projectileScript = projectile.GetComponent<Skill_System_Projectile>();
                 if (projectileScript != null)
                 {
-                    projectileScript.skillData = skillData;
+                    projectileScript.Initialize(skillData, mousePosition);
 
                     // Fire 관련 코드 제외, 다른 스킬에 대한 추가 처리가 필요하면 여기서 추가 가능
                 }

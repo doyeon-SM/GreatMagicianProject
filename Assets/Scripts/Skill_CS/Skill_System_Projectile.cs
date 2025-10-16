@@ -7,6 +7,12 @@ public class Skill_System_Projectile : MonoBehaviour
     public Skill_Data skillData;  // 해당 스킬의 데이터 참조
     private bool hasCollided = false;  // 첫 충돌 여부를 확인하는 변수
 
+    private bool hasTarget = false;     // 목표지점 저장여부
+    private Vector3 targetPosition;     // 목표지점
+
+    [SerializeField] private float explodeThreshold = 0.25f;    //위치 오차 허용정도
+    private Vector3 lastPosition;       // 위치 저장
+
     private void Start()
     {
         // Skill_System_Projectile이 자기 자신에게 적용되는 경우 무한 루프 방지
@@ -14,6 +20,43 @@ public class Skill_System_Projectile : MonoBehaviour
         {
             Debug.LogError("SkillData or attackPrefab is missing in Skill_System_Projectile.");
             return; // 이 프리팹이 제대로 설정되지 않았을 때, 투사체 생성을 방지
+        }
+    }
+
+    private void Awake()
+    {
+        lastPosition = transform.position;
+    }
+    public void Initialize(Skill_Data data, Vector3 targetPos)
+    {
+        skillData = data;
+        targetPosition = targetPos;
+        hasTarget = true;
+    }
+    private void Update()
+    {
+        // Explosion이고 아직 충돌 안했고 목표가 있으면, 목표 도달/통과 체크하여 폭발
+        if (!hasCollided &&
+            skillData != null &&
+            skillData.skillEffect == Skill_Data.SkillEffect.Explosion &&
+            hasTarget)
+        {
+            // 목표 반경 안에 진입했는지
+            bool reached = Vector2.Distance(transform.position, targetPosition) <= explodeThreshold;
+
+            // 프레임 사이에서 목표를 "지나쳤는지" (세그먼트 교차 간이 판정)
+            //    (target - last) · (target - now) <= 0  이면 목표를 지나쳤다고 판단
+            bool passed = Vector2.Dot((targetPosition - lastPosition), (targetPosition - transform.position)) <= 0f;
+
+            if (reached || passed)
+            {
+                hasCollided = true;
+                CreateRange(targetPosition); // 마우스(목표) 지점에서 폭발
+                Destroy(gameObject);
+                return;
+            }
+
+            lastPosition = transform.position;
         }
     }
 
