@@ -30,6 +30,8 @@ public class GameResultUI : MonoBehaviour
     public GameObject guaranteedSkillIconPrefab;  // (없으면 skillIconPrefab 재사용)
     public Text guaranteedHeaderText;             // "Guaranteed Rewards" 같은 헤더 텍스트(선택)
 
+    [SerializeField] protected Image dimBackground;     // 전체화면 딤(이미지) - Raycast Target = true
+
     [Header("스토리 전용 UI")]
     public Button nextStageButton;
 
@@ -64,6 +66,11 @@ public class GameResultUI : MonoBehaviour
         {
             nextStageButton.onClick.RemoveAllListeners();   //인스펙터에 남은 리스너 제거
             nextStageButton.onClick.AddListener(OnNextStageButtonClicked);
+        }
+        // 딤 배경은 클릭만 먹고 아무것도 안 함 (다른 UI 클릭 차단)
+        if (dimBackground != null)
+        {
+            dimBackground.raycastTarget = true;
         }
     }
 
