@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.UI;
-using UnityEngine.EventSystems; 
+using UnityEngine.EventSystems;
 
 public class TutorialManager : MonoBehaviour
 {
@@ -11,10 +11,16 @@ public class TutorialManager : MonoBehaviour
     public TutorialDatabase database;
     public TutorialPopup popupPrefab;
 
+    [Header("UI")]
+    public Camera uiCamera;           // 비워두면 MainCamera 사용
+    [Tooltip("튜토리얼 전용 레이어 정렬 순서(높을수록 위)")]
+    public int sortingOrder = 32760;
+
     private bool _showing = false;
-    public bool IsShowing => _showing; 
+    public bool IsShowing => _showing;
 
     private Queue<string> _queue = new Queue<string>();
+    private Transform _parent;        // 튜토리얼 팝업들이 붙을 부모(카메라 캔버스)
 
     private void Awake()
     {
@@ -22,20 +28,45 @@ public class TutorialManager : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
 
-        EnsureEventSystem(); 
+        var canvas = UIUtilities.EnsureCameraCanvas(uiCamera, sortingOrder);
+        _parent = canvas.transform;
+
+        // 카메라/캔버스 보이기 보장
+        var cam = canvas.worldCamera != null ? canvas.worldCamera : Camera.main;
+        if (cam != null)
+        {
+            // Canvas 레이어를 UI로, 카메라 CullingMask에 UI 포함
+            int uiLayer = LayerMask.NameToLayer("UI");
+            if (uiLayer != -1)
+            {
+                canvas.gameObject.layer = uiLayer;
+                cam.cullingMask |= (1 << uiLayer);
+            }
+            else
+            {
+                // UI 레이어가 없다면, 캔버스 레이어를 카메라가 이미 그리는 레이어로 맞추세요(예: Default)
+                // canvas.gameObject.layer = LayerMask.NameToLayer("Default");
+            }
+
+            // Plane Distance를 카메라 클립 안에 맞춤
+            float safePD = Mathf.Min(10f, cam.farClipPlane - 1f);           
+            safePD = Mathf.Max(cam.nearClipPlane + 0.01f, safePD);          
+            canvas.planeDistance = safePD;
+        }
+
+        //  Raycaster 보장(혹시 프리팹에 없을 수 있으니)
+        if (canvas.GetComponent<GraphicRaycaster>() == null)
+            canvas.gameObject.AddComponent<GraphicRaycaster>();
+
+        UIUtilities.EnsureEventSystem();
+        Debug.Log($"[TutorialManager] cam={cam?.name}, near={cam?.nearClipPlane}, far={cam?.farClipPlane}, planeDistance={canvas.planeDistance}, canvasLayer={LayerMask.LayerToName(canvas.gameObject.layer)}, camMask={(cam != null ? cam.cullingMask.ToString() : "null")}");
+
     }
-
-    private void EnsureEventSystem()
+    private Transform ResolveParent()
     {
-        if (EventSystem.current != null) return;
-
-        var es = new GameObject("EventSystem", typeof(EventSystem));
-#if ENABLE_INPUT_SYSTEM
-        es.AddComponent<UnityEngine.InputSystem.UI.InputSystemUIInputModule>();
-#else
-        es.AddComponent<StandaloneInputModule>();
-#endif
-        DontDestroyOnLoad(es);
+        // 씬이 바뀌었거나 기존 캔버스가 파괴되었을 수 있으니 매번 보장
+        var canvas = UIUtilities.EnsureCameraCanvas(uiCamera, sortingOrder);
+        return canvas.transform;
     }
 
     public void TryTrigger(string key)
@@ -60,12 +91,16 @@ public class TutorialManager : MonoBehaviour
     private void ShowInternal(string key, Sprite sprite)
     {
         _showing = true;
+
+        // 일시정지 관리: 첫 진입/마지막 종료로 다루고 싶다면 depth로 관리하세요.
         Time.timeScale = 0f;
 
-        var popup = Instantiate(popupPrefab, GetTopCanvas());
+        // 부모를 매번 재해결 + UIUtilities로 안전 생성
+        var parent = ResolveParent();
+        var popup = UIUtilities.SpawnUI(popupPrefab, parent, uiCamera, sortingOrder);
+
         popup.Show(sprite, () =>
         {
-            Time.timeScale = 1f;
             database.SetCleared(key, true);
             _showing = false;
 
@@ -78,34 +113,9 @@ public class TutorialManager : MonoBehaviour
                     return;
                 }
             }
+
+            // 큐 없으면 일시정지 해제
+            Time.timeScale = 1f;
         });
-    }
-
-    private Transform GetTopCanvas()
-    {
-        // 전용 튜토리얼 캔버스를 찾아 쓰고, 없으면 생성
-        var existing = GameObject.Find("TutorialCanvas");
-        Canvas c = null;
-
-        if (existing == null)
-        {
-            var go = new GameObject("TutorialCanvas", typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
-            c = go.GetComponent<Canvas>();
-            c.renderMode = RenderMode.ScreenSpaceOverlay;
-            c.sortingOrder = 32760; // 매우 높은 순서
-            DontDestroyOnLoad(go);
-            return go.transform;
-        }
-        else
-        {
-            c = existing.GetComponent<Canvas>();
-            if (c == null) c = existing.AddComponent<Canvas>();
-            if (existing.GetComponent<GraphicRaycaster>() == null)
-                existing.AddComponent<GraphicRaycaster>();
-
-            c.renderMode = RenderMode.ScreenSpaceOverlay;
-            c.sortingOrder = Mathf.Max(c.sortingOrder, 32760); // 항상 제일 위로
-            return existing.transform;
-        }
     }
 }

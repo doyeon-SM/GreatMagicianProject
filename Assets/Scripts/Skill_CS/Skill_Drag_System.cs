@@ -82,29 +82,23 @@ public class Skill_Drag_System : MonoBehaviour
 
     private bool HasInput()
     {
-#if UNITY_EDITOR
-        return Input.GetMouseButton(0);
-#else
-        return Input.touchCount > 0;
-#endif
+        // 마우스 왼쪽 버튼이 눌려 있거나, 터치가 1개 이상이면 "입력 중"
+        return Input.GetMouseButton(0) || Input.touchCount > 0;
     }
 
     private bool InputStarted()
     {
-#if UNITY_EDITOR
-        return Input.GetMouseButtonDown(0);
-#else
-        return Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began;
-#endif
+        // 마우스: 이번 프레임에 눌림 / 터치: Began
+        if (Input.GetMouseButtonDown(0)) return true;
+        if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began) return true;
+        return false;
     }
 
     private Vector3 GetInputPosition()
     {
-#if UNITY_EDITOR
+        // 터치가 있으면 터치 좌표, 없으면 마우스 좌표
+        if (Input.touchCount > 0) return Input.GetTouch(0).position;
         return Input.mousePosition;
-#else
-        return Input.GetTouch(0).position;
-#endif
     }
 
     private void InitializeComponents()
@@ -761,16 +755,20 @@ public class Skill_Drag_System : MonoBehaviour
 
     private Vector3 GetMouseWorldPosition()
     {
-        Vector3 mousePoint = Input.mousePosition;
-        mousePoint.z = zCoordinate;
-        return Camera.main.ScreenToWorldPoint(mousePoint);
+        // 현재 입력의 스크린 좌표를 기준으로 월드 변환
+        Vector3 screen = GetInputPosition();
+        screen.z = zCoordinate; // 카메라와의 거리 유지
+        return Camera.main.ScreenToWorldPoint(screen);
     }
 
     private bool IsMouseWithinUnderUI()
     {
-        Vector3 mouseWorldPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        mouseWorldPosition.z = 0f;
-        return underUISprite.bounds.Contains(mouseWorldPosition);
+        if (underUISprite == null) return false;
+
+        Vector3 screen = GetInputPosition();
+        Vector3 world = Camera.main.ScreenToWorldPoint(screen);
+        world.z = 0f;
+        return underUISprite.bounds.Contains(world);
     }
 
     private void ApplyCombinedSkill(Skill_Data combinedSkill, UnderUI_Slot_System otherSlot)

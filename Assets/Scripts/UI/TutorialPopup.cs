@@ -15,34 +15,39 @@ public class TutorialPopup : MonoBehaviour
     {
         _onClosed = onClosed;
 
-        // 클릭은 버튼이 받게 하고, centerImage는 레이캐스트 차단 X
         if (centerImage != null)
         {
             centerImage.sprite = sprite;
             centerImage.raycastTarget = false;
+            centerImage.preserveAspect = true;             
+            centerImage.color = Color.white;              
         }
 
-        // 버튼이 진짜로 화면을 덮도록 Rect 고정
         FixRects();
+
+        var rtRoot = GetComponent<RectTransform>();
+        if (rtRoot != null)
+        {
+            rtRoot.localScale = Vector3.one;
+            rtRoot.localRotation = Quaternion.identity;
+            rtRoot.anchoredPosition3D = Vector3.zero;     
+        }
 
         if (fullscreenButton != null)
         {
             fullscreenButton.interactable = false;
-
-            // 버튼 그래픽이 레이캐스트 받는지 보장
             if (fullscreenButton.targetGraphic != null)
                 fullscreenButton.targetGraphic.raycastTarget = true;
-
             fullscreenButton.onClick.RemoveAllListeners();
             fullscreenButton.onClick.AddListener(OnClickClose);
         }
 
-        // 버튼/부모가 레이캐스트를 막지 않도록 CanvasGroup 보정
         EnsureCanvasGroupAllowsRaycast();
 
         gameObject.SetActive(true);
         StartCoroutine(ForceWatchThenEnable());
     }
+
 
     private void FixRects()
     {

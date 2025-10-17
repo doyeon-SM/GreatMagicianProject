@@ -1031,6 +1031,7 @@ MonoBehaviour:
   TimerText: {fileID: 840991634}
   WaveText: {fileID: 752546736}
   PlayTime: 0
+  isGameOver: 0
   underUIPrefab: {fileID: 674028022263856363, guid: 259a9c259248e5145b0334c0d82d0630, type: 3}
 --- !u!61 &829349312
 BoxCollider2D:
