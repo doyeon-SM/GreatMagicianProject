@@ -201,6 +201,31 @@ public class Reset_System : MonoBehaviour
         // 저장 데이터도 즉시 반영하고 싶다면 SaveGameData() 호출
     }
 
+    public void SoundReset(bool alsoClearPrefs = true)
+    {
+        if(SoundSettingsManager.Instance != null)
+        {
+            var sm = SoundSettingsManager.Instance;
+
+            sm.SetMasterSound(1f);
+            sm.SetBGM(1f);
+            sm.SetSFX(1f);
+            sm.SetSkill(1f);
+
+            sm.Save();
+            sm.ApplyAllToMixer();
+        }
+
+        if(alsoClearPrefs)
+        {
+            PlayerPrefs.DeleteKey("Sound.Master");
+            PlayerPrefs.DeleteKey("Sound.BGM");
+            PlayerPrefs.DeleteKey("Sound.SFX");
+            PlayerPrefs.DeleteKey("sound.SkillSFX");
+            PlayerPrefs.Save();
+        }
+    }
+
     /// <summary>
     /// 로비의 "초기화" 버튼에 연결: 팝업을 띄운다.
     /// </summary>
@@ -223,20 +248,21 @@ public class Reset_System : MonoBehaviour
     /// </summary>
     private void DoFullResetAndRestart()
     {
-        // 1) 세이브 파일 삭제
+        // 세이브 파일 삭제
         DeleteSaveFile();
 
-        // 2) 게임 데이터 초기화(순서는 필요에 따라 조정 가능)
+        // 게임 데이터 초기화(순서는 필요에 따라 조정 가능)
         CharacterReset();
         SkillReset();
         SkillknowReset();
         StoryProgressReset();
         QuestReset();
         ResetAllTutorials();
+        SoundReset(alsoClearPrefs: true);
 
         if (save) save.SaveGameData(); // 초기화된 상태로 즉시 저장(선택)
 
-        // 3) 게임 재시작 (모바일 포함 공통)
+        // 게임 재시작 (모바일 포함 공통)
         RestartGame();
     }
 
