@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.Audio;
 using UnityEngine;
 
 public class Skill_Range_System : MonoBehaviour
@@ -12,9 +13,22 @@ public class Skill_Range_System : MonoBehaviour
 
     public GameObject createPrefab; //Create 타입 프리팹
 
+    [Header("SFX (SkillSFX 그룹)")]
+    public AudioClip skillSFX;                          // 틱마다 재생할 사운드
+    public AudioMixerGroup skillSFXGroup;               // SkillSFX 오디오 믹서 그룹
+    [Range(0f, 1f)] public float sfxVolume = 1f;        // 개별 볼륨(프로젝트 전체는 믹서에서 제어)
+    private AudioSource _sfxSource;                     // 내부용 오디오 소스
+
     private void Start()
     {
-        
+        if (_sfxSource == null)
+        {
+            _sfxSource = gameObject.AddComponent<AudioSource>();
+            _sfxSource.playOnAwake = false;
+            _sfxSource.spatialBlend = 0f; // UI/2D SFX
+            _sfxSource.outputAudioMixerGroup = skillSFXGroup; // SkillSFX 그룹으로 라우팅
+            _sfxSource.volume = sfxVolume; // 개별 인스턴스 볼륨
+        }
     }
     public void StartRangeEffect()
     {
@@ -34,8 +48,8 @@ public class Skill_Range_System : MonoBehaviour
 
     private IEnumerator ApplyPeriodicDamage(float duration, float interval)
     {
-        float elapsedTime = 0f;
-        float effectvalue = 0f;
+        
+        float effectvalue = 1f;
         bool tmpblind = false;
         string monster_Element_String = "None";
 
@@ -56,37 +70,48 @@ public class Skill_Range_System : MonoBehaviour
                 effectvalue = 1.0f;
                 break;
         }
-            
-        
-        while (elapsedTime < duration)
+
+
+        int totalTicks = Mathf.Max(1, Mathf.CeilToInt(duration / Mathf.Max(0.0001f, interval)));
+
+        for (int tick = 0; tick < totalTicks; tick++)
         {
-            if (this == null || gameObject == null)
-            {
-                yield break; // 오브젝트가 파괴된 경우 코루틴 종료
-            }
-            
+            if (this == null || gameObject == null) yield break;
+
+            // 범위 내 몬스터에 지속효과 적용(슬로우/블라인드 등)
             foreach (Monster_Base monster in monstersInRange)
             {
                 if (monster != null)
                 {
                     if (monster_Element_String != "None")
                         monster.ApplyElement(monster_Element_String);
+
                     monster.ApplySlowEffect(effectvalue);
                     monster.ApplyBlindEffect(tmpblind);
                 }
             }
+
+            // [FIRST] 즉시 타격/회복 실행
             if (skillData.skillEffect == Skill_Data.SkillEffect.Heal)
-            {
                 ApplyHealingInRange();
-            }
             else
-            {
                 ApplyDamageInRange();
+
+            // [NEW] 틱마다 스킬 SFX 재생
+            if (_sfxSource != null && skillSFX != null)
+            {
+                if (SoundSettingsManager.Instance != null)
+                {
+                    var group = SoundSettingsManager.Instance.GetSkillSFXGroup();
+                    SoundSettingsManager.Instance.ConfigureSourceToGroup(_sfxSource, group, is2D: true);
+                }
             }
-            elapsedTime += interval;
-            yield return new WaitForSeconds(interval);
+
+            // 마지막 틱이 아니면 interval만큼 대기
+            if (tick < totalTicks - 1)
+                yield return new WaitForSeconds(interval);
         }
-        
+
         foreach (Monster_Base monster in monstersInRange)
         {
             if (monster != null)

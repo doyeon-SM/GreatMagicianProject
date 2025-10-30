@@ -12,6 +12,11 @@ public class SoundSettingsManager : MonoBehaviour
     [SerializeField] private string sfxParam = "SFX_Volume";
     [SerializeField] private string skillParam = "SkillSFX_Volume";
 
+    [Header("Mixer Groups (assign in Inspector)")]
+    [SerializeField] private AudioMixerGroup bgmGroup;
+    [SerializeField] private AudioMixerGroup sfxGroup;
+    [SerializeField] private AudioMixerGroup skillSfxGroup;
+
     // PlayerPrefs 키
     private const string KEY_MASTER = "Sound.Master";
     private const string KEY_BGM = "Sound.BGM";
@@ -51,6 +56,8 @@ public class SoundSettingsManager : MonoBehaviour
     public void SetSFX(float v) { SFX = Mathf.Clamp01(v); SetMixer(sfxParam, SFX); Save(); }
     public void SetSkill(float v) { SKILL = Mathf.Clamp01(v); SetMixer(skillParam, SKILL); Save(); }
 
+    public void SetSkillSFXVolume(float linear01) => SetSkill(linear01);
+
     // ===== 저장/불러오기 =====
     public void Save()
     {
@@ -76,6 +83,20 @@ public class SoundSettingsManager : MonoBehaviour
         SetMixer(bgmParam, BGM);
         SetMixer(sfxParam, SFX);
         SetMixer(skillParam, SKILL);
+    }
+
+    // ===== Group Getters =====
+    public AudioMixerGroup GetBGMGroup() => bgmGroup;
+    public AudioMixerGroup GetSFXGroup() => sfxGroup;
+    public AudioMixerGroup GetSkillSFXGroup() => skillSfxGroup;
+
+    // ===== Source 라우팅 유틸 =====
+    public void ConfigureSourceToGroup(AudioSource src, AudioMixerGroup group, bool is2D = true)
+    {
+        if (src == null) return;
+        src.playOnAwake = false;
+        src.outputAudioMixerGroup = group;
+        src.spatialBlend = is2D ? 0f : 1f;
     }
 
     // ===== 유틸 =====

@@ -821,6 +821,54 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 235859256}
   m_CullTransparentMesh: 1
+--- !u!1 &251580122
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 251580124}
+  - component: {fileID: 251580123}
+  m_Layer: 0
+  m_Name: SceneBGMTrigger
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &251580123
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 251580122}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 82aff2e654f521c4ebebf6ae5c46bd2d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  entries: []
+  defaultBgm: {fileID: 0}
+  defaultFadeTime: 1
+  stopIfUnmapped: 0
+--- !u!4 &251580124
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 251580122}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.31838447, y: 2.5881045, z: -5.04783}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &269933935
 GameObject:
   m_ObjectHideFlags: 0
@@ -1688,6 +1736,51 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 430078924}
   m_CullTransparentMesh: 1
+--- !u!1 &470373080
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 470373082}
+  - component: {fileID: 470373081}
+  m_Layer: 0
+  m_Name: BGMManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &470373081
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 470373080}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d8e7a3b8cbf30f5438b79e3e86f71b9e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  currentClip: {fileID: 0}
+--- !u!4 &470373082
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 470373080}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.31838447, y: 2.5881045, z: -5.04783}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!224 &496837068 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 8205803967356679292, guid: 18fea574950eac8469ff2ec25fd605c9, type: 3}
@@ -2095,6 +2188,9 @@ MonoBehaviour:
   bgmParam: BGM_Volume
   sfxParam: SFX_Volume
   skillParam: SkillSFX_Volume
+  bgmGroup: {fileID: 8423992049624426825, guid: 70b73d4c23e7c3d4394379fc0f8b1f3f, type: 2}
+  sfxGroup: {fileID: 1060228515980353777, guid: 70b73d4c23e7c3d4394379fc0f8b1f3f, type: 2}
+  skillSfxGroup: {fileID: -6599125078769162727, guid: 70b73d4c23e7c3d4394379fc0f8b1f3f, type: 2}
 --- !u!4 &665111419
 Transform:
   m_ObjectHideFlags: 0
@@ -5180,3 +5276,5 @@ SceneRoots:
   - {fileID: 8811629846622864666}
   - {fileID: 126744807}
   - {fileID: 665111419}
+  - {fileID: 470373082}
+  - {fileID: 251580124}
