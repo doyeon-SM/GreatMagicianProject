@@ -16,6 +16,7 @@ public class PauseSoundSliders : MonoBehaviour
     [SerializeField] private Text skillPercentText;
 
     private bool _bound;
+    private Coroutine _waitCo;
 
     private void Awake()
     {
@@ -35,14 +36,35 @@ public class PauseSoundSliders : MonoBehaviour
     private void OnEnable()
     {
         EnsureBound();
-        PushSavedValuesToUI();
-        UpdateTexts();
+
+        if (SoundSettingsManager.Instance != null)
+        {
+            SoundSettingsManager.Instance.VolumesApplied += PushSavedValuesToUI;
+            PushSavedValuesToUI(); 
+            UpdateTexts();
+        }
+        else
+        {
+            _waitCo = StartCoroutine(CoWaitAndSync());
+        }
     }
 
     private void OnDisable()
     {
         RemoveListeners();
         _bound = false;
+
+        if (_waitCo != null) { StopCoroutine(_waitCo); _waitCo = null; }
+        if (SoundSettingsManager.Instance != null)
+            SoundSettingsManager.Instance.VolumesApplied -= PushSavedValuesToUI;
+    }
+    private System.Collections.IEnumerator CoWaitAndSync()
+    {
+        while (SoundSettingsManager.Instance == null) yield return null;
+        SoundSettingsManager.Instance.VolumesApplied += PushSavedValuesToUI;
+        PushSavedValuesToUI();
+        UpdateTexts();
+        _waitCo = null;
     }
 
     private void Update()
@@ -81,6 +103,8 @@ public class PauseSoundSliders : MonoBehaviour
         if (bgmSlider) bgmSlider.SetValueWithoutNotify(sm.GetBGMPercent());
         if (sfxSlider) sfxSlider.SetValueWithoutNotify(sm.GetSFXPercent());
         if (skillSlider) skillSlider.SetValueWithoutNotify(sm.GetSkillPercent());
+
+        UpdateTexts();
     }
 
     private void OnMasterChanged(float v)

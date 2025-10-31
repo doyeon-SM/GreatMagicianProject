@@ -14,7 +14,7 @@ public class Skill_Range_System : MonoBehaviour
     public GameObject createPrefab; //Create 타입 프리팹
 
     [Header("SFX (SkillSFX 그룹)")]
-    public AudioClip skillSFX;                          // 틱마다 재생할 사운드
+    public AudioClip skillSFX_Rangetick;                          // 틱마다 재생할 사운드
     public AudioMixerGroup skillSFXGroup;               // SkillSFX 오디오 믹서 그룹
     [Range(0f, 1f)] public float sfxVolume = 1f;        // 개별 볼륨(프로젝트 전체는 믹서에서 제어)
     private AudioSource _sfxSource;                     // 내부용 오디오 소스
@@ -91,14 +91,14 @@ public class Skill_Range_System : MonoBehaviour
                 }
             }
 
-            // [FIRST] 즉시 타격/회복 실행
+            // 즉시 타격/회복 실행
             if (skillData.skillEffect == Skill_Data.SkillEffect.Heal)
                 ApplyHealingInRange();
             else
                 ApplyDamageInRange();
 
-            // [NEW] 틱마다 스킬 SFX 재생
-            if (_sfxSource != null && skillSFX != null)
+            // 틱마다 스킬 SFX 재생
+            if (_sfxSource != null && skillSFX_Rangetick != null)
             {
                 if (SoundSettingsManager.Instance != null)
                 {

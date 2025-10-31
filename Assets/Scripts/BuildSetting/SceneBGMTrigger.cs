@@ -76,20 +76,16 @@ public class SceneBGMTrigger : MonoBehaviour
             return;
         }
 
+        // Mixer 바인딩 재확인 (Awake 순서 이슈 대비)
+        BGMManager.Instance.TryBindToMixer();
+
         if (map != null && map.TryGetValue(sceneName, out var entry) && entry.clip != null)
         {
-            // 볼륨 보정(엔트리 개별 보정)
-            var src = GetBGMAudioSource();
-            float prev = 1f;
-            if (src != null) prev = src.volume;
+            // 1) 씬 보정 먼저 반영
+            BGMManager.Instance.SetSceneVolumeMultiplier(entry.volumeMultiplier, applyInstant: false);
 
-            // 페이드 교체
+            // 2) 페이드 교체 (페이드 인 타겟은 BGMManager 내부에서 scene multiplier를 사용)
             BGMManager.Instance.PlayBGMWithFade(entry.clip, entry.fadeTime);
-
-            // 페이드 인이 끝난 다음 최종 볼륨을 보정하고 싶다면 코루틴으로 딜레이 적용하는 방식도 가능.
-            // 여기서는 간단히 즉시 보정:
-            if (src != null) src.volume = Mathf.Clamp01(entry.volumeMultiplier);
-
             return;
         }
 
@@ -100,22 +96,14 @@ public class SceneBGMTrigger : MonoBehaviour
         }
         else if (defaultBgm != null)
         {
+            BGMManager.Instance.SetSceneVolumeMultiplier(1f, applyInstant: false);
             BGMManager.Instance.PlayBGMWithFade(defaultBgm, defaultFadeTime);
-            var src = GetBGMAudioSource();
-            if (src != null) src.volume = 1f;
         }
-        // else: 아무 것도 하지 않음 (현재 재생 유지)
+        // else: 현재 재생 유지
     }
 
-    /// <summary>
-    /// BGMManager의 내부 AudioSource를 얻는다. (볼륨 보정용)
-    /// </summary>
     private AudioSource GetBGMAudioSource()
     {
-        // BGMManager에 public 프로퍼티가 없다면, 아래처럼 Reflection 없이 간단한 Getter를 BGMManager에 추가해서 쓰는 걸 권장.
-        // 여기서는 FindObjectsOfType로 예외적으로 접근(1개만 존재 가정).
-        var mgr = BGMManager.Instance;
-        var src = mgr != null ? mgr.GetComponent<AudioSource>() : null;
-        return src;
+        return BGMManager.Instance != null ? BGMManager.Instance.Source : null;
     }
 }

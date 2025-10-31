@@ -1,29 +1,36 @@
 using UnityEngine;
 using UnityEngine.Audio;
+using UnityEngine.SceneManagement;
 
+[DefaultExecutionOrder(-10000)] 
 public class SoundSettingsManager : MonoBehaviour
 {
     public static SoundSettingsManager Instance { get; private set; }
 
+    public event System.Action VolumesApplied; 
+
     [Header("Mixer & Groups")]
-    [SerializeField] private AudioMixer gameMixer; // GameMixer
+    [SerializeField] private AudioMixer gameMixer;
     [SerializeField] private string masterParam = "Master_Volume";
     [SerializeField] private string bgmParam = "BGM_Volume";
     [SerializeField] private string sfxParam = "SFX_Volume";
     [SerializeField] private string skillParam = "SkillSFX_Volume";
 
-    [Header("Mixer Groups (assign in Inspector)")]
+    [Header("Group Names for routing (by name search)")]
+    [SerializeField] private string bgmGroupName = "BGM";
+    [SerializeField] private string sfxGroupName = "SFX";
+    [SerializeField] private string skillGroupName = "SkillSFX";
+
+    [Header("Mixer Groups (optional, auto-filled if empty)")]
     [SerializeField] private AudioMixerGroup bgmGroup;
     [SerializeField] private AudioMixerGroup sfxGroup;
     [SerializeField] private AudioMixerGroup skillSfxGroup;
 
-    // PlayerPrefs 키
     private const string KEY_MASTER = "Sound.Master";
     private const string KEY_BGM = "Sound.BGM";
     private const string KEY_SFX = "Sound.SFX";
     private const string KEY_SKILL = "Sound.SkillSFX";
 
-    // 0~1 (내부 저장은 0~1), 기본값 1.0f (== 100%)
     public float Master { get; private set; } = 1f;
     public float BGM { get; private set; } = 1f;
     public float SFX { get; private set; } = 1f;
@@ -35,30 +42,70 @@ public class SoundSettingsManager : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
 
-        Load();
-        ApplyAllToMixer();
+        ForceRebindGroups();  
+        Load();               
+        ApplyAllToMixer();    
+        VolumesApplied?.Invoke();
+        StartCoroutine(CoReapplyVolumesNextFrame());
     }
 
-    // ===== Public API (퍼센트 단위 0~100 입력 편의) =====
-    public void SetMasterSoundPercent(float percent) { SetMasterSound(Mathf.Clamp01(percent / 100f)); }
-    public void SetBGMPercent(float percent) { SetBGM(Mathf.Clamp01(percent / 100f)); }
-    public void SetSFXPercent(float percent) { SetSFX(Mathf.Clamp01(percent / 100f)); }
-    public void SetSkillPercent(float percent) { SetSkill(Mathf.Clamp01(percent / 100f)); }
+    private void OnEnable()
+    {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+        AudioSettings.OnAudioConfigurationChanged += OnAudioConfigChanged;
+    }
+
+    private void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+        AudioSettings.OnAudioConfigurationChanged -= OnAudioConfigChanged;
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        ForceRebindGroups();   // 혹시 새 씬에서 그룹이 끊기지 않게
+        ApplyAllToMixer();     // 저장값 다시 Mixer에 재적용
+        VolumesApplied?.Invoke();
+    }
+    private void OnAudioConfigChanged(bool deviceWasChanged)
+    {
+        
+        ApplyAllToMixer();
+        VolumesApplied?.Invoke();
+        StartCoroutine(CoReapplyVolumesNextFrame());
+    }
+    private System.Collections.IEnumerator CoReapplyVolumesNextFrame()
+    {
+        yield return null; // 1프레임 대기
+        ApplyAllToMixer();
+        VolumesApplied?.Invoke();
+    }
+
+    private void OnValidate()
+    {
+        if (!Application.isPlaying) return;
+        ForceRebindGroups();
+        ApplyAllToMixer();
+        VolumesApplied?.Invoke();
+    }
+
+    // --- 퍼센트 API (0~100) ---
+    public void SetMasterSoundPercent(float p) => SetMasterSound(Mathf.Clamp01(p / 100f));
+    public void SetBGMPercent(float p) => SetBGM(Mathf.Clamp01(p / 100f));
+    public void SetSFXPercent(float p) => SetSFX(Mathf.Clamp01(p / 100f));
+    public void SetSkillPercent(float p) => SetSkill(Mathf.Clamp01(p / 100f));
 
     public float GetMasterSoundPercent() => Mathf.RoundToInt(Master * 100f);
     public float GetBGMPercent() => Mathf.RoundToInt(BGM * 100f);
     public float GetSFXPercent() => Mathf.RoundToInt(SFX * 100f);
     public float GetSkillPercent() => Mathf.RoundToInt(SKILL * 100f);
 
-    // ===== 내부 실제 세터 (0~1) =====
-    public void SetMasterSound(float v) { Master = Mathf.Clamp01(v); SetMixer(masterParam, Master); Save(); }
-    public void SetBGM(float v) { BGM = Mathf.Clamp01(v); SetMixer(bgmParam, BGM); Save(); }
-    public void SetSFX(float v) { SFX = Mathf.Clamp01(v); SetMixer(sfxParam, SFX); Save(); }
-    public void SetSkill(float v) { SKILL = Mathf.Clamp01(v); SetMixer(skillParam, SKILL); Save(); }
+    // --- 내부 세터 (0~1) : 저장+즉시적용+알림 ---
+    public void SetMasterSound(float v) { Master = Mathf.Clamp01(v); SetMixer(masterParam, Master); Save(); VolumesApplied?.Invoke(); }
+    public void SetBGM(float v) { BGM = Mathf.Clamp01(v); SetMixer(bgmParam, BGM); Save(); VolumesApplied?.Invoke(); }
+    public void SetSFX(float v) { SFX = Mathf.Clamp01(v); SetMixer(sfxParam, SFX); Save(); VolumesApplied?.Invoke(); }
+    public void SetSkill(float v) { SKILL = Mathf.Clamp01(v); SetMixer(skillParam, SKILL); Save(); VolumesApplied?.Invoke(); }
 
-    public void SetSkillSFXVolume(float linear01) => SetSkill(linear01);
-
-    // ===== 저장/불러오기 =====
     public void Save()
     {
         PlayerPrefs.SetFloat(KEY_MASTER, Master);
@@ -70,7 +117,6 @@ public class SoundSettingsManager : MonoBehaviour
 
     public void Load()
     {
-        // 존재하지 않으면 기본 1.0 (=100%)
         Master = PlayerPrefs.GetFloat(KEY_MASTER, 1f);
         BGM = PlayerPrefs.GetFloat(KEY_BGM, 1f);
         SFX = PlayerPrefs.GetFloat(KEY_SFX, 1f);
@@ -85,27 +131,43 @@ public class SoundSettingsManager : MonoBehaviour
         SetMixer(skillParam, SKILL);
     }
 
-    // ===== Group Getters =====
     public AudioMixerGroup GetBGMGroup() => bgmGroup;
     public AudioMixerGroup GetSFXGroup() => sfxGroup;
     public AudioMixerGroup GetSkillSFXGroup() => skillSfxGroup;
 
-    // ===== Source 라우팅 유틸 =====
     public void ConfigureSourceToGroup(AudioSource src, AudioMixerGroup group, bool is2D = true)
     {
-        if (src == null) return;
+        if (!src || !group) return;
         src.playOnAwake = false;
         src.outputAudioMixerGroup = group;
         src.spatialBlend = is2D ? 0f : 1f;
     }
 
-    // ===== 유틸 =====
+    public void ForceRebindGroups()
+    {
+        if (gameMixer == null) return;
+
+        if (bgmGroup == null)
+        {
+            var g = gameMixer.FindMatchingGroups(string.IsNullOrEmpty(bgmGroupName) ? "BGM" : bgmGroupName);
+            if (g != null && g.Length > 0) bgmGroup = g[0];
+        }
+        if (sfxGroup == null)
+        {
+            var g = gameMixer.FindMatchingGroups(string.IsNullOrEmpty(sfxGroupName) ? "SFX" : sfxGroupName);
+            if (g != null && g.Length > 0) sfxGroup = g[0];
+        }
+        if (skillSfxGroup == null)
+        {
+            var g = gameMixer.FindMatchingGroups(string.IsNullOrEmpty(skillGroupName) ? "SkillSFX" : skillGroupName);
+            if (g != null && g.Length > 0) skillSfxGroup = g[0];
+        }
+    }
+
     private void SetMixer(string exposedParam, float linear01)
     {
         if (gameMixer == null || string.IsNullOrEmpty(exposedParam)) return;
-
-        // 0은 -80dB로 취급 (Mute에 가까운 값), 그 외는 20*log10
-        float dB = (linear01 <= 0.0001f) ? -80f : Mathf.Log10(linear01) * 20f;
+        float dB = (linear01 <= 0.0001f) ? -80f : Mathf.Log10(Mathf.Clamp01(linear01)) * 20f;
         gameMixer.SetFloat(exposedParam, dB);
     }
 }
