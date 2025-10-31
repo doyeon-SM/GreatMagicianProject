@@ -163,3 +163,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   skillData: {fileID: 11400000, guid: 1b604f97287ec884b94d887793a25e5c, type: 2}
   createPrefab: {fileID: 0}
+  skillSFX_Rangetick: {fileID: 8300000, guid: de3ad9621f56ec34ab68a4eda1ab88b6, type: 3}
+  skillSFXGroup: {fileID: -6599125078769162727, guid: 70b73d4c23e7c3d4394379fc0f8b1f3f, type: 2}
+  sfxVolume: 1

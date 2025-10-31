@@ -1,35 +1,95 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.Audio;
 using UnityEngine;
 
 public class Skill_Range_System : MonoBehaviour
 {
-    public Skill_Data skillData;  // ÇöÀç ½ºÅ³¿¡ ´ëÇÑ SkillData ÂüÁ¶
-    private List<Monster_Base> monstersInRange = new List<Monster_Base>();  // ¹üÀ§ ³»ÀÇ ¸ó½ºÅÍ ¸®½ºÆ®
-    private List<Wall_System_Create> WCreateInRange = new List<Wall_System_Create>();//¹üÀ§ ³»ÀÇ º® ¸®½ºÆ®
-    private List<Summon_System> SCreateInRange = new List<Summon_System>(); //¹üÀ§ ³»ÀÇ ¼ÒÈ¯¼ö ¸®½ºÆ®
+    public Skill_Data skillData;  // í˜„ì¬ ìŠ¤í‚¬ì— ëŒ€í•œ SkillData ì°¸ì¡°
+    private List<Monster_Base> monstersInRange = new List<Monster_Base>();  // ë²”ìœ„ ë‚´ì˜ ëª¬ìŠ¤í„° ë¦¬ìŠ¤íŠ¸
+    private List<Wall_System_Create> WCreateInRange = new List<Wall_System_Create>();//ë²”ìœ„ ë‚´ì˜ ë²½ ë¦¬ìŠ¤íŠ¸
+    private List<Summon_System> SCreateInRange = new List<Summon_System>(); //ë²”ìœ„ ë‚´ì˜ ì†Œí™˜ìˆ˜ ë¦¬ìŠ¤íŠ¸
     private Coroutine periodicDamageCoroutine;
 
-    public GameObject createPrefab; //Create Å¸ÀÔ ÇÁ¸®ÆÕ
+    public GameObject createPrefab; //Create íƒ€ì… í”„ë¦¬íŒ¹
 
-    [Header("SFX (SkillSFX ±×·ì)")]
-    public AudioClip skillSFX_Rangetick;                          // Æ½¸¶´Ù Àç»ıÇÒ »ç¿îµå
-    public AudioMixerGroup skillSFXGroup;               // SkillSFX ¿Àµğ¿À ¹Í¼­ ±×·ì
-    [Range(0f, 1f)] public float sfxVolume = 1f;        // °³º° º¼·ı(ÇÁ·ÎÁ§Æ® ÀüÃ¼´Â ¹Í¼­¿¡¼­ Á¦¾î)
-    private AudioSource _sfxSource;                     // ³»ºÎ¿ë ¿Àµğ¿À ¼Ò½º
+    [Header("SFX (SkillSFX ê·¸ë£¹)")]
+    public AudioClip skillSFX_Rangetick;                // í‹±ë§ˆë‹¤ ì¬ìƒí•  ì‚¬ìš´ë“œ
+    public AudioClip skillSFX_Use;                      // ìŠ¤í‚¬ ì‚¬ìš©ì‹œ ì‚¬ìš´ë“œ
+    public AudioMixerGroup skillSFXGroup;               // SkillSFX ì˜¤ë””ì˜¤ ë¯¹ì„œ ê·¸ë£¹
+    [Range(0f, 1f)] public float sfxVolume = 1f;        // ê°œë³„ ë³¼ë¥¨(í”„ë¡œì íŠ¸ ì „ì²´ëŠ” ë¯¹ì„œì—ì„œ ì œì–´)
+    private AudioSource _sfxSource;                     // ë‚´ë¶€ìš© ì˜¤ë””ì˜¤ ì†ŒìŠ¤
 
     private void Start()
     {
+        if (skillSFXGroup == null && SoundSettingsManager.Instance != null)
+            skillSFXGroup = SoundSettingsManager.Instance.GetSkillSFXGroup();
+
         if (_sfxSource == null)
         {
             _sfxSource = gameObject.AddComponent<AudioSource>();
             _sfxSource.playOnAwake = false;
-            _sfxSource.spatialBlend = 0f; // UI/2D SFX
-            _sfxSource.outputAudioMixerGroup = skillSFXGroup; // SkillSFX ±×·ìÀ¸·Î ¶ó¿ìÆÃ
-            _sfxSource.volume = sfxVolume; // °³º° ÀÎ½ºÅÏ½º º¼·ı
+            _sfxSource.spatialBlend = 0f;      // 2D
+            _sfxSource.ignoreListenerPause = false; // ì¼ì‹œì •ì§€ ì¤‘ ì¬ìƒ ì›ì¹˜ ì•Šìœ¼ë©´ false(ì›í•˜ë©´ true)
+            _sfxSource.outputAudioMixerGroup = skillSFXGroup;
+            _sfxSource.volume = sfxVolume;
+        }
+
+        // ë³¼ë¥¨ ì‹œìŠ¤í…œì´ ì¬ì ìš©ë  ë•Œ ë¼ìš°íŒ… ë³´ì •
+        if (SoundSettingsManager.Instance != null)
+            SoundSettingsManager.Instance.VolumesApplied += RebindSkillGroup;
+    }
+    private void Awake()
+    {
+        // ê·¸ë£¹ ìë™ í• ë‹¹
+        if (skillSFXGroup == null && SoundSettingsManager.Instance != null)
+            skillSFXGroup = SoundSettingsManager.Instance.GetSkillSFXGroup();
+
+        // ì˜¤ë””ì˜¤ì†ŒìŠ¤ ìƒì„±
+        if (_sfxSource == null)
+        {
+            _sfxSource = gameObject.AddComponent<AudioSource>();
+            _sfxSource.playOnAwake = false;
+            _sfxSource.spatialBlend = 0f;            // 2D
+            _sfxSource.ignoreListenerPause = false;  // í•„ìš” ì‹œ true
+            _sfxSource.outputAudioMixerGroup = skillSFXGroup;
+            _sfxSource.volume = 1f;                  // â† ì´ì¤‘ ê°ì‡  ë°©ì§€ (PlayOneShotì—ì„œë§Œ ìŠ¤ì¼€ì¼)
         }
     }
+    private void OnEnable()
+    {
+        if (SoundSettingsManager.Instance != null)
+            SoundSettingsManager.Instance.VolumesApplied += RebindSkillGroup;
+    }
+
+    private void OnDisable()
+    {
+        if (SoundSettingsManager.Instance != null)
+            SoundSettingsManager.Instance.VolumesApplied -= RebindSkillGroup;
+    }
+    private void EnsureSfxSource()
+    {
+        if (_sfxSource != null) return;
+
+        // ê·¸ë£¹ í™•ë³´
+        if (skillSFXGroup == null && SoundSettingsManager.Instance != null)
+            skillSFXGroup = SoundSettingsManager.Instance.GetSkillSFXGroup();
+
+        _sfxSource = gameObject.AddComponent<AudioSource>();
+        _sfxSource.playOnAwake = false;
+        _sfxSource.spatialBlend = 0f;
+        _sfxSource.ignoreListenerPause = false;
+        _sfxSource.outputAudioMixerGroup = skillSFXGroup;
+        _sfxSource.volume = 1f; // ì´ì¤‘ ê°ì‡  ë°©ì§€
+    }
+
+    private void RebindSkillGroup()
+    {
+        if (_sfxSource == null) return;
+        var group = SoundSettingsManager.Instance?.GetSkillSFXGroup();
+        if (group != null) SoundSettingsManager.Instance.ConfigureSourceToGroup(_sfxSource, group, is2D: true);
+    }
+
     public void StartRangeEffect()
     {
         if (skillData != null && skillData.skillEffect == Skill_Data.SkillEffect.Explosion)
@@ -78,7 +138,7 @@ public class Skill_Range_System : MonoBehaviour
         {
             if (this == null || gameObject == null) yield break;
 
-            // ¹üÀ§ ³» ¸ó½ºÅÍ¿¡ Áö¼ÓÈ¿°ú Àû¿ë(½½·Î¿ì/ºí¶óÀÎµå µî)
+            // ë²”ìœ„ ë‚´ ëª¬ìŠ¤í„°ì— ì§€ì†íš¨ê³¼ ì ìš©(ìŠ¬ë¡œìš°/ë¸”ë¼ì¸ë“œ ë“±)
             foreach (Monster_Base monster in monstersInRange)
             {
                 if (monster != null)
@@ -91,23 +151,14 @@ public class Skill_Range_System : MonoBehaviour
                 }
             }
 
-            // Áï½Ã Å¸°İ/È¸º¹ ½ÇÇà
+            // ì¦‰ì‹œ íƒ€ê²©/íšŒë³µ ì‹¤í–‰
             if (skillData.skillEffect == Skill_Data.SkillEffect.Heal)
                 ApplyHealingInRange();
             else
                 ApplyDamageInRange();
 
-            // Æ½¸¶´Ù ½ºÅ³ SFX Àç»ı
-            if (_sfxSource != null && skillSFX_Rangetick != null)
-            {
-                if (SoundSettingsManager.Instance != null)
-                {
-                    var group = SoundSettingsManager.Instance.GetSkillSFXGroup();
-                    SoundSettingsManager.Instance.ConfigureSourceToGroup(_sfxSource, group, is2D: true);
-                }
-            }
 
-            // ¸¶Áö¸· Æ½ÀÌ ¾Æ´Ï¸é interval¸¸Å­ ´ë±â
+            // ë§ˆì§€ë§‰ í‹±ì´ ì•„ë‹ˆë©´ intervalë§Œí¼ ëŒ€ê¸°
             if (tick < totalTicks - 1)
                 yield return new WaitForSeconds(interval);
         }
@@ -121,7 +172,7 @@ public class Skill_Range_System : MonoBehaviour
             }
         }
         
-        // ¿ÀºêÁ§Æ®°¡ ÆÄ±«µÇÁö ¾Ê¾ÒÀ» ¶§¸¸ ÆÄ±« ½Ãµµ
+        // ì˜¤ë¸Œì íŠ¸ê°€ íŒŒê´´ë˜ì§€ ì•Šì•˜ì„ ë•Œë§Œ íŒŒê´´ ì‹œë„
         if (gameObject != null)
         {
             Debug.Log("Destroying range object after periodic damage");
@@ -132,10 +183,12 @@ public class Skill_Range_System : MonoBehaviour
     private void OnDestroy()
     {
         Debug.Log("Skill_Range_System destroyed: " + gameObject.name);
+
+        if (SoundSettingsManager.Instance != null)
+            SoundSettingsManager.Instance.VolumesApplied -= RebindSkillGroup;
+
         if (periodicDamageCoroutine != null)
-        {
             StopCoroutine(periodicDamageCoroutine);
-        }
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -191,7 +244,7 @@ public class Skill_Range_System : MonoBehaviour
 
     public void ApplyDamageInRange()
     {
-        // monstersInRange ¸®½ºÆ®ÀÇ º¹»çº»À» »ç¿ëÇÏ¿© ¹İº¹À» ¼öÇàÇÕ´Ï´Ù.
+        // monstersInRange ë¦¬ìŠ¤íŠ¸ì˜ ë³µì‚¬ë³¸ì„ ì‚¬ìš©í•˜ì—¬ ë°˜ë³µì„ ìˆ˜í–‰í•©ë‹ˆë‹¤.
         List<Monster_Base> monstersToDamage = new List<Monster_Base>(monstersInRange);
 
         foreach (Monster_Base monster in monstersToDamage)
@@ -201,11 +254,21 @@ public class Skill_Range_System : MonoBehaviour
                 Debug.Log("Attack: " + monster);
                 skillData.ApplyDamage(monster);
 
-                if (monster.MonsterIsDead) // ¸ó½ºÅÍ°¡ Á×¾ú´ÂÁö È®ÀÎ
+                if (monster.MonsterIsDead) // ëª¬ìŠ¤í„°ê°€ ì£½ì—ˆëŠ”ì§€ í™•ì¸
                 {
-                    monstersInRange.Remove(monster); // ¿øº» ¸®½ºÆ®¿¡¼­ ¸ó½ºÅÍ¸¦ Á¦°Å
+                    monstersInRange.Remove(monster); // ì›ë³¸ ë¦¬ìŠ¤íŠ¸ì—ì„œ ëª¬ìŠ¤í„°ë¥¼ ì œê±°
                 }
             }
+        }
+
+        // í‹±ë§ˆë‹¤ ìŠ¤í‚¬ SFX ì¬ìƒ
+        if (skillSFX_Rangetick != null)
+        {
+            EnsureSfxSource();
+            if (_sfxSource.outputAudioMixerGroup == null && SoundSettingsManager.Instance != null)
+                SoundSettingsManager.Instance.ConfigureSourceToGroup(_sfxSource, SoundSettingsManager.Instance.GetSkillSFXGroup(), is2D: true);
+
+            _sfxSource.PlayOneShot(skillSFX_Rangetick, Mathf.Clamp01(sfxVolume));
         }
     }
 
@@ -245,6 +308,9 @@ public class Skill_Range_System : MonoBehaviour
             Debug.LogError("SkillData is not assigned.");
             return;
         }
+        // ìŠ¤í‚¬ ì‚¬ìš©ì‹œ SFX ì¬ìƒ
+        if (skillSFX_Use != null)
+            PlayUseSfxAtPoint(skillSFX_Use, transform.position);
 
         switch (skillData.skillType.ToString())
         {
@@ -289,11 +355,11 @@ public class Skill_Range_System : MonoBehaviour
                 CreateAroundSkill();
                 break;
 
-            case "StraightLine":   // Á÷¼±ÇüÀº Ä³½ºÆ® À§Ä¡·Î ´Ù½Ã Á¶ÁØ ÈÄ Å¸°İ
+            case "StraightLine":   // ì§ì„ í˜•ì€ ìºìŠ¤íŠ¸ ìœ„ì¹˜ë¡œ ë‹¤ì‹œ ì¡°ì¤€ í›„ íƒ€ê²©
                 AimAndApplyStraightLine(mousePosition);
                 break;
 
-            default:               // AreaOfEffect µî
+            default:               // AreaOfEffect ë“±
                 ApplyDamageToMonsters();
                 break;
         }
@@ -327,14 +393,14 @@ public class Skill_Range_System : MonoBehaviour
                 {
                     projectileScript.Initialize(skillData, mousePosition);
 
-                    // Fire °ü·Ã ÄÚµå Á¦¿Ü, ´Ù¸¥ ½ºÅ³¿¡ ´ëÇÑ Ãß°¡ Ã³¸®°¡ ÇÊ¿äÇÏ¸é ¿©±â¼­ Ãß°¡ °¡´É
+                    // Fire ê´€ë ¨ ì½”ë“œ ì œì™¸, ë‹¤ë¥¸ ìŠ¤í‚¬ì— ëŒ€í•œ ì¶”ê°€ ì²˜ë¦¬ê°€ í•„ìš”í•˜ë©´ ì—¬ê¸°ì„œ ì¶”ê°€ ê°€ëŠ¥
                 }
                 else
                 {
                     Debug.LogError("Skill_System_Projectile component is missing on the attackPrefab.");
                 }
 
-                Destroy(projectile, 5f); // Åõ»çÃ¼°¡ 5ÃÊ ÈÄ¿¡ Á¦°ÅµÇµµ·Ï ¼³Á¤
+                Destroy(projectile, 5f); // íˆ¬ì‚¬ì²´ê°€ 5ì´ˆ í›„ì— ì œê±°ë˜ë„ë¡ ì„¤ì •
             }
             else
             {
@@ -393,7 +459,7 @@ public class Skill_Range_System : MonoBehaviour
         float orbitRadius = 7.0f;
         float orbitSpeed = 180.0f;
         float duration = skillData.AreaTime;
-        Debug.Log("Around Center »ı¼º ¿Ï·á");
+        Debug.Log("Around Center ìƒì„± ì™„ë£Œ");
 
         for (int i = 0; i < numberOfOrbitProjectiles; i++)
         {
@@ -410,17 +476,17 @@ public class Skill_Range_System : MonoBehaviour
             orbitScript.center = centerObject.transform;
             orbitScript.radius = orbitRadius;
             orbitScript.angularSpeed = orbitSpeed;
-            orbitScript.startAngle = angleOffset; // °¢µµ ºĞ¹è·Î À§»ó Â÷ÀÌ ºÎ¿©
+            orbitScript.startAngle = angleOffset; // ê°ë„ ë¶„ë°°ë¡œ ìœ„ìƒ ì°¨ì´ ë¶€ì—¬
             
-            // Åõ»çÃ¼µµ Áö¼Ó½Ã°£ ÈÄ Á¦°Å
+            // íˆ¬ì‚¬ì²´ë„ ì§€ì†ì‹œê°„ í›„ ì œê±°
             Destroy(orbitProjectile, duration);
         }
 
-        // Áß½É ¿ÀºêÁ§Æ®µµ ÀÏÁ¤ ½Ã°£ µÚ Á¦°Å
+        // ì¤‘ì‹¬ ì˜¤ë¸Œì íŠ¸ë„ ì¼ì • ì‹œê°„ ë’¤ ì œê±°
         Destroy(centerObject, duration);
     }
 
-    //Heal ±â´É
+    //Heal ê¸°ëŠ¥
     private void ApplyHealingInRange()
     {
         List<Wall_System_Create> WCreatetoHeal = new List<Wall_System_Create>(WCreateInRange);
@@ -442,25 +508,35 @@ public class Skill_Range_System : MonoBehaviour
                 SCreate.Heal_Summon(skillData.damage);
             }
         }
+
+        // í‹±ë§ˆë‹¤ ìŠ¤í‚¬ SFX ì¬ìƒ
+        if (skillSFX_Rangetick != null)
+        {
+            EnsureSfxSource();
+            if (_sfxSource.outputAudioMixerGroup == null && SoundSettingsManager.Instance != null)
+                SoundSettingsManager.Instance.ConfigureSourceToGroup(_sfxSource, SoundSettingsManager.Instance.GetSkillSFXGroup(), is2D: true);
+
+            _sfxSource.PlayOneShot(skillSFX_Rangetick, Mathf.Clamp01(sfxVolume));
+        }
     }
     private void AimAndApplyStraightLine(Vector3 castPos)
     {
-        // µå·¡±× ½Ã½ºÅÛ°ú µ¿ÀÏÇÑ ¡®¾Æ·§º¯ Áß¾Ó¡¯ ±âÁØÁ¡
+        // ë“œë˜ê·¸ ì‹œìŠ¤í…œê³¼ ë™ì¼í•œ â€˜ì•„ë«ë³€ ì¤‘ì•™â€™ ê¸°ì¤€ì 
         Vector3 bottomCenter = new Vector3(0f, -8f, 0f);
 
-        // ÀÌ Range ¿ÀºêÁ§Æ®(Á÷»ç°¢Çü ÇÁ¸®ÆÕ)°¡ ¹Ù·Î È¸Àü/Àû¿ëÀÇ ÁÖÃ¼
+        // ì´ Range ì˜¤ë¸Œì íŠ¸(ì§ì‚¬ê°í˜• í”„ë¦¬íŒ¹)ê°€ ë°”ë¡œ íšŒì „/ì ìš©ì˜ ì£¼ì²´
         transform.position = bottomCenter;
 
         Vector3 dir = castPos - bottomCenter;
         if (dir.sqrMagnitude < 0.0001f)
         {
-            dir = Vector3.right; // ¹æ¾îÀû: 0º¤ÅÍ¸é ¿À¸¥ÂÊÀ¸·Î
+            dir = Vector3.right; // ë°©ì–´ì : 0ë²¡í„°ë©´ ì˜¤ë¥¸ìª½ìœ¼ë¡œ
         }
 
         float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
         transform.rotation = Quaternion.Euler(0f, 0f, angle);
 
-        // ÇöÀç Äİ¶óÀÌ´õ¿¡ °ãÃÄÁø ´ë»óµé¿¡°Ô Àû¿ë
+        // í˜„ì¬ ì½œë¼ì´ë”ì— ê²¹ì³ì§„ ëŒ€ìƒë“¤ì—ê²Œ ì ìš©
         ApplyDamageToMonsters();
     }
 
@@ -489,5 +565,34 @@ public class Skill_Range_System : MonoBehaviour
         transform.rotation = Quaternion.Euler(0f, 0f, 90f);
 
         LaunchProjectile(castPos);
+    }
+
+    private void PlayUseSfxAtPoint(AudioClip clip, Vector3 worldPos)
+    {
+        if (clip == null) return;
+
+        // ì„ì‹œ ì˜¤ë¸Œì íŠ¸ ìƒì„±
+        var go = new GameObject("SkillSFX_Use_Temp");
+        go.transform.position = worldPos;
+
+        var src = go.AddComponent<AudioSource>();
+        src.playOnAwake = false;
+        src.spatialBlend = 0f;              // 2D ì¬ìƒ (3D ì›í•˜ë©´ 1fë¡œ)
+        src.ignoreListenerPause = false;    // ì¼ì‹œì •ì§€ ì¤‘ì—ë„ ë“¤ë¦¬ê²Œ í•˜ë ¤ë©´ true
+        src.loop = false;
+
+        // Mixer ê·¸ë£¹ ë¼ìš°íŒ… (SkillSFX)
+        var group = skillSFXGroup != null
+            ? skillSFXGroup
+            : SoundSettingsManager.Instance?.GetSkillSFXGroup();
+        if (group != null) src.outputAudioMixerGroup = group;
+
+        // ë³¼ë¥¨ (ì´ì¤‘ ê°ì‡  í”¼í•˜ë ¤ë©´ AudioSource.volumeë§Œ ì‚¬ìš©)
+        src.volume = Mathf.Clamp01(sfxVolume);
+
+        src.clip = clip;
+        src.Play();
+
+        Destroy(go, clip.length + 0.05f);
     }
 }

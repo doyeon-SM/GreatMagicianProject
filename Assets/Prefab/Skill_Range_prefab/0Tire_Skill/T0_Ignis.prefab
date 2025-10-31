@@ -128,6 +128,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   skillData: {fileID: 11400000, guid: a3018a307d23370448eb0e615b1b53a5, type: 2}
   createPrefab: {fileID: 0}
+  skillSFX_Rangetick: {fileID: 0}
+  skillSFX_Use: {fileID: 8300000, guid: 96a15cd51abee5746b288d529ea3ab48, type: 3}
+  skillSFXGroup: {fileID: -6599125078769162727, guid: 70b73d4c23e7c3d4394379fc0f8b1f3f, type: 2}
+  sfxVolume: 1
 --- !u!61 &-3859503010188459072
 BoxCollider2D:
   m_ObjectHideFlags: 0
