@@ -833,6 +833,7 @@ GameObject:
   - component: {fileID: 269933939}
   - component: {fileID: 269933938}
   - component: {fileID: 269933937}
+  - component: {fileID: 269933940}
   m_Layer: 5
   m_Name: ResetButton
   m_TagString: Untagged
@@ -954,6 +955,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 269933935}
   m_CullTransparentMesh: 1
+--- !u!114 &269933940
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 269933935}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 691b2024065c09b4ba7fa61b1ed57234, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  defaultClip: {fileID: 0}
+  overrideClip: {fileID: 8300000, guid: 33cb4ab5a7283bf4c95573ba8e67c625, type: 3}
+  volume: 1
 --- !u!1 &272954476
 GameObject:
   m_ObjectHideFlags: 0
@@ -2140,6 +2156,9 @@ MonoBehaviour:
   bgmParam: BGM_Volume
   sfxParam: SFX_Volume
   skillParam: SkillSFX_Volume
+  bgmGroupName: BGM
+  sfxGroupName: SFX
+  skillGroupName: SkillSFX
   bgmGroup: {fileID: 8423992049624426825, guid: 70b73d4c23e7c3d4394379fc0f8b1f3f, type: 2}
   sfxGroup: {fileID: 1060228515980353777, guid: 70b73d4c23e7c3d4394379fc0f8b1f3f, type: 2}
   skillSfxGroup: {fileID: -6599125078769162727, guid: 70b73d4c23e7c3d4394379fc0f8b1f3f, type: 2}
@@ -2172,6 +2191,7 @@ GameObject:
   - component: {fileID: 681328579}
   - component: {fileID: 681328583}
   - component: {fileID: 681328582}
+  - component: {fileID: 681328584}
   m_Layer: 5
   m_Name: OptionButton
   m_TagString: Untagged
@@ -2318,6 +2338,21 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
+--- !u!114 &681328584
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 681328577}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 691b2024065c09b4ba7fa61b1ed57234, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  defaultClip: {fileID: 8300000, guid: cc959e17cd9996f4c9e2a5689327e085, type: 3}
+  overrideClip: {fileID: 0}
+  volume: 1
 --- !u!224 &755146602 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 8194749416246034958, guid: ff0f9ab4a877fbf44882d81e852e1dbc, type: 3}

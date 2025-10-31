@@ -170,4 +170,12 @@ public class SoundSettingsManager : MonoBehaviour
         float dB = (linear01 <= 0.0001f) ? -80f : Mathf.Log10(Mathf.Clamp01(linear01)) * 20f;
         gameMixer.SetFloat(exposedParam, dB);
     }
+
+    public AudioSource CreateSFXSource(GameObject owner)
+    {
+        var src = owner.AddComponent<AudioSource>();
+        ConfigureSourceToGroup(src, GetSFXGroup(), is2D: true);
+        return src;
+    }
+
 }

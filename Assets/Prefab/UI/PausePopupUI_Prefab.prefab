@@ -344,6 +344,7 @@ GameObject:
   - component: {fileID: 1071795092292461925}
   - component: {fileID: 3670365382607420448}
   - component: {fileID: 730776094548513424}
+  - component: {fileID: 7135640682288666429}
   m_Layer: 5
   m_Name: ResumeButton
   m_TagString: Untagged
@@ -453,3 +454,18 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &7135640682288666429
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9067675100584935188}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 691b2024065c09b4ba7fa61b1ed57234, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  defaultClip: {fileID: 8300000, guid: cc959e17cd9996f4c9e2a5689327e085, type: 3}
+  overrideClip: {fileID: 0}
+  volume: 1

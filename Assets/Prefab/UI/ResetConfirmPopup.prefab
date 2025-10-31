@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 7087423855812071948}
   - component: {fileID: 8020675416141761776}
   - component: {fileID: 1369225398509504992}
+  - component: {fileID: 8569134228668159528}
   m_Layer: 5
   m_Name: cancelButton
   m_TagString: Untagged
@@ -121,6 +122,21 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &8569134228668159528
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2136194389111266728}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 691b2024065c09b4ba7fa61b1ed57234, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  defaultClip: {fileID: 8300000, guid: cc959e17cd9996f4c9e2a5689327e085, type: 3}
+  overrideClip: {fileID: 0}
+  volume: 1
 --- !u!1 &4723541165308495460
 GameObject:
   m_ObjectHideFlags: 0
@@ -372,6 +388,7 @@ GameObject:
   - component: {fileID: 2024161924069390005}
   - component: {fileID: 6253373291404233933}
   - component: {fileID: 6054435596001430131}
+  - component: {fileID: 6937910568686487371}
   m_Layer: 5
   m_Name: resetButton
   m_TagString: Untagged
@@ -481,6 +498,21 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &6937910568686487371
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7759028481490954292}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 691b2024065c09b4ba7fa61b1ed57234, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  defaultClip: {fileID: 0}
+  overrideClip: {fileID: 8300000, guid: 33cb4ab5a7283bf4c95573ba8e67c625, type: 3}
+  volume: 1
 --- !u!1 &8879558829031744618
 GameObject:
   m_ObjectHideFlags: 0
