@@ -167,3 +167,6 @@ MonoBehaviour:
   skillSFX_Use: {fileID: 8300000, guid: d69f3289499ae7849976b9f53bfff1d2, type: 3}
   skillSFXGroup: {fileID: -6599125078769162727, guid: 70b73d4c23e7c3d4394379fc0f8b1f3f, type: 2}
   sfxVolume: 1
+  vfx_UsePrefab: {fileID: 7022268795503775816, guid: 7377f38a94f13bd43924090d4a77f29e, type: 3}
+  vfx_TickPrefab: {fileID: 0}
+  vfxAnchor: {fileID: 0}

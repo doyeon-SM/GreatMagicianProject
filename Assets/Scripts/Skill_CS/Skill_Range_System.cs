@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.Audio;
+using UnityEngine.VFX;
 using UnityEngine;
 
 public class Skill_Range_System : MonoBehaviour
@@ -19,6 +20,14 @@ public class Skill_Range_System : MonoBehaviour
     public AudioMixerGroup skillSFXGroup;               // SkillSFX 오디오 믹서 그룹
     [Range(0f, 1f)] public float sfxVolume = 1f;        // 개별 볼륨(프로젝트 전체는 믹서에서 제어)
     private AudioSource _sfxSource;                     // 내부용 오디오 소스
+
+    [Header("VFX")]
+    [Tooltip("스킬 사용 시 1회 재생되는 효과(폭발, 소환 이펙트 등)")]
+    public GameObject vfx_UsePrefab;
+    [Tooltip("틱마다 재생되는 효과(범위 중앙 또는 대상마다)")]
+    public GameObject vfx_TickPrefab;
+    [Tooltip("VFX 기준점(비워두면 this.transform 기준)")]
+    public Transform vfxAnchor;
 
     private void Start()
     {
@@ -270,6 +279,12 @@ public class Skill_Range_System : MonoBehaviour
 
             _sfxSource.PlayOneShot(skillSFX_Rangetick, Mathf.Clamp01(sfxVolume));
         }
+        // 틱 VFX 재생
+        if (vfx_TickPrefab != null)
+        {
+            // 범위 중앙(앵커)에서 한 번
+            SpawnVfxAtTransform(vfx_TickPrefab, vfxAnchor);
+        }
     }
 
 
@@ -308,9 +323,13 @@ public class Skill_Range_System : MonoBehaviour
             Debug.LogError("SkillData is not assigned.");
             return;
         }
-        // 스킬 사용시 SFX 재생
+        // 스킬 사용시 SFX
         if (skillSFX_Use != null)
             PlayUseSfxAtPoint(skillSFX_Use, transform.position);
+
+        // 스킬 사용 VFX
+        if (vfx_UsePrefab != null)
+            SpawnVfxAtPoint(vfx_UsePrefab, (vfxAnchor ? vfxAnchor.position : transform.position));
 
         switch (skillData.skillType.ToString())
         {
@@ -518,6 +537,12 @@ public class Skill_Range_System : MonoBehaviour
 
             _sfxSource.PlayOneShot(skillSFX_Rangetick, Mathf.Clamp01(sfxVolume));
         }
+        // 틱 VFX 재생
+        if (vfx_TickPrefab != null)
+        {
+            // 범위 중앙(앵커)에서 한 번
+            SpawnVfxAtTransform(vfx_TickPrefab, vfxAnchor);          
+        }
     }
     private void AimAndApplyStraightLine(Vector3 castPos)
     {
@@ -595,4 +620,36 @@ public class Skill_Range_System : MonoBehaviour
 
         Destroy(go, clip.length + 0.05f);
     }
+
+    // VFX 공용 스폰: 위치 지정
+    private void SpawnVfxAtPoint(GameObject prefab, Vector3 worldPos)
+    {
+        if (prefab == null) return;
+        var go = Instantiate(prefab, worldPos, Quaternion.identity);
+        AttachAutoDestroy(go);
+    }
+
+    // VFX 공용 스폰: 트랜스폼 기준 (부모 연결 선택)
+    private void SpawnVfxAtTransform(GameObject prefab, Transform parent = null, bool keepWorldPosition = true)
+    {
+        if (prefab == null) return;
+        Transform anchor = vfxAnchor != null ? vfxAnchor : transform;
+
+        GameObject go;
+        if (parent != null)
+            go = Instantiate(prefab, parent.position, parent.rotation, keepWorldPosition ? null : parent);
+        else
+            go = Instantiate(prefab, anchor.position, anchor.rotation);
+
+        AttachAutoDestroy(go);
+    }
+
+    // 프리팹이 파티클/비주얼이 끝나면 자동 삭제되도록 부착
+    private void AttachAutoDestroy(GameObject go)
+    {
+        if (go == null) return;
+        if (!go.TryGetComponent<AutoDestroyVFX>(out var _))
+            go.AddComponent<AutoDestroyVFX>(); // 기본 동작: 파티클 길이(or 최대값) 후 파괴
+    }
+
 }
