@@ -22,6 +22,8 @@ public class Monster_Base : MonoBehaviour
     private GameObject healthTextInstance;
     private Text healthText;
     private RectTransform healthRT;
+    private CanvasGroup healthCG;         
+    private bool healthUIVisible = false;  
 
     // 캐시
     private Camera cam;
@@ -75,6 +77,13 @@ public class Monster_Base : MonoBehaviour
             healthTextInstance = Instantiate(healthTextPrefab, uiParent);
             healthText = healthTextInstance.GetComponent<Text>();
             healthRT = healthTextInstance.GetComponent<RectTransform>();
+
+            // 최초엔 숨김(알파 0) → 위치가 잡히면 보이게 전환
+            healthCG = healthTextInstance.GetComponent<CanvasGroup>();
+            if (healthCG == null) healthCG = healthTextInstance.AddComponent<CanvasGroup>();
+            healthCG.alpha = 0f;
+            healthCG.blocksRaycasts = false;
+            healthUIVisible = false;
         }
     }
 
@@ -95,7 +104,16 @@ public class Monster_Base : MonoBehaviour
         // HP UI 갱신
         if (healthRT != null && canvasRT != null)
         {
-            UpdateUIPosition(healthRT, transform.position + new Vector3(0f, 0.0f, 0f));
+            // 위치 계산이 성공하면 true 반환
+            bool positioned = UpdateUIPosition(healthRT, transform.position + new Vector3(0f, 0.0f, 0f));
+
+            // 최초로 위치가 제대로 잡힌 순간에만 보이도록 전환
+            if (!healthUIVisible && positioned)
+            {
+                healthUIVisible = true;
+                if (healthCG != null) healthCG.alpha = 1f;
+            }
+
             if (healthText != null) healthText.text = currentHealth.ToString();
         }
 
@@ -103,16 +121,18 @@ public class Monster_Base : MonoBehaviour
     }
 
     // Screen → UI local 변환으로 anchoredPosition 세팅
-    private void UpdateUIPosition(RectTransform targetRT, Vector3 worldPos)
+    private bool UpdateUIPosition(RectTransform targetRT, Vector3 worldPos)
     {
         Vector3 screenPos = cam.WorldToScreenPoint(worldPos);
 
         Vector2 localPos;
-        // SS-Camera Canvas에서는 cam 전달, Overlay면 null
+        // ScreenSpace-Camera면 cam 전달, Overlay면 cam=null로도 OK
         if (RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRT, screenPos, cam, out localPos))
         {
             targetRT.anchoredPosition = localPos;
+            return true;
         }
+        return false;
     }
 
     public void TakeDamage(int damage)

@@ -75,7 +75,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 0}
+  m_Color: {r: 0.08018869, g: 0.8149059, b: 1, a: 0.19607843}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -114,7 +114,6 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 7a339c104bb7d854db1aaf44f8cbdb29, type: 2}
   - {fileID: 11400000, guid: 1b604f97287ec884b94d887793a25e5c, type: 2}
   - {fileID: 11400000, guid: 260d1f9095ca9454f9081dead2568783, type: 2}
-  tier2SkillDataLais:
-  - {fileID: 11400000, guid: 437476ee47075014181726f9790cd966, type: 2}
+  tier2SkillDataLais: []
   skillSlotSize: {x: 1, y: 1}
   slotDataList: []

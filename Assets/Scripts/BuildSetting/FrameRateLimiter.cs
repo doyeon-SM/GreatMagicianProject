@@ -11,6 +11,6 @@ public class FrameRateLimiter : MonoBehaviour
         QualitySettings.vSyncCount = 0;
 
         // 프레임 고정
-        Application.targetFrameRate = 30;
+        Application.targetFrameRate = 60;
     }
 }
