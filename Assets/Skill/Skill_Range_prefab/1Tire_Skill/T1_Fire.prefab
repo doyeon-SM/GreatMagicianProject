@@ -164,5 +164,9 @@ MonoBehaviour:
   skillData: {fileID: 11400000, guid: f79541974eaa9d0499d2ca29b2a40dcd, type: 2}
   createPrefab: {fileID: 0}
   skillSFX_Rangetick: {fileID: 8300000, guid: 7aa1acae7cb825b46a23d50cec81f4a4, type: 3}
+  skillSFX_Use: {fileID: 8300000, guid: 96a15cd51abee5746b288d529ea3ab48, type: 3}
   skillSFXGroup: {fileID: -6599125078769162727, guid: 70b73d4c23e7c3d4394379fc0f8b1f3f, type: 2}
   sfxVolume: 1
+  vfx_UsePrefab: {fileID: 417761080263594737, guid: 7800b8f6b712bfe49bd663eeb3ebe1e4, type: 3}
+  vfx_TickPrefab: {fileID: 0}
+  vfxAnchor: {fileID: 0}

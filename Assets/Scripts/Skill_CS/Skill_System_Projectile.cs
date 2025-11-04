@@ -1,11 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
+using System;
 using UnityEngine;
 
 public class Skill_System_Projectile : MonoBehaviour
 {
     public Skill_Data skillData;  // 해당 스킬의 데이터 참조
     private bool hasCollided = false;  // 첫 충돌 여부를 확인하는 변수
+
+    public Action<Vector3> OnExplode; // 폭발 콜백
 
     private bool hasTarget = false;     // 목표지점 저장여부
     private Vector3 targetPosition;     // 목표지점
@@ -160,6 +163,10 @@ public class Skill_System_Projectile : MonoBehaviour
             if (rangeSystem != null)
             {
                 rangeSystem.skillData = skillData;
+
+                // 폭발 시점(Area 생성 시점)에 Use SFX/VFX 출력
+                rangeSystem.TriggerUseFxAt(hitPosition);
+
                 rangeSystem.StartRangeEffect();
             }
             else
@@ -172,4 +179,5 @@ public class Skill_System_Projectile : MonoBehaviour
             Debug.LogError("rangePrefab is not assigned in SkillData.");
         }
     }
+
 }

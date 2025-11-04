@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 4419983726389890878}
   - component: {fileID: -2411939967956354763}
   m_Layer: 0
-  m_Name: T1_Tornado
+  m_Name: T1_Plants
   m_TagString: SkillArea
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -77,7 +77,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_Sprite: {fileID: -2413806693520163455, guid: a86470a33a6bf42c4b3595704624658b, type: 3}
-  m_Color: {r: 0.754717, g: 0.754717, b: 0.754717, a: 0.5529412}
+  m_Color: {r: 0.21124065, g: 0.9528302, b: 0.25588715, a: 0.5529412}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -161,5 +161,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 245722a2b5d9625469b1062dbd1a7653, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  skillData: {fileID: 11400000, guid: 7a339c104bb7d854db1aaf44f8cbdb29, type: 2}
+  skillData: {fileID: 11400000, guid: 913e169a24362454687a8e4f2b961867, type: 2}
   createPrefab: {fileID: 0}
+  skillSFX_Rangetick: {fileID: 8300000, guid: 02eb5c490cfdc2a47b9f7027a6d774b9, type: 3}
+  skillSFX_Use: {fileID: 8300000, guid: 02eb5c490cfdc2a47b9f7027a6d774b9, type: 3}
+  skillSFXGroup: {fileID: -6599125078769162727, guid: 70b73d4c23e7c3d4394379fc0f8b1f3f, type: 2}
+  sfxVolume: 1
+  vfx_UsePrefab: {fileID: 0}
+  vfx_TickPrefab: {fileID: 0}
+  vfxAnchor: {fileID: 0}

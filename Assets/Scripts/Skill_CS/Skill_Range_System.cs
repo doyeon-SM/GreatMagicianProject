@@ -28,6 +28,8 @@ public class Skill_Range_System : MonoBehaviour
     public GameObject vfx_TickPrefab;
     [Tooltip("VFX 기준점(비워두면 this.transform 기준)")]
     public Transform vfxAnchor;
+    [Tooltip("틱 VFX를 '범위 중앙' 대신 '범위 내 몬스터 위치'에 찍습니다.")]
+    public bool vfxTickAtMonsters = false;
 
     private void Start()
     {
@@ -107,7 +109,7 @@ public class Skill_Range_System : MonoBehaviour
         }
         else if (skillData != null && skillData.skillType == Skill_Data.SkillType.Area)
         {
-            periodicDamageCoroutine = StartCoroutine(ApplyPeriodicDamage(skillData.AreaTime, 0.5f));
+            periodicDamageCoroutine = StartCoroutine(ApplyPeriodicDamage(skillData.AreaTime, 1f));
         }
         else
         {
@@ -255,6 +257,12 @@ public class Skill_Range_System : MonoBehaviour
     {
         // monstersInRange 리스트의 복사본을 사용하여 반복을 수행합니다.
         List<Monster_Base> monstersToDamage = new List<Monster_Base>(monstersInRange);
+        List<Vector3> hitPositions = new List<Vector3>(monstersToDamage.Count);
+        foreach (var m in monstersToDamage)
+        {
+            if (m != null)
+                hitPositions.Add(m.transform.position);
+        }
 
         foreach (Monster_Base monster in monstersToDamage)
         {
@@ -279,43 +287,38 @@ public class Skill_Range_System : MonoBehaviour
 
             _sfxSource.PlayOneShot(skillSFX_Rangetick, Mathf.Clamp01(sfxVolume));
         }
-        // 틱 VFX 재생
-        if (vfx_TickPrefab != null)
-        {
-            // 범위 중앙(앵커)에서 한 번
-            SpawnVfxAtTransform(vfx_TickPrefab, vfxAnchor);
-        }
+        // VFX 재생
+        SpawnTickVfxAtPositions(hitPositions);
     }
 
 
 
     private void ApplyDamageToMonsters()
     {
-        List<Monster_Base> monstersToDamage = new List<Monster_Base>(monstersInRange);
-
-        foreach (Monster_Base monster in monstersToDamage)
+        List<Monster_Base> targets = new List<Monster_Base>(monstersInRange);
+        List<Vector3> hitPositions = new List<Vector3>(targets.Count);
+        foreach (var m in targets)
         {
-            if (monster != null)
-            {
-                skillData.ExecuteSkill(monster, transform.position);
-            }
+            if (m != null)
+                hitPositions.Add(m.transform.position); // VFX용 위치 스냅샷
         }
 
-        List<Monster_Base> monstersToRemove = new List<Monster_Base>();
+        foreach (var monster in targets)
+        {
+            if (monster == null) continue;
+            skillData.ExecuteSkill(monster, transform.position);
+        }
 
-        foreach (Monster_Base monster in monstersToDamage)
+        foreach (var monster in targets)
         {
             if (monster != null && monster.MonsterIsDead)
-            {
-                monstersToRemove.Add(monster);
-            }
+                monstersInRange.Remove(monster);
         }
 
-        foreach (Monster_Base monster in monstersToRemove)
-        {
-            monstersInRange.Remove(monster);
-        }
+        // 5) 퍼-몬스터 VFX (vfxTickAtMonsters=true면 각 위치, 아니면 중앙 폴백)
+        SpawnTickVfxAtPositions(hitPositions);
     }
+
     public void ApplySkillEffect(Vector3 mousePosition)
     {
         if (skillData == null)
@@ -323,14 +326,21 @@ public class Skill_Range_System : MonoBehaviour
             Debug.LogError("SkillData is not assigned.");
             return;
         }
-        // 스킬 사용시 SFX
-        if (skillSFX_Use != null)
-            PlayUseSfxAtPoint(skillSFX_Use, transform.position);
+        // 사용 SFX/VFX: '폭발형'이면 지금 재생하지 않는다 (Area 생성 시점에 재생됨)
+        bool isProjectileExplosion =
+            (skillData.skillType == Skill_Data.SkillType.Projectile) &&
+            (skillData.skillEffect == Skill_Data.SkillEffect.Explosion);
 
-        // 스킬 사용 VFX
-        if (vfx_UsePrefab != null)
-            SpawnVfxAtPoint(vfx_UsePrefab, (vfxAnchor ? vfxAnchor.position : transform.position));
+        if (!isProjectileExplosion)
+        {
+            // 스킬 사용시 SFX
+            if (skillSFX_Use != null)
+                PlayUseSfxAtPoint(skillSFX_Use, transform.position);
 
+            // 스킬 사용 VFX
+            if (vfx_UsePrefab != null)
+                SpawnVfxAtPoint(vfx_UsePrefab, (vfxAnchor ? vfxAnchor.position : transform.position));
+        }
         switch (skillData.skillType.ToString())
         {
             case "Projectile":
@@ -411,8 +421,6 @@ public class Skill_Range_System : MonoBehaviour
                 if (projectileScript != null)
                 {
                     projectileScript.Initialize(skillData, mousePosition);
-
-                    // Fire 관련 코드 제외, 다른 스킬에 대한 추가 처리가 필요하면 여기서 추가 가능
                 }
                 else
                 {
@@ -432,11 +440,11 @@ public class Skill_Range_System : MonoBehaviour
         }
     }
 
-    private void CreateArea(Vector3 mousePosition)
+    private void CreateArea(Vector3 worldPos)
     {
         if (skillData != null && skillData.rangePrefab != null)
         {
-            GameObject rangeObject = Instantiate(skillData.rangePrefab, mousePosition, Quaternion.identity);
+            GameObject rangeObject = Instantiate(skillData.rangePrefab, worldPos, Quaternion.identity);
             Skill_Range_System rangeSystem = rangeObject.GetComponent<Skill_Range_System>();
 
             if (rangeSystem != null)
@@ -651,5 +659,31 @@ public class Skill_Range_System : MonoBehaviour
         if (!go.TryGetComponent<AutoDestroyVFX>(out var _))
             go.AddComponent<AutoDestroyVFX>(); // 기본 동작: 파티클 길이(or 최대값) 후 파괴
     }
+    private void SpawnTickVfxAtPositions(List<Vector3> positionsSnapshot)
+    {
+        if (vfx_TickPrefab == null) return;
 
+        if (vfxTickAtMonsters && positionsSnapshot != null && positionsSnapshot.Count > 0)
+        {
+            foreach (var pos in positionsSnapshot)
+            {
+                SpawnVfxAtPoint(vfx_TickPrefab, pos);
+            }
+        }
+        else
+        {
+            // 몬스터 없으면 중앙 폴백
+            SpawnVfxAtTransform(vfx_TickPrefab, vfxAnchor);
+        }
+    }
+
+    // 폭발시점에 사용 SFX/VFX를 출력
+    public void TriggerUseFxAt(Vector3 worldPos)
+    {
+        if (skillSFX_Use != null)
+            PlayUseSfxAtPoint(skillSFX_Use, worldPos);
+
+        if (vfx_UsePrefab != null)
+            SpawnVfxAtPoint(vfx_UsePrefab, worldPos);
+    }
 }
